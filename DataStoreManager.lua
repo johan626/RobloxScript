@@ -83,9 +83,30 @@ function DataStoreManager:LoadPlayerData(player)
 
 	task.spawn(function()
 		local userId = tostring(player.UserId)
-		local data = retryDataStoreCall(function() return playerDS:GetAsync(userId) end)
+
+		local data
+		local success = false
+		for i = 1, 3 do
+			local pcall_success, result = pcall(function()
+				return playerDS:GetAsync(userId)
+			end)
+			if pcall_success then
+				success = true
+				data = result
+				break
+			else
+				warn("[DataStoreManager] Percobaan memuat data " .. i .. " gagal: " .. tostring(result))
+				if i < 3 then task.wait(2) end
+			end
+		end
 
 		if not Players:GetPlayerByUserId(player.UserId) then
+			playerDataLoading[player] = nil
+			return
+		end
+
+		if not success then
+			player:Kick("Gagal memuat data Anda karena masalah layanan. Silakan coba lagi nanti untuk melindungi progres Anda.")
 			playerDataLoading[player] = nil
 			return
 		end

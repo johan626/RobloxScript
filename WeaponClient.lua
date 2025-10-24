@@ -42,6 +42,10 @@ toggleAimEvent.Name = "ToggleAimEvent"
 local aimStatusChangedEvent = BindableEvents:FindFirstChild("AimStatusChangedEvent") or Instance.new("BindableEvent", BindableEvents)
 aimStatusChangedEvent.Name = "AimStatusChangedEvent"
 
+-- Bindable Event for Reload Request
+local requestReloadEvent = BindableEvents:FindFirstChild("RequestReloadEvent") or Instance.new("BindableEvent", BindableEvents)
+requestReloadEvent.Name = "RequestReloadEvent"
+
 
 -- State variables
 local currentWeapon = nil
@@ -261,6 +265,34 @@ local function setupWeapon(tool)
 end
 
 -- Input Handling
+local function handleReloadRequest()
+	if not currentWeapon or not weaponStats or reloading or isKnocked then return end
+
+	local isSprinting = player.Character and player.Character:GetAttribute("IsSprinting")
+	if isSprinting then
+		player.Character:SetAttribute("RequestStopSprint", true)
+	end
+
+	reloading = true
+	if player.Character then player.Character:SetAttribute("IsReloading", true) end
+
+	-- Jika sedang ADS, batalkan ADS & modifier speednya dulu (THE FIX)
+	if isAiming then
+		isAiming = false
+		aimStatusChangedEvent:Fire(false) -- Fire status update
+		UpdateWalkSpeedModifierEvent:FireServer("aim", false)
+	end
+
+	currentWeapon:SetAttribute("IsAiming", false)
+	if player.Character then
+		player.Character:SetAttribute("IsAiming", false)
+	end
+	transitionToHip()
+
+	UpdateWalkSpeedModifierEvent:FireServer("reload", true)
+	ReloadEvent:FireServer(currentWeapon)
+end
+
 local function onInputBegan(input, gpe)
 	if gpe then return end
 	if not currentWeapon or not weaponStats then return end
@@ -276,33 +308,9 @@ local function onInputBegan(input, gpe)
 			transitionToADS()
 			UpdateWalkSpeedModifierEvent:FireServer("aim", true)
 		end
-		-- Reload (R key)
+	-- Reload (R key)
 	elseif input.KeyCode == Enum.KeyCode.R then
-		if not reloading and not isKnocked then
-			local isSprinting = player.Character and player.Character:GetAttribute("IsSprinting")
-			if isSprinting then
-				player.Character:SetAttribute("RequestStopSprint", true)
-			end
-
-			reloading = true
-			if player.Character then player.Character:SetAttribute("IsReloading", true) end
-
-			-- Jika sedang ADS, batalkan ADS & modifier speednya dulu
-			if isAiming then
-				isAiming = false
-				aimStatusChangedEvent:Fire(false) -- Fire status update
-				UpdateWalkSpeedModifierEvent:FireServer("aim", false)
-			end
-
-			currentWeapon:SetAttribute("IsAiming", false)
-			if player.Character then
-				player.Character:SetAttribute("IsAiming", false)
-			end
-			transitionToHip()
-
-			UpdateWalkSpeedModifierEvent:FireServer("reload", true)
-			ReloadEvent:FireServer(currentWeapon)
-		end
+		handleReloadRequest()
 	end
 end
 
@@ -730,6 +738,8 @@ RunService.RenderStepped:Connect(onRenderStepped)
 RunService.Stepped:Connect(onStepped)
 -- Connect Mobile Aim Event
 toggleAimEvent.Event:Connect(handleToggleAim)
+-- Connect Reload Request Event
+requestReloadEvent.Event:Connect(handleReloadRequest)
 
 -- Handle character already existing or being added
 player.CharacterAdded:Connect(onCharacterAdded)

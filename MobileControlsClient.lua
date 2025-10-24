@@ -41,8 +41,11 @@ if not aimStatusChangedEvent then
 	aimStatusChangedEvent.Parent = BindableEvents
 end
 
-local ReloadEvent = RemoteEvents:WaitForChild("ReloadEvent")
 local KnockEvent = RemoteEvents:WaitForChild("KnockEvent")
+
+-- Bindable Event for Reload Request
+local requestReloadEvent = BindableEvents:FindFirstChild("RequestReloadEvent") or Instance.new("BindableEvent", BindableEvents)
+requestReloadEvent.Name = "RequestReloadEvent"
 
 -- Utility: cari Tool bersenjata yang sedang dipegang
 local function getEquippedWeapon()
@@ -231,15 +234,8 @@ end)
 
 -- Klik: Reload
 reloadBtn.MouseButton1Click:Connect(function()
-	local char = player.Character
-	if not char then return end
-	if char:GetAttribute("IsSprinting") then return end
-	if char:FindFirstChild("Knocked") then return end
-
-	local tool = getEquippedWeapon()
-	if tool then
-		ReloadEvent:FireServer(tool)
-	end
+	-- Cukup fire event bindable. WeaponClient akan menangani logika & validasi.
+	requestReloadEvent:Fire()
 end)
 
 -- Klik: Toggle preferensi ADS (double-tap uses ADS vs HIP)

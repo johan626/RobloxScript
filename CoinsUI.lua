@@ -14,6 +14,7 @@ local CoinsUpdateEvent = ReplicatedStorage.RemoteEvents:WaitForChild("CoinsUpdat
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CoinsUI"
 screenGui.Parent = playerGui
+screenGui.IgnoreGuiInset = true
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- Container utama di pojok kanan atas

@@ -1,6 +1,6 @@
 -- LeaderboardConfig.lua
--- File ini berisi semua konfigurasi untuk setiap papan peringkat di dalam game.
--- Ini memungkinkan pengelolaan terpusat untuk semua papan peringkat.
+-- Path: ReplicatedStorage/LeaderboardConfig.lua
+-- Script Place: Lobby
 
 local LeaderboardConfig = {
 	AP = {

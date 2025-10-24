@@ -36,6 +36,10 @@ startAutoFireEvent.Name = "StartAutoFireEvent"
 local stopAutoFireEvent = BindableEvents:FindFirstChild("StopAutoFireEvent") or Instance.new("BindableEvent", BindableEvents)
 stopAutoFireEvent.Name = "StopAutoFireEvent"
 
+-- Bindable Event for Mobile Aim Toggle
+local toggleAimEvent = BindableEvents:FindFirstChild("ToggleAimEvent") or Instance.new("BindableEvent", BindableEvents)
+toggleAimEvent.Name = "ToggleAimEvent"
+
 
 -- State variables
 local currentWeapon = nil
@@ -672,6 +676,27 @@ local function onCharacterAdded(character)
 	character.Destroying:Connect(cleanupWeapon)
 end
 
+-- Mobile Aim Button Handler
+local function handleToggleAim()
+	if not currentWeapon or not weaponStats or reloading or isKnocked then return end
+
+	-- Toggle the aiming state
+	isAiming = not isAiming
+	currentWeapon:SetAttribute("IsAiming", isAiming)
+	if player.Character then
+		player.Character:SetAttribute("IsAiming", isAiming)
+	end
+
+	if isAiming then
+		transitionToADS()
+		UpdateWalkSpeedModifierEvent:FireServer("aim", true)
+	else
+		transitionToHip()
+		UpdateWalkSpeedModifierEvent:FireServer("aim", false)
+	end
+end
+
+
 -- Main Setup
 if player:GetAttribute("DoubleTapUsesADS") == nil then
 	player:SetAttribute("DoubleTapUsesADS", true)
@@ -686,6 +711,8 @@ UserInputService.TouchStarted:Connect(onTouchStarted)
 UserInputService.TouchEnded:Connect(onTouchEnded)
 RunService.RenderStepped:Connect(onRenderStepped)
 RunService.Stepped:Connect(onStepped)
+-- Connect Mobile Aim Event
+toggleAimEvent.Event:Connect(handleToggleAim)
 
 -- Handle character already existing or being added
 player.CharacterAdded:Connect(onCharacterAdded)

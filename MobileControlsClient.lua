@@ -25,6 +25,14 @@ end
 local startAutoFireEvent = BindableEvents:WaitForChild("StartAutoFireEvent")
 local stopAutoFireEvent = BindableEvents:WaitForChild("StopAutoFireEvent")
 
+-- Pastikan BindableEvent untuk toggle aim ada
+local toggleAimEvent = BindableEvents:FindFirstChild("ToggleAimEvent")
+if not toggleAimEvent then
+    toggleAimEvent = Instance.new("BindableEvent")
+    toggleAimEvent.Name = "ToggleAimEvent"
+    toggleAimEvent.Parent = BindableEvents
+end
+
 local ReloadEvent = RemoteEvents:WaitForChild("ReloadEvent")
 local KnockEvent = RemoteEvents:WaitForChild("KnockEvent")
 
@@ -227,10 +235,19 @@ reloadBtn.MouseButton1Click:Connect(function()
 end)
 
 -- Klik: Toggle preferensi ADS (double-tap uses ADS vs HIP)
+-- Klik: Toggle ADS (mode tombol tembak) atau Toggle Preferensi (mode double tap)
 adsBtn.MouseButton1Click:Connect(function()
-	local cur = player:GetAttribute("DoubleTapUsesADS")
-	player:SetAttribute("DoubleTapUsesADS", not cur)
-	setAdsStyle()
+	local fireControlType = player:GetAttribute("FireControlType")
+
+	if fireControlType == "FireButton" then
+		-- Mode tombol tembak: kirim event untuk toggle ADS
+		toggleAimEvent:Fire()
+	else
+		-- Mode double tap: ubah preferensi double tap
+		local cur = player:GetAttribute("DoubleTapUsesADS")
+		player:SetAttribute("DoubleTapUsesADS", not cur)
+		setAdsStyle()
+	end
 end)
 
 -- Klik: Lompat

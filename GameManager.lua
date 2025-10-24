@@ -213,7 +213,10 @@ local function countActivePlayers()
 	local count = 0
 	for _, player in ipairs(game.Players:GetPlayers()) do
 		if player.Character and not player.Character:FindFirstChild("Knocked") then
-			count += 1
+			local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+			if humanoid and humanoid.Health > 0 then
+				count += 1
+			end
 		end
 	end
 	return count
@@ -624,8 +627,10 @@ game.Players.PlayerRemoving:Connect(function(player)
 end)
 
 -- Update jumlah pemain ketika status knocked berubah
+-- Update jumlah pemain ketika status knocked berubah atau pemain mati
 game.Players.PlayerAdded:Connect(function(player)
 	player.CharacterAdded:Connect(function(character)
+		-- Pemicu untuk saat pemain di-knock
 		character.ChildAdded:Connect(function(child)
 			if child.Name == "Knocked" then
 				updatePlayerCount()
@@ -635,6 +640,14 @@ game.Players.PlayerAdded:Connect(function(player)
 			if child.Name == "Knocked" then
 				updatePlayerCount()
 			end
+		end)
+
+		-- Pemicu baru untuk saat pemain mati
+		local humanoid = character:WaitForChild("Humanoid")
+		humanoid.Died:Connect(function()
+			-- Tambahkan jeda singkat untuk memastikan status "Knocked" (jika ada) sudah direplikasi
+			task.wait(0.1)
+			updatePlayerCount()
 		end)
 	end)
 end)

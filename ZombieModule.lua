@@ -199,36 +199,51 @@ function ZombieModule.SpawnZombie(spawnPoint, typeName, playerCount)
 
 			-- 1. ATTACK LOGIC: Highest priority. If in range, attack.
 			if distanceToTarget <= attackRange then
-				-- Clear any existing path since we've reached the target
-				currentWaypoints = {}
+				-- NEW: Line of Sight Check
+				local raycastParams = RaycastParams.new()
+				raycastParams.FilterDescendantsInstances = {zombie}
+				raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+				local origin = currentPos + Vector3.new(0, 2.5, 0) -- Start ray from zombie's chest height
+				local direction = (targetPos - origin)
+				local result = workspace:Raycast(origin, direction, raycastParams)
 
-				-- Check attack cooldown
-				if tick() - lastAttackTime > attackCooldown then
-					lastAttackTime = tick()
-					zombie:SetAttribute("Attacking", true)
-					humanoid.WalkSpeed = 0 -- Stop moving to attack
-
-					-- Face the target for the attack
-					zombie:SetPrimaryPartCFrame(CFrame.new(currentPos, Vector3.new(targetPos.X, currentPos.Y, targetPos.Z)))
-
-					-- Perform the attack damage in a separate thread
-					task.spawn(function()
-						local playerHumanoid = target.Character:FindFirstChildOfClass("Humanoid")
-						if playerHumanoid and not target.Character:FindFirstChild("Knocked") and not ElementModule.IsPlayerInvincible(target) then
-							local damage = (cfg and cfg.AttackDamage) or ZombieConfig.BaseZombie.AttackDamage
-							damage = ElementModule.ApplyDamageReduction(target, damage)
-							local leftoverDamage = ShieldModule.Damage(target, damage)
-							if leftoverDamage > 0 then
-								playerHumanoid:TakeDamage(leftoverDamage)
-							end
-						end
-
-						-- Brief delay after attacking before moving again
-						task.wait(0.5) 
-						zombie:SetAttribute("Attacking", false)
-					end)
+				local hasLineOfSight = false
+				if result and result.Instance and result.Instance:IsDescendantOf(target.Character) then
+					hasLineOfSight = true
 				end
-				continue -- Do not proceed to movement logic this cycle
+
+				if hasLineOfSight then
+					-- Clear any existing path since we've reached the target
+					currentWaypoints = {}
+
+					-- Check attack cooldown
+					if tick() - lastAttackTime > attackCooldown then
+						lastAttackTime = tick()
+						zombie:SetAttribute("Attacking", true)
+						humanoid.WalkSpeed = 0 -- Stop moving to attack
+
+						-- Face the target for the attack
+						zombie:SetPrimaryPartCFrame(CFrame.new(currentPos, Vector3.new(targetPos.X, currentPos.Y, targetPos.Z)))
+
+						-- Perform the attack damage in a separate thread
+						task.spawn(function()
+							local playerHumanoid = target.Character:FindFirstChildOfClass("Humanoid")
+							if playerHumanoid and not target.Character:FindFirstChild("Knocked") and not ElementModule.IsPlayerInvincible(target) then
+								local damage = (cfg and cfg.AttackDamage) or ZombieConfig.BaseZombie.AttackDamage
+								damage = ElementModule.ApplyDamageReduction(target, damage)
+								local leftoverDamage = ShieldModule.Damage(target, damage)
+								if leftoverDamage > 0 then
+									playerHumanoid:TakeDamage(leftoverDamage)
+								end
+							end
+
+							-- Brief delay after attacking before moving again
+							task.wait(0.5)
+							zombie:SetAttribute("Attacking", false)
+						end)
+					end
+					continue -- Do not proceed to movement logic this cycle
+				end
 			end
 
 			-- 2. MOVEMENT LOGIC: Diverge based on whether it's a boss

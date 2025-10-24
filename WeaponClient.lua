@@ -39,6 +39,8 @@ stopAutoFireEvent.Name = "StopAutoFireEvent"
 -- Bindable Event for Mobile Aim Toggle
 local toggleAimEvent = BindableEvents:FindFirstChild("ToggleAimEvent") or Instance.new("BindableEvent", BindableEvents)
 toggleAimEvent.Name = "ToggleAimEvent"
+local aimStatusChangedEvent = BindableEvents:FindFirstChild("AimStatusChangedEvent") or Instance.new("BindableEvent", BindableEvents)
+aimStatusChangedEvent.Name = "AimStatusChangedEvent"
 
 
 -- State variables
@@ -80,6 +82,7 @@ local function cleanupWeapon()
 
 	if isAiming then
 		isAiming = false
+		aimStatusChangedEvent:Fire(false) -- Fire status update
 		currentWeapon:SetAttribute("IsAiming", false)
 		if player.Character then
 			player.Character:SetAttribute("IsAiming", false)
@@ -286,10 +289,11 @@ local function onInputBegan(input, gpe)
 
 			-- Jika sedang ADS, batalkan ADS & modifier speednya dulu
 			if isAiming then
+				isAiming = false
+				aimStatusChangedEvent:Fire(false) -- Fire status update
 				UpdateWalkSpeedModifierEvent:FireServer("aim", false)
 			end
 
-			isAiming = false
 			currentWeapon:SetAttribute("IsAiming", false)
 			if player.Character then
 				player.Character:SetAttribute("IsAiming", false)
@@ -305,13 +309,16 @@ end
 local function onInputEnded(input, gpe)
 	if not currentWeapon or not weaponStats then return end
 	if input.UserInputType == Enum.UserInputType.MouseButton2 then
-		isAiming = false
-		currentWeapon:SetAttribute("IsAiming", false)
-		if player.Character then
-			player.Character:SetAttribute("IsAiming", false)
+		if isAiming then -- Hanya jika state benar-benar berubah
+			isAiming = false
+			aimStatusChangedEvent:Fire(false) -- Fire status update
+			currentWeapon:SetAttribute("IsAiming", false)
+			if player.Character then
+				player.Character:SetAttribute("IsAiming", false)
+			end
+			transitionToHip()
+			UpdateWalkSpeedModifierEvent:FireServer("aim", false)
 		end
-		transitionToHip()
-		UpdateWalkSpeedModifierEvent:FireServer("aim", false)
 	end
 end
 
@@ -621,8 +628,11 @@ end)
 KnockEvent.OnClientEvent:Connect(function(knockStatus)
 	isKnocked = knockStatus
 	if isKnocked and currentWeapon then
+		if isAiming then
+			isAiming = false
+			aimStatusChangedEvent:Fire(false)
+		end
 		isMouseDown = false
-		isAiming = false
 		currentWeapon:SetAttribute("IsAiming", false)
 		if player.Character then
 			player.Character:SetAttribute("IsAiming", false)
@@ -636,9 +646,12 @@ end)
 
 GameOverEvent.OnClientEvent:Connect(function()
 	isGameOver = true
+	if isAiming then
+		isAiming = false
+		aimStatusChangedEvent:Fire(false)
+	end
 	isMouseDown = false
 	if currentWeapon then
-		isAiming = false
 		currentWeapon:SetAttribute("IsAiming", false)
 		if player.Character then
 			player.Character:SetAttribute("IsAiming", false)
@@ -694,6 +707,8 @@ local function handleToggleAim()
 		transitionToHip()
 		UpdateWalkSpeedModifierEvent:FireServer("aim", false)
 	end
+	-- Fire status update to UI
+	aimStatusChangedEvent:Fire(isAiming)
 end
 
 

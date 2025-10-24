@@ -33,6 +33,14 @@ if not toggleAimEvent then
     toggleAimEvent.Parent = BindableEvents
 end
 
+-- Event untuk sinkronisasi status ADS ke UI
+local aimStatusChangedEvent = BindableEvents:FindFirstChild("AimStatusChangedEvent")
+if not aimStatusChangedEvent then
+	aimStatusChangedEvent = Instance.new("BindableEvent")
+	aimStatusChangedEvent.Name = "AimStatusChangedEvent"
+	aimStatusChangedEvent.Parent = BindableEvents
+end
+
 local ReloadEvent = RemoteEvents:WaitForChild("ReloadEvent")
 local KnockEvent = RemoteEvents:WaitForChild("KnockEvent")
 
@@ -349,3 +357,44 @@ end)
 -- Inisialisasi pertama
 refreshButtonsVisibility()
 setAdsStyle()
+
+-- Fungsi untuk update warna tombol ADS berdasarkan status
+local function updateAdsButtonColor(isAiming)
+	local fireControlType = player:GetAttribute("FireControlType")
+	if fireControlType ~= "FireButton" then
+		-- Jika bukan mode tombol tembak, kembalikan ke style default (berdasarkan preferensi double tap)
+		setAdsStyle()
+		return
+	end
+
+	local bg = adsBtn:FindFirstChild("BG")
+	if not bg then return end
+	local stroke = bg:FindFirstChild("Stroke")
+	if not stroke then return end
+
+	if isAiming then
+		stroke.Color = Color3.fromRGB(80, 200, 120) -- Hijau (aktif)
+	else
+		stroke.Color = Color3.fromRGB(255, 255, 255) -- Putih (non-aktif)
+	end
+end
+
+-- Dengarkan perubahan status ADS dari WeaponClient
+aimStatusChangedEvent.Event:Connect(updateAdsButtonColor)
+
+-- Pastikan warna direset saat equip/unequip senjata
+local function onWeaponEquippedChanged()
+	task.wait(0.1) -- Beri waktu agar `getEquippedWeapon` mendapatkan status terbaru
+	if not getEquippedWeapon() then
+		updateAdsButtonColor(false) -- Reset ke status off jika tidak ada senjata
+	end
+end
+
+if player.Character then
+	player.Character.ChildAdded:Connect(onWeaponEquippedChanged)
+	player.Character.ChildRemoved:Connect(onWeaponEquippedChanged)
+end
+player.CharacterAdded:Connect(function(char)
+	char.ChildAdded:Connect(onWeaponEquippedChanged)
+	char.ChildRemoved:Connect(onWeaponEquippedChanged)
+end)

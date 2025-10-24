@@ -55,8 +55,15 @@ end
 
 -- Fungsi yield (menunggu) sampai data pemain dimuat
 function DataStoreManager:GetOrWaitForPlayerData(player)
+	local startTime = tick()
+	local TIMEOUT = 20 -- Detik
+
 	while not self:IsPlayerDataLoaded(player) do
-		dataLoadedEvent.Event:Wait()
+		if tick() - startTime > TIMEOUT then
+			warn("[DataStoreManager] GetOrWaitForPlayerData timed out untuk " .. player.Name)
+			return nil
+		end
+		dataLoadedEvent.Event:Wait(0.1) -- Tunggu sebentar agar loop bisa memeriksa timeout
 	end
 	return playerDataCache[player]
 end

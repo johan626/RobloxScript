@@ -1,5 +1,5 @@
--- LeaderboardService.lua (Script)
--- Path: ServerScriptService/Script/LeaderboardService.lua
+-- LeaderboardManager.lua (Script)
+-- Path: ServerScriptService/Script/LeaderboardManager.lua
 -- Script Place: Lobby
 -- This script manages all leaderboards in a centralized way.
 

@@ -447,6 +447,7 @@ local function onTouchStarted(touch, gpe)
 							player.Character:SetAttribute("IsAiming", true)
 						end
 						transitionToADS()
+						UpdateWalkSpeedModifierEvent:FireServer("aim", true) -- FIX: Add walkspeed modifier
 					end
 					adsHeldByFire = true
 				else
@@ -495,6 +496,7 @@ local function onTouchEnded(touch, gpe)
 				player.Character:SetAttribute("IsAiming", false)
 			end
 			transitionToHip()
+			UpdateWalkSpeedModifierEvent:FireServer("aim", false) -- FIX: Reset walkspeed modifier
 		end
 	end
 	if sniperHoldTouch and touch == sniperHoldTouch then

@@ -334,17 +334,10 @@ local function onInputEnded(input, gpe)
 			transitionToHip()
 			UpdateWalkSpeedModifierEvent:FireServer("aim", false)
 
-			-- Mulai transisi FOV kembali dan lepas kunci setelah selesai
-			stopFovTween()
-			fovTween = TweenService:Create(camera, TweenInfo.new(adsTransitionTime), {FieldOfView = originalFoV})
-			fovTween:Play()
-
-			task.spawn(function()
-				fovTween.Completed:Wait()
-				if not isAiming and player.Character then -- Pastikan state masih sama
-					player.Character:SetAttribute("CameraLock", false) -- Lepas kunci
-				end
-			end)
+			-- Langsung lepas kunci kamera, jangan tween FOV lagi
+			if player.Character then
+				player.Character:SetAttribute("CameraLock", false)
+			end
 		end
 	end
 end
@@ -728,17 +721,10 @@ local function handleToggleAim()
 		transitionToHip()
 		UpdateWalkSpeedModifierEvent:FireServer("aim", false)
 
-		-- Mulai transisi FOV kembali dan lepas kunci setelah selesai
-		stopFovTween()
-		fovTween = TweenService:Create(camera, TweenInfo.new(adsTransitionTime), {FieldOfView = originalFoV})
-		fovTween:Play()
-
-		task.spawn(function()
-			fovTween.Completed:Wait()
-			if not isAiming and player.Character then -- Pastikan state masih sama
-				player.Character:SetAttribute("CameraLock", false) -- Lepas kunci
-			end
-		end)
+		-- Langsung lepas kunci kamera, jangan tween FOV lagi
+		if player.Character then
+			player.Character:SetAttribute("CameraLock", false)
+		end
 	end
 	-- Fire status update to UI
 	aimStatusChangedEvent:Fire(isAiming)

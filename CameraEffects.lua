@@ -142,7 +142,8 @@ local function CameraUpdt(dt)
 
 		local cameraLock = char and char:GetAttribute("CameraLock") or false
 		if not cameraLock then
-			Cam.FieldOfView = BaseFov + sqrt(Vel)
+			local targetFov = BaseFov + sqrt(Vel)
+			Cam.FieldOfView = NumLerp(Cam.FieldOfView, targetFov, 0.1) -- Transisi mulus
 		end
 
 		MotionBlur.Size = clamp(abs(Drift*Settings.BlurMult) --[[ & Vel with lower mult]], 0, Settings.MaxBlur)

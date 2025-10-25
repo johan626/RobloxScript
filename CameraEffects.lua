@@ -140,8 +140,8 @@ local function CameraUpdt(dt)
 
 		Drift = GetMouseDrift(Drift, MouseDelta, dt)
 
-		local isAiming = char and char:GetAttribute("IsAiming") or false
-		if not isAiming then
+		local cameraLock = char and char:GetAttribute("CameraLock") or false
+		if not cameraLock then
 			Cam.FieldOfView = BaseFov + sqrt(Vel)
 		end
 

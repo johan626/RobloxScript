@@ -90,6 +90,7 @@ local function cleanupWeapon()
 		currentWeapon:SetAttribute("IsAiming", false)
 		if player.Character then
 			player.Character:SetAttribute("IsAiming", false)
+			player.Character:SetAttribute("CameraLock", false) -- Pastikan kunci dilepas
 		end
 	end
 	if reloading then
@@ -304,9 +305,15 @@ local function onInputBegan(input, gpe)
 			currentWeapon:SetAttribute("IsAiming", true)
 			if player.Character then
 				player.Character:SetAttribute("IsAiming", true)
+				player.Character:SetAttribute("CameraLock", true) -- Kunci kamera
 			end
 			transitionToADS()
 			UpdateWalkSpeedModifierEvent:FireServer("aim", true)
+
+			-- Mulai transisi FOV
+			stopFovTween()
+			fovTween = TweenService:Create(camera, TweenInfo.new(adsTransitionTime), {FieldOfView = weaponStats.ADSFoV})
+			fovTween:Play()
 		end
 	-- Reload (R key)
 	elseif input.KeyCode == Enum.KeyCode.R then
@@ -326,6 +333,18 @@ local function onInputEnded(input, gpe)
 			end
 			transitionToHip()
 			UpdateWalkSpeedModifierEvent:FireServer("aim", false)
+
+			-- Mulai transisi FOV kembali dan lepas kunci setelah selesai
+			stopFovTween()
+			fovTween = TweenService:Create(camera, TweenInfo.new(adsTransitionTime), {FieldOfView = originalFoV})
+			fovTween:Play()
+
+			task.spawn(function()
+				fovTween.Completed:Wait()
+				if not isAiming and player.Character then -- Pastikan state masih sama
+					player.Character:SetAttribute("CameraLock", false) -- Lepas kunci
+				end
+			end)
 		end
 	end
 end
@@ -575,22 +594,6 @@ local function onStepped(dt)
 		canShoot = true
 	end
 
-	if isAiming and not reloading then
-		if math.abs(weaponStats.ADSFoV - lastTargetFoV) > 0.1 then
-			stopFovTween()
-			fovTween = TweenService:Create(camera, TweenInfo.new(0.2), {FieldOfView = weaponStats.ADSFoV})
-			fovTween:Play()
-			lastTargetFoV = weaponStats.ADSFoV
-		end
-	else
-		if math.abs(originalFoV - lastTargetFoV) > 0.1 then
-			stopFovTween()
-			fovTween = TweenService:Create(camera, TweenInfo.new(0.2), {FieldOfView = originalFoV})
-			fovTween:Play()
-			lastTargetFoV = originalFoV
-		end
-	end
-
 	local currentCFrame = camera.CFrame
 	local recoilCFrame = CFrame.Angles(math.rad(currentRecoil), 0, 0)
 	camera.CFrame = currentCFrame * recoilCFrame
@@ -608,6 +611,7 @@ AmmoUpdateEvent.OnClientEvent:Connect(function(updatedWeaponName, ammo, reserveA
 		currentWeapon:SetAttribute("IsAiming", false)
 		if player.Character then
 			player.Character:SetAttribute("IsAiming", false)
+			player.Character:SetAttribute("CameraLock", false) -- Lepas kunci
 		end
 		transitionToHip()
 	end
@@ -665,6 +669,7 @@ GameOverEvent.OnClientEvent:Connect(function()
 		currentWeapon:SetAttribute("IsAiming", false)
 		if player.Character then
 			player.Character:SetAttribute("IsAiming", false)
+			player.Character:SetAttribute("CameraLock", false) -- Lepas kunci
 		end
 		transitionToHip()
 	end
@@ -711,11 +716,29 @@ local function handleToggleAim()
 	end
 
 	if isAiming then
+		if player.Character then player.Character:SetAttribute("CameraLock", true) end
 		transitionToADS()
 		UpdateWalkSpeedModifierEvent:FireServer("aim", true)
+
+		-- Mulai transisi FOV
+		stopFovTween()
+		fovTween = TweenService:Create(camera, TweenInfo.new(adsTransitionTime), {FieldOfView = weaponStats.ADSFoV})
+		fovTween:Play()
 	else
 		transitionToHip()
 		UpdateWalkSpeedModifierEvent:FireServer("aim", false)
+
+		-- Mulai transisi FOV kembali dan lepas kunci setelah selesai
+		stopFovTween()
+		fovTween = TweenService:Create(camera, TweenInfo.new(adsTransitionTime), {FieldOfView = originalFoV})
+		fovTween:Play()
+
+		task.spawn(function()
+			fovTween.Completed:Wait()
+			if not isAiming and player.Character then -- Pastikan state masih sama
+				player.Character:SetAttribute("CameraLock", false) -- Lepas kunci
+			end
+		end)
 	end
 	-- Fire status update to UI
 	aimStatusChangedEvent:Fire(isAiming)

@@ -202,7 +202,7 @@ function ZombieModule.SpawnZombie(spawnPoint, typeName, playerCount)
 				-- NEW: Line of Sight Check
 				local raycastParams = RaycastParams.new()
 				raycastParams.FilterDescendantsInstances = {zombie}
-				raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+				raycastParams.FilterType = Enum.RaycastFilterType.Exclude
 				local origin = currentPos + Vector3.new(0, 2.5, 0) -- Start ray from zombie's chest height
 				local direction = (targetPos - origin)
 				local result = workspace:Raycast(origin, direction, raycastParams)
@@ -238,7 +238,7 @@ function ZombieModule.SpawnZombie(spawnPoint, typeName, playerCount)
 							end
 
 							-- Brief delay after attacking before moving again
-							task.wait(0.5)
+							task.wait(0.5) 
 							zombie:SetAttribute("Attacking", false)
 						end)
 					end

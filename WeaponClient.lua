@@ -721,6 +721,96 @@ local function handleToggleAim()
 	aimStatusChangedEvent:Fire(isAiming)
 end
 
+-- BARU: Logika untuk mereplikasi skin pada pemain lain
+local function applySkinToCharacterTool(tool)
+	if not tool or not tool:IsA("Tool") or not tool:FindFirstChild("Handle") then
+		return
+	end
+
+	local weaponName = tool.Name
+	local weaponStats = WeaponModule.Weapons[weaponName]
+	if not weaponStats or not weaponStats.Skins then
+		return
+	end
+
+	-- Beri jeda singkat untuk memastikan atribut sudah direplikasi
+	task.wait()
+
+	local equippedSkinName = tool:GetAttribute("EquippedSkin") or "Default Skin"
+	local skinData = weaponStats.Skins[equippedSkinName] or weaponStats.Skins["Default Skin"]
+
+	if not skinData then return end
+
+	local handle = tool.Handle
+	local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+	if not mesh then
+		mesh = Instance.new("SpecialMesh")
+		mesh.Name = "Mesh"
+		mesh.Parent = handle
+	end
+
+	if skinData.MeshId and skinData.MeshId ~= "" then
+		mesh.MeshId = skinData.MeshId
+	end
+	if skinData.TextureId and skinData.TextureId ~= "" then
+		mesh.TextureId = skinData.TextureId
+	end
+end
+
+local function watchCharacter(character)
+    local connections = {} -- Tabel untuk koneksi spesifik karakter ini
+
+	-- Terapkan skin pada senjata yang sudah ada saat karakter muncul
+	for _, child in ipairs(character:GetChildren()) do
+		if child:IsA("Tool") then
+			applySkinToCharacterTool(child)
+		end
+	end
+
+	-- Amati senjata baru yang ditambahkan ke karakter
+	table.insert(connections, character.ChildAdded:Connect(function(child)
+		if child:IsA("Tool") then
+			applySkinToCharacterTool(child)
+			-- Amati jika atribut skin berubah (untuk mengatasi race condition replikasi)
+			table.insert(connections, child.AttributeChanged:Connect(function(attribute)
+				if attribute == "EquippedSkin" then
+					applySkinToCharacterTool(child)
+				end
+			end))
+		end
+	end))
+
+    -- Fungsi pembersihan untuk karakter ini
+    character.Destroying:Connect(function()
+        for _, conn in ipairs(connections) do
+            conn:Disconnect()
+        end
+        table.clear(connections)
+    end)
+end
+
+local playerWatchConnections = {} -- Tabel untuk menyimpan koneksi
+
+local function watchPlayer(playerToWatch)
+    -- Jangan amati pemain lokal, karena skin mereka ditangani oleh setupWeapon
+	if playerToWatch == player then return end
+    -- Hindari duplikasi koneksi
+    if playerWatchConnections[playerToWatch] then return end
+
+	if playerToWatch.Character then
+		watchCharacter(playerToWatch.Character)
+	end
+	-- Simpan koneksi agar bisa diputuskan nanti
+	playerWatchConnections[playerToWatch] = playerToWatch.CharacterAdded:Connect(watchCharacter)
+end
+
+local function unwatchPlayer(playerToRemove)
+    if playerWatchConnections[playerToRemove] then
+        playerWatchConnections[playerToRemove]:Disconnect()
+        playerWatchConnections[playerToRemove] = nil
+    end
+end
+
 
 -- Main Setup
 if player:GetAttribute("DoubleTapUsesADS") == nil then
@@ -746,6 +836,13 @@ player.CharacterAdded:Connect(onCharacterAdded)
 if player.Character then
 	onCharacterAdded(player.Character)
 end
+
+-- BARU: Mulai amati semua pemain yang ada dan yang akan bergabung
+for _, p in ipairs(game.Players:GetPlayers()) do
+	watchPlayer(p)
+end
+game.Players.PlayerAdded:Connect(watchPlayer)
+game.Players.PlayerRemoving:Connect(unwatchPlayer) -- PASTIKAN PEMBERSIHAN
 
 -- Boss2 Gravity Fix
 do

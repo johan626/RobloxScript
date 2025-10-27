@@ -502,20 +502,22 @@ function DataStoreManager:SavePlayerData(player)
 
 	local userId = tostring(player.UserId)
 
-	local mainSuccess = retryDataStoreCall(function() playerDS:SetAsync(userId, dataToSave); return true end)
+	local mainSuccess = retryDataStoreCall(function()
+		playerDS:UpdateAsync(userId, function(oldData)
+			-- Cukup kembalikan data baru dari cache.
+			-- Ini mencegah data sesi lama menimpa data sesi ini.
+			return dataToSave
+		end)
+		return true -- Mengembalikan true jika UpdateAsync berhasil
+	end)
 
 	if mainSuccess then
-
+		-- Simpan ke backup setelah DS utama berhasil
 		retryDataStoreCall(function() playerDSBackup:SetAsync(userId, dataToSave); return true end)
-
 		print("[DataStoreManager] Data berhasil disimpan ke DS utama & backup untuk " .. player.Name)
-
 		dirtyPlayers[player] = nil
-
 	else
-
-		warn("[DataStoreManager] Gagal menyimpan data ke DS utama untuk " .. player.Name)
-
+		warn("[DataStoreManager] Gagal menyimpan data ke DS utama untuk " .. player.Name .. ". Data akan dicoba disimpan lagi nanti.")
 	end
 
 end

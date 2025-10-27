@@ -1,6 +1,6 @@
 -- RandomWeaponConfig.lua (ModuleScript)
 -- Path: ServerScriptService/ModuleScript/RandomWeaponConfig.lua
--- Script Place: ACT 1: Village
+-- Script Place: Lobby, ACT 1: Village
 
 local RandomWeaponConfig = {}
 

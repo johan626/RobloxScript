@@ -285,121 +285,81 @@ function DataStoreManager:LoadPlayerData(player)
 
 
 	task.spawn(function()
-
 		local userId = tostring(player.UserId)
-
-
-
 		local data
+		local loadedFromBackup = false
 
-		local success = false
+		-- Coba muat dari DS utama menggunakan fungsi retry
+		data = retryDataStoreCall(function()
+			return playerDS:GetAsync(userId)
+		end)
 
-		for i = 1, 3 do
-
-			local pcall_success, result = pcall(function()
-
-				return playerDS:GetAsync(userId)
-
+		-- Jika gagal, coba dari backup
+		if not data then
+			warn("[DataStoreManager] Gagal memuat dari DS utama. Mencoba dari backup untuk " .. player.Name)
+			data = retryDataStoreCall(function()
+				return playerDSBackup:GetAsync(userId)
 			end)
 
-			if pcall_success then
-
-				success = true
-
-				data = result
-
-				break
-
-			else
-
-				warn("[DataStoreManager] Percobaan memuat data " .. i .. " gagal: " .. tostring(result))
-
-				if i < 3 then task.wait(2) end
-
+			if data then
+				loadedFromBackup = true
+				print("[DataStoreManager] Berhasil memuat data dari backup untuk " .. player.Name)
 			end
-
 		end
 
-
+		-- Periksa apakah pemain masih ada sebelum melanjutkan.
+		-- Ini penting karena proses di atas bisa memakan waktu.
 		if not Players:GetPlayerByUserId(player.UserId) then
-
 			playerDataLoading[player] = nil
-
 			return
-
 		end
 
-
-
-		if not success then
-
-			player:Kick("Gagal memuat data Anda karena masalah layanan. Silakan coba lagi nanti untuk melindungi progres Anda.")
-
+		-- Jika keduanya gagal (data masih nil), kick pemain.
+		if not data then
+			player:Kick("Gagal memuat data Anda dari server utama dan backup. Silakan coba lagi nanti.")
 			playerDataLoading[player] = nil
-
 			return
-
 		end
 
-
+		-- Proses data yang berhasil dimuat (baik dari utama maupun backup)
 		if data and type(data) == "table" then
-
 			if data.version < DATA_VERSION then
-
 				-- Data versi lama, jalankan migrasi
-
 				local migratedData = _migrateData(data)
-
 				if migratedData then
-
 					playerDataCache[player] = migratedData
-
 				else
-
 					-- Migrasi gagal, buat data default untuk sesi ini
-
 					warn("Migrasi data gagal untuk " .. player.Name .. ". Membuat data default.")
-
 					playerDataCache[player] = createDefaultData()
-
 				end
-
 			else
-
 				-- Versi data sudah sesuai
-
 				playerDataCache[player] = data
-
 			end
-
 		else
-
-			-- Tidak ada data, buat struktur default baru
-
+			-- Tidak ada data / data tidak valid, buat struktur default baru
 			playerDataCache[player] = createDefaultData()
-
 		end
 
+		-- Jika data berhasil dimuat dari backup, tandai sebagai 'dirty'
+		-- agar disimpan kembali ke DS utama pada siklus penyimpanan berikutnya.
+		if loadedFromBackup then
+			dirtyPlayers[player] = true
+		end
 
+		-- Selesaikan proses pemuatan data
 		playerDataLoading[player] = nil
-
-		print("[DataStoreManager] Data berhasil dimuat untuk " .. player.Name)
-
+		print("[DataStoreManager] Data berhasil dimuat untuk " .. player.Name .. (loadedFromBackup and " (dari backup)" or ""))
 		dataLoadedEvent:Fire()
 
-
+		-- Jalankan callback yang tertunda
 		if playerDataLoadedCallbacks[player] then
-
 			for _, callback in ipairs(playerDataLoadedCallbacks[player]) do
-
 				task.spawn(callback, playerDataCache[player])
-
 			end
-
 			playerDataLoadedCallbacks[player] = nil
-
 		end
-
 	end)
 
 end
@@ -531,39 +491,46 @@ end
 
 
 function DataStoreManager:Init()
+	-- Ada tiga mekanisme utama untuk menyimpan data:
 
-	coroutine.wrap(function()
-
+	-- 1. Auto-Saving Loop (Penyimpanan Berkala)
+	-- Ini adalah mekanisme utama yang secara rutin menyimpan progres pemain
+	-- setiap 60 detik. Ini mengurangi jumlah data yang hilang jika terjadi crash.
+	-- task.spawn digunakan sebagai pengganti coroutine modern.
+	task.spawn(function()
 		while not isShuttingDown do
-
 			task.wait(60)
-
-			for player, _ in pairs(dirtyPlayers) do self:SavePlayerData(player) end
-
+			for player, _ in pairs(dirtyPlayers) do
+				self:SavePlayerData(player)
+			end
 		end
+	end)
 
-	end)()
-
+	-- 2. PlayerRemoving (Penyimpanan Saat Pemain Keluar)
+	-- Ini adalah upaya "best-effort" untuk menyimpan data segera setelah pemain pergi.
+	-- Berguna, tetapi tidak 100% dapat diandalkan karena server mungkin sibuk atau
+	-- dalam proses mati, sehingga tidak boleh menjadi satu-satunya sandaran.
 	Players.PlayerRemoving:Connect(function(player)
-
-		if dirtyPlayers[player] then self:SavePlayerData(player) end
-
-		self:ClearPlayerCache(player)
-
-	end)
-
-	game:BindToClose(function()
-
-		isShuttingDown = true
-
-		for _, player in pairs(Players:GetPlayers()) do
-
-			if dirtyPlayers[player] then self:SavePlayerData(player) end
-
+		if dirtyPlayers[player] then
+			self:SavePlayerData(player)
 		end
-
+		self:ClearPlayerCache(player)
 	end)
 
+	-- 3. BindToClose (Penyimpanan Darurat Saat Server Mati)
+	-- Ini adalah MEKANISME PALING PENTING.
+	-- Fungsi ini akan berjalan saat server akan dimatikan (misalnya, untuk update).
+	-- Roblox memberikan waktu hingga 30 detik untuk menyelesaikan semua operasi di sini.
+	-- Ini adalah jaring pengaman terakhir dan paling andal untuk mencegah kehilangan data.
+	game:BindToClose(function()
+		isShuttingDown = true
+		-- Coba simpan untuk semua pemain yang datanya telah berubah.
+		for _, player in pairs(Players:GetPlayers()) do
+			if dirtyPlayers[player] then
+				self:SavePlayerData(player)
+			end
+		end
+	end)
 end
 
 

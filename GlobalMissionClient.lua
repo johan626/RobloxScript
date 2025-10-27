@@ -252,22 +252,25 @@ local function updateUI()
 	local currentRewardText = "Tidak ada hadiah"
 	local nextRewardText = "Tidak ada target berikutnya"
 
-	-- Cari hadiah saat ini dan berikutnya
+	-- Cari hadiah saat ini dan berikutnya (dengan asumsi rewardTiers diurutkan dari kecil ke besar)
 	if rewardTiers and #rewardTiers > 0 then
 		local currentTier = nil
-		local nextTier = nil
-		for i = #rewardTiers, 1, -1 do
+		local nextTier = rewardTiers[1] -- Asumsikan target berikutnya adalah tier pertama
+
+		for i = 1, #rewardTiers do
 			if playerContribution >= rewardTiers[i].Contribution then
 				currentTier = rewardTiers[i]
+				-- Cek apakah ada tier berikutnya
 				if i < #rewardTiers then
 					nextTier = rewardTiers[i+1]
+				else
+					nextTier = nil -- Sudah mencapai tier maksimum
 				end
+			else
+				-- Karena sudah diurutkan, tier pertama yang tidak tercapai adalah target berikutnya
+				nextTier = rewardTiers[i]
 				break
 			end
-		end
-
-		if not currentTier then -- Jika kontribusi di bawah tier pertama
-			nextTier = rewardTiers[1]
 		end
 
 		if currentTier then

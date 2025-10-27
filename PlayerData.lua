@@ -7,6 +7,7 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 local DataStoreManager = require(ServerScriptService.ModuleScript:WaitForChild("DataStoreManager"))
 local TitleManager = require(ServerScriptService.ModuleScript:WaitForChild("TitleManager"))
+local GlobalMissionManager = require(ServerScriptService.ModuleScript:WaitForChild("GlobalMissionManager"))
 
 -- Tidak ada logika lain yang diperlukan di sini, karena modul-modul
 -- sudah menangani event mereka secara internal.

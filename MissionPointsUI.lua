@@ -1,6 +1,6 @@
 -- MissionPointsUI.lua (LocalScript)
 -- Path: StarterGui/MissionPointsUI.lua
--- Script Place: Lobby & ACT 1: Village
+-- Script Place: Lobby
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")

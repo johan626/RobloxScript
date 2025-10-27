@@ -82,43 +82,6 @@ function StatsModule.SaveData(player, statsData)
 end
 
 -- =============================================================================
--- LOGIKA LEADERBOARD
--- =============================================================================
-
-local leaderboardCache = {} -- { userId = { StatName = value } }
-local dirtyLeaderboardPlayers = {} -- { userId = true }
-
-local function updateLeaderboardCache(player, statName, value)
-	local userId = player.UserId
-	if not leaderboardCache[userId] then leaderboardCache[userId] = {} end
-	leaderboardCache[userId][statName] = value
-	dirtyLeaderboardPlayers[userId] = true
-end
-
-local function saveDirtyLeaderboards()
-	for userId, _ in pairs(dirtyLeaderboardPlayers) do
-		local playerData = leaderboardCache[userId]
-		if playerData then
-			if playerData.TotalKills then
-				DataStoreManager:UpdateLeaderboard("KillsLeaderboard", userId, playerData.TotalKills)
-			end
-			if playerData.TotalDamageDealt then
-				DataStoreManager:UpdateLeaderboard("DamageLeaderboard", userId, playerData.TotalDamageDealt)
-			end
-			-- Tambahkan leaderboard lain di sini jika perlu
-		end
-	end
-	dirtyLeaderboardPlayers = {} -- Reset setelah disimpan
-end
-
--- Simpan leaderboard secara berkala
-task.spawn(function()
-	while true do
-		task.wait(120) -- Simpan setiap 2 menit
-		saveDirtyLeaderboards()
-	end
-end)
-
 -- =============================================================================
 -- FUNGSI PUBLIK (API)
 -- =============================================================================
@@ -136,12 +99,13 @@ function StatsModule.IncrementStat(player, key, amount)
 	if not AchievementManager then AchievementManager = require(script.Parent:WaitForChild("AchievementManager")) end
 	AchievementManager:UpdateStatProgress(player, key, newValue)
 
-	-- Update cache leaderboard jika stat ini dilacak
-	if key == "TotalKills" or key == "TotalDamageDealt" then
-		updateLeaderboardCache(player, key, newValue)
-	end
-
-	if key == "AchievementPoints" then
+	-- Update leaderboard secara langsung jika stat ini dilacak
+	if key == "TotalKills" then
+		DataStoreManager:UpdateLeaderboard("KillsLeaderboard_v1", player.UserId, newValue)
+	elseif key == "TotalDamageDealt" then
+		DataStoreManager:UpdateLeaderboard("TDLeaderboard_v1", player.UserId, newValue)
+	elseif key == "AchievementPoints" then
+		DataStoreManager:UpdateLeaderboard("APLeaderboard_v1", player.UserId, newValue)
 		apChangedEvent:FireClient(player, data[key])
 	end
 end
@@ -220,11 +184,6 @@ end
 -- =============================================================================
 
 Players.PlayerRemoving:Connect(function(player)
-	if dirtyLeaderboardPlayers[player.UserId] then
-		saveDirtyLeaderboards() -- Simpan semua yang kotor jika pemain keluar
-	end
-	leaderboardCache[player.UserId] = nil
-	dirtyLeaderboardPlayers[player.UserId] = nil
 end)
 
 getInitialAPFunc.OnServerInvoke = function(player)

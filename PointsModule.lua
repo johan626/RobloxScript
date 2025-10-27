@@ -56,15 +56,7 @@ function PointsSystem.RemovePlayer(player)
 end
 
 function PointsSystem.AddPoints(player, amount)
-	if not playerPoints[player] then return false end
-
-	-- Jika ini adalah pengurangan (pembelian), periksa apakah poin cukup
-	if amount < 0 then
-		if playerPoints[player] < math.abs(amount) then
-			return false -- Poin tidak cukup
-		end
-	end
-
+	if not playerPoints[player] then return end
 	playerPoints[player] += amount
 
 	-- update leaderstats BP bila ada
@@ -81,8 +73,6 @@ function PointsSystem.AddPoints(player, amount)
 	if PointsUpdate then
 		PointsUpdate:FireClient(player, playerPoints[player])
 	end
-
-	return true
 end
 
 function PointsSystem.GetPoints(player)

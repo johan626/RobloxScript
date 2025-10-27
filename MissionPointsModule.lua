@@ -67,6 +67,10 @@ function MissionPointsModule:AddMissionPoints(player, amount)
 	local data = self.GetData(player)
 	data.MissionPoints += amount
 	self.SaveData(player, data)
+
+	-- Update leaderboard
+	DataStoreManager:UpdateLeaderboard("MPLeaderboard_v1", player.UserId, data.MissionPoints)
+
 	missionPointsChangedEvent:FireClient(player, data.MissionPoints)
 end
 

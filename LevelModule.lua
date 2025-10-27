@@ -91,6 +91,10 @@ function LevelManager.AddXP(player, amount)
 		data.Level += 1
 		SkillModule.AddSkillPoint(player, 1) -- Asumsi menambah 1 poin per level
 		AchievementManager:UpdateStatProgress(player, "PlayerLevel", data.Level)
+
+		-- Update leaderboard saat level naik
+		DataStoreManager:UpdateLeaderboard("LevelLeaderboard_v1", player.UserId, data.Level)
+
 		xpNeeded = GetXPForNextLevel(data.Level)
 	end
 

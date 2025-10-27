@@ -14,13 +14,9 @@ local DataStoreManager = {}
 -- Menentukan lingkungan datastore
 local ENVIRONMENT = GameConfig.DataStore and GameConfig.DataStore.Environment or "dev"
 
--- Mendefinisikan nama DataStore dengan suffix lingkungan
-local playerDataStoreName = "PlayerDS_" .. ENVIRONMENT
-local globalDataStoreName = "GlobalDS_" .. ENVIRONMENT
-
--- Mendapatkan objek DataStore
-local PlayerDS = DataStoreService:GetDataStore(playerDataStoreName)
-local GlobalDS = DataStoreService:GetDataStore(globalDataStoreName)
+-- Mendapatkan objek DataStore dengan scope lingkungan
+local PlayerDS = DataStoreService:GetDataStore("PlayerDS", ENVIRONMENT)
+local GlobalDS = DataStoreService:GetDataStore("GlobalDS", ENVIRONMENT)
 
 -- Cache untuk menyimpan data pemain yang sedang online
 -- Struktur Cache: { [UserId] = { data = {}, isDirty = false, isLoading = true } }
@@ -264,7 +260,7 @@ end
 
 function DataStoreManager:UpdateLeaderboard(leaderboardName, key, value)
     local success, err = pcall(function()
-        local orderedDataStore = DataStoreService:GetOrderedDataStore(leaderboardName .. "_" .. ENVIRONMENT)
+        local orderedDataStore = DataStoreService:GetOrderedDataStore(leaderboardName, ENVIRONMENT)
         orderedDataStore:SetAsync(tostring(key), tonumber(value))
     end)
     if not success then
@@ -274,7 +270,7 @@ end
 
 function DataStoreManager:GetPlayerRankInLeaderboard(leaderboardName, userId)
     local success, result = pcall(function()
-        local orderedDataStore = DataStoreService:GetOrderedDataStore(leaderboardName .. "_" .. ENVIRONMENT)
+        local orderedDataStore = DataStoreService:GetOrderedDataStore(leaderboardName, ENVIRONMENT)
         local playerScore = orderedDataStore:GetAsync(tostring(userId))
         if not playerScore then
             return nil, nil -- Pemain tidak ada di papan peringkat
@@ -308,7 +304,7 @@ function DataStoreManager:GetLeaderboardData(leaderboardName, isAscending, pageS
     pageSize = pageSize or 50 -- Sesuaikan dengan kebutuhan LeaderboardManager
 
     local success, result = pcall(function()
-        local orderedDataStore = DataStoreService:GetOrderedDataStore(leaderboardName .. "_" .. ENVIRONMENT)
+        local orderedDataStore = DataStoreService:GetOrderedDataStore(leaderboardName, ENVIRONMENT)
         local pages = orderedDataStore:GetSortedAsync(isAscending, pageSize)
         return pages:GetCurrentPage()
     end)

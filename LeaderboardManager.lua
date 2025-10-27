@@ -18,10 +18,11 @@ if game.PlaceId ~= PlaceData["Lobby"] then
 end
 
 -- --- Remote Objects Setup ---
-local remoteFolder = ReplicatedStorage:FindFirstChild("RemoteObjects")
+-- --- Remote Functions Setup ---
+local remoteFolder = ReplicatedStorage:FindFirstChild("RemoteFunctions")
 if not remoteFolder then
 	remoteFolder = Instance.new("Folder")
-	remoteFolder.Name = "RemoteObjects"
+	remoteFolder.Name = "RemoteFunctions"
 	remoteFolder.Parent = ReplicatedStorage
 end
 

@@ -16,14 +16,6 @@ local CoinsManager = {}
 local CoinsUpdateEvent = ReplicatedStorage.RemoteEvents:FindFirstChild("CoinsUpdateEvent") or Instance.new("RemoteEvent", ReplicatedStorage.RemoteEvents)
 CoinsUpdateEvent.Name = "CoinsUpdateEvent"
 
--- Struktur data default
-local DEFAULT_INVENTORY = {
-	Coins = 0,
-	Skins = { Owned = {}, Equipped = {} },
-	PityCount = 0,
-	LastFreeGachaClaimUTC = 0
-}
-
 -- =============================================================================
 -- FUNGSI INTI
 -- =============================================================================
@@ -31,26 +23,25 @@ local DEFAULT_INVENTORY = {
 function CoinsManager.GetData(player)
 	local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
 	if not playerData or not playerData.data then
-		warn("[CoinsManager] Gagal mendapatkan data bahkan setelah menunggu untuk pemain: " .. player.Name)
-		return table.clone(DEFAULT_INVENTORY)
+		warn("[CoinsManager] Gagal mendapatkan data untuk pemain: " .. player.Name)
+		return {} -- Kembalikan tabel kosong untuk mencegah error
 	end
 
+	-- Pastikan sub-tabel inventory ada
 	if not playerData.data.inventory then
-		playerData.data.inventory = table.clone(DEFAULT_INVENTORY)
+		-- Jika tidak ada, salin dari struktur default di DataStoreManager
+		local defaultData = require(script.Parent:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
+		playerData.data.inventory = {}
+		for k, v in pairs(defaultData.inventory) do
+			playerData.data.inventory[k] = v
+		end
+		DataStoreManager:UpdatePlayerData(player, playerData.data)
 	end
 
 	local inventory = playerData.data.inventory
 	local hasChanges = false
 
-	-- Validasi dan migrasi data
-	for key, value in pairs(DEFAULT_INVENTORY) do
-		if inventory[key] == nil then
-			inventory[key] = value
-			hasChanges = true
-		end
-	end
-
-	-- Inisialisasi skin default
+	-- Inisialisasi skin default untuk senjata yang mungkin belum ada di data pemain
 	for weaponName, _ in pairs(WeaponModule.Weapons) do
 		if not inventory.Skins.Owned[weaponName] then
 			inventory.Skins.Owned[weaponName] = {"Default Skin"}
@@ -63,18 +54,18 @@ function CoinsManager.GetData(player)
 	end
 
 	if hasChanges then
-		CoinsManager.SaveData(player, inventory)
+		DataStoreManager:UpdatePlayerData(player, playerData.data)
 	end
 
 	return inventory
 end
 
 function CoinsManager.SaveData(player, inventoryData)
-	local playerData = DataStoreManager:GetPlayerData(player)
-	if not playerData or not playerData.data then return end
+    local playerData = DataStoreManager:GetPlayerData(player)
+    if not playerData or not playerData.data then return end
 
-	playerData.data.inventory = inventoryData
-	DataStoreManager:UpdatePlayerData(player, playerData.data)
+    playerData.data.inventory = inventoryData
+    DataStoreManager:UpdatePlayerData(player, playerData.data)
 end
 
 -- =============================================================================
@@ -131,23 +122,19 @@ end
 -- KONEKSI EVENT
 -- =============================================================================
 
-local function initializePlayerData(player)
-	task.spawn(function()
-		local data = CoinsManager.GetData(player)
-		CoinsUpdateEvent:FireClient(player, data.Coins)
-	end)
+local function onPlayerAdded(player)
+    -- Memulai inisialisasi dalam thread baru.
+    -- GetData akan secara internal menunggu data dimuat.
+    task.spawn(function()
+        local data = CoinsManager.GetData(player)
+        CoinsUpdateEvent:FireClient(player, data.Coins)
+    end)
 end
 
-Players.PlayerAdded:Connect(function(player)
-	DataStoreManager:OnPlayerDataLoaded(player, function()
-		initializePlayerData(player)
-	end)
-end)
+Players.PlayerAdded:Connect(onPlayerAdded)
 
 for _, player in ipairs(Players:GetPlayers()) do
-	DataStoreManager:OnPlayerDataLoaded(player, function()
-		initializePlayerData(player)
-	end)
+    onPlayerAdded(player)
 end
 
 return CoinsManager

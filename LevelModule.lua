@@ -32,46 +32,27 @@ local function GetXPForNextLevel(level)
 end
 
 function LevelManager.GetData(player)
-	local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
-	if not playerData or not playerData.data then
-		warn("[LevelManager] Gagal mendapatkan data bahkan setelah menunggu untuk pemain: " .. player.Name)
-		return table.clone(DEFAULT_LEVEL_DATA)
-	end
+    local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
+    if not playerData or not playerData.data then
+        warn("[LevelManager] Gagal mendapatkan data bahkan setelah menunggu untuk pemain: " .. player.Name)
+        return table.clone(DEFAULT_LEVEL_DATA)
+    end
 
-	-- Data level adalah bagian dari data Stats
-	if not playerData.data.stats then
-		playerData.data.stats = {}
-	end
+    -- Data level sekarang ada di bawah 'leveling'
+    if not playerData.data.leveling then
+        playerData.data.leveling = table.clone(DEFAULT_LEVEL_DATA)
+        DataStoreManager:UpdatePlayerData(player, playerData.data)
+    end
 
-	local stats = playerData.data.stats
-	local hasChanges = false
-	if stats.Level == nil then
-		stats.Level = DEFAULT_LEVEL_DATA.Level
-		hasChanges = true
-	end
-	if stats.XP == nil then
-		stats.XP = DEFAULT_LEVEL_DATA.XP
-		hasChanges = true
-	end
-
-	if hasChanges then
-		DataStoreManager:UpdatePlayerData(player, playerData.data)
-	end
-
-	return { Level = stats.Level, XP = stats.XP }
+    return playerData.data.leveling
 end
 
 function LevelManager.SaveData(player, levelData)
-	local playerData = DataStoreManager:GetPlayerData(player)
-	if not playerData or not playerData.data then return end
+    local playerData = DataStoreManager:GetPlayerData(player)
+    if not playerData or not playerData.data then return end
 
-	if not playerData.data.stats then
-		playerData.data.stats = {}
-	end
-
-	playerData.data.stats.Level = levelData.Level
-	playerData.data.stats.XP = levelData.XP
-	DataStoreManager:UpdatePlayerData(player, playerData.data)
+    playerData.data.leveling = levelData
+    DataStoreManager:UpdatePlayerData(player, playerData.data)
 end
 
 -- =============================================================================
@@ -106,24 +87,20 @@ end
 -- KONEKSI EVENT
 -- =============================================================================
 
-local function initializePlayerData(player)
-	task.spawn(function()
-		local data = LevelManager.GetData(player)
-		local xpNeeded = GetXPForNextLevel(data.Level)
-		LevelUpdateEvent:FireClient(player, data.Level, data.XP, xpNeeded)
-	end)
+local function onPlayerAdded(player)
+    -- Memulai inisialisasi dalam thread baru.
+    -- GetData akan secara internal menunggu data dimuat.
+    task.spawn(function()
+        local data = LevelManager.GetData(player)
+        local xpNeeded = GetXPForNextLevel(data.Level)
+        LevelUpdateEvent:FireClient(player, data.Level, data.XP, xpNeeded)
+    end)
 end
 
-Players.PlayerAdded:Connect(function(player)
-	DataStoreManager:OnPlayerDataLoaded(player, function()
-		initializePlayerData(player)
-	end)
-end)
+Players.PlayerAdded:Connect(onPlayerAdded)
 
 for _, player in ipairs(Players:GetPlayers()) do
-	DataStoreManager:OnPlayerDataLoaded(player, function()
-		initializePlayerData(player)
-	end)
+    onPlayerAdded(player)
 end
 
 return LevelManager

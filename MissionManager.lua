@@ -26,43 +26,28 @@ local rerollMissionFunc = Instance.new("RemoteFunction", RemoteEvents)
 rerollMissionFunc.Name = "RerollMissionFunc"
 
 
--- Struktur data default
-local DEFAULT_MISSIONS = {
-	Daily = { Missions = {}, LastReset = 0, RerollUsed = false },
-	Weekly = { Missions = {}, LastReset = 0, RerollUsed = false },
-	RecentMissions = {}
-}
-
 -- =============================================================================
 -- FUNGSI INTI
 -- =============================================================================
 
 function MissionManager.GetData(player)
-	-- Fungsi ini sekarang akan menunggu (yield) hingga data siap.
-	local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
+    local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
+    if not playerData or not playerData.data then
+        warn("[MissionManager] Gagal mendapatkan data untuk pemain: " .. player.Name)
+        return {}
+    end
 
-	if not playerData or not playerData.data then
-		-- Ini seharusnya tidak terjadi lagi, tetapi sebagai pengaman
-		warn("[MissionManager] Gagal mendapatkan data bahkan setelah menunggu untuk pemain: " .. player.Name)
-		return table.clone(DEFAULT_MISSIONS)
-	end
+    -- Pastikan sub-tabel missions ada
+    if not playerData.data.missions then
+        local defaultData = require(script.Parent:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
+        playerData.data.missions = {}
+		for k, v in pairs(defaultData.missions) do
+			playerData.data.missions[k] = v
+		end
+        DataStoreManager:UpdatePlayerData(player, playerData.data)
+    end
 
-	if not playerData.data.missions then
-		playerData.data.missions = table.clone(DEFAULT_MISSIONS)
-	end
-
-	-- Migrasi & Validasi
-	local missions = playerData.data.missions
-	local hasChanges = false
-	if not missions.Daily then missions.Daily = table.clone(DEFAULT_MISSIONS.Daily); hasChanges = true end
-	if not missions.Weekly then missions.Weekly = table.clone(DEFAULT_MISSIONS.Weekly); hasChanges = true end
-	if not missions.RecentMissions then missions.RecentMissions = {}; hasChanges = true end
-
-	if hasChanges then
-		MissionManager.SaveData(player, missions)
-	end
-
-	return missions
+    return playerData.data.missions
 end
 
 function MissionManager.SaveData(player, missionsData)
@@ -260,26 +245,21 @@ end
 -- KONEKSI EVENT
 -- =============================================================================
 
-local function onPlayerDataLoaded(player)
-	-- Pastikan data dibuat/dimigrasikan dan cek apakah misi perlu di-reset
-	-- karena fungsi ini berjalan di thread baru, tidak akan menghalangi.
-	task.spawn(function()
-		MissionManager:CheckAndResetMissions(player)
-	end)
+-- Fungsi yang dipanggil saat pemain bergabung
+local function onPlayerAdded(player)
+    -- Memulai pemeriksaan misi dalam thread baru.
+    -- GetData akan secara internal menunggu data dimuat.
+    task.spawn(function()
+        MissionManager:CheckAndResetMissions(player)
+    end)
 end
 
 -- Dengarkan event untuk setiap pemain yang bergabung
-Players.PlayerAdded:Connect(function(player)
-	DataStoreManager:OnPlayerDataLoaded(player, function()
-		onPlayerDataLoaded(player)
-	end)
-end)
+Players.PlayerAdded:Connect(onPlayerAdded)
 
 -- Jalankan juga untuk pemain yang mungkin sudah ada saat skrip ini dimuat
 for _, player in ipairs(Players:GetPlayers()) do
-	DataStoreManager:OnPlayerDataLoaded(player, function()
-		onPlayerDataLoaded(player)
-	end)
+    onPlayerAdded(player)
 end
 
 

@@ -17,12 +17,6 @@ local BoosterUpdateEvent = ReplicatedStorage.RemoteEvents:WaitForChild("BoosterU
 local UpdatePlayerBoosterStatusEvent = ReplicatedStorage.RemoteEvents:WaitForChild("UpdatePlayerBoosterStatusEvent")
 local ActivateBoosterEvent = ReplicatedStorage.RemoteEvents:WaitForChild("ActivateBoosterEvent")
 
--- Struktur data default
-local DEFAULT_BOOSTERS = {
-	Owned = {},
-	Active = nil
-}
-
 -- =============================================================================
 -- FUNGSI INTI
 -- =============================================================================
@@ -30,12 +24,18 @@ local DEFAULT_BOOSTERS = {
 function BoosterModule.GetData(player)
 	local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
 	if not playerData or not playerData.data then
-		warn("[BoosterModule] Gagal mendapatkan data bahkan setelah menunggu untuk pemain: " .. player.Name)
-		return table.clone(DEFAULT_BOOSTERS)
+		warn("[BoosterModule] Gagal mendapatkan data untuk pemain: " .. player.Name)
+		return { Owned = {}, Active = nil }
 	end
 
+	-- Pastikan sub-tabel boosters ada
 	if not playerData.data.boosters then
-		playerData.data.boosters = table.clone(DEFAULT_BOOSTERS)
+		local defaultData = require(script.Parent:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
+		playerData.data.boosters = {}
+		for k, v in pairs(defaultData.boosters) do
+			playerData.data.boosters[k] = v
+		end
+		DataStoreManager:UpdatePlayerData(player, playerData.data)
 	end
 
 	local boosters = playerData.data.boosters
@@ -50,7 +50,7 @@ function BoosterModule.GetData(player)
 	end
 
 	if hasChanges then
-		BoosterModule.SaveData(player, boosters)
+		DataStoreManager:UpdatePlayerData(player, playerData.data)
 	end
 
 	return boosters
@@ -117,23 +117,17 @@ end
 -- KONEKSI EVENT
 -- =============================================================================
 
-local function initializePlayerData(player)
-	task.spawn(function()
-		local data = BoosterModule.GetData(player)
-		BoosterUpdateEvent:FireClient(player, data)
-	end)
+local function onPlayerAdded(player)
+    task.spawn(function()
+        local data = BoosterModule.GetData(player)
+        BoosterUpdateEvent:FireClient(player, data)
+    end)
 end
 
-Players.PlayerAdded:Connect(function(player)
-	DataStoreManager:OnPlayerDataLoaded(player, function()
-		initializePlayerData(player)
-	end)
-end)
+Players.PlayerAdded:Connect(onPlayerAdded)
 
 for _, player in ipairs(Players:GetPlayers()) do
-	DataStoreManager:OnPlayerDataLoaded(player, function()
-		initializePlayerData(player)
-	end)
+    onPlayerAdded(player)
 end
 
 ActivateBoosterEvent.OnServerEvent:Connect(function(player, boosterName)

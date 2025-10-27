@@ -21,12 +21,6 @@ setEquippedTitleEvent.Name = "SetEquippedTitleEvent"
 local titleChangedEvent = ReplicatedStorage:FindFirstChild("TitleChangedEvent") or Instance.new("RemoteEvent", ReplicatedStorage)
 titleChangedEvent.Name = "TitleChangedEvent"
 
--- Struktur data default
-local DEFAULT_TITLE_DATA = {
-	UnlockedTitles = {},
-	EquippedTitle = ""
-}
-
 -- =============================================================================
 -- FUNGSI INTI
 -- =============================================================================
@@ -34,34 +28,28 @@ local DEFAULT_TITLE_DATA = {
 function TitleManager.GetData(player)
 	local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
 	if not playerData or not playerData.data then
-		warn("[TitleManager] Gagal mendapatkan data bahkan setelah menunggu untuk pemain: " .. player.Name)
-		return table.clone(DEFAULT_TITLE_DATA)
+		warn("[TitleManager] Gagal mendapatkan data untuk pemain: " .. player.Name)
+		return {}
 	end
 
-	if not playerData.data.stats then
-		playerData.data.stats = {}
+	-- Pastikan sub-tabel titles ada
+	if not playerData.data.titles then
+		local defaultData = require(script.Parent:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
+		playerData.data.titles = {}
+		for k, v in pairs(defaultData.titles) do
+			playerData.data.titles[k] = v
+		end
+		DataStoreManager:UpdatePlayerData(player, playerData.data)
 	end
 
-	local stats = playerData.data.stats
-	if stats.UnlockedTitles == nil then stats.UnlockedTitles = {} end
-	if stats.EquippedTitle == nil then stats.EquippedTitle = "" end
-
-	return {
-		UnlockedTitles = stats.UnlockedTitles,
-		EquippedTitle = stats.EquippedTitle
-	}
+	return playerData.data.titles
 end
 
 function TitleManager.SaveData(player, titleData)
 	local playerData = DataStoreManager:GetPlayerData(player)
 	if not playerData or not playerData.data then return end
 
-	if not playerData.data.stats then
-		playerData.data.stats = {}
-	end
-
-	playerData.data.stats.UnlockedTitles = titleData.UnlockedTitles
-	playerData.data.stats.EquippedTitle = titleData.EquippedTitle
+	playerData.data.titles = titleData
 	DataStoreManager:UpdatePlayerData(player, playerData.data)
 end
 

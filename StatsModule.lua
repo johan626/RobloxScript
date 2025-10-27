@@ -23,62 +23,38 @@ getInitialAPFunc.Name = "GetInitialAchievementPoints"
 local getWeaponStatsFunc = ReplicatedStorage:FindFirstChild("GetWeaponStats") or Instance.new("RemoteFunction", ReplicatedStorage)
 getWeaponStatsFunc.Name = "GetWeaponStats"
 
--- Struktur data default untuk statistik
-local DEFAULT_STATS = {
-	TotalCoins = 0,
-	TotalDamageDealt = 0,
-	TotalKills = 0,
-	TotalRevives = 0,
-	TotalKnocks = 0,
-	SkillPoints = 0,
-	Skills = {},
-	DailyRewardLastClaim = 0,
-	DailyRewardCurrentDay = 1,
-	SkillResetCount = 0,
-	AchievementPoints = 0,
-	WeaponStats = {}
-}
-
 -- =============================================================================
 -- FUNGSI INTI
 -- =============================================================================
 
 -- Fungsi untuk mendapatkan data statistik pemain dari cache DataStoreManager
 function StatsModule.GetData(player)
-	local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
-	if not playerData or not playerData.data then
-		warn("[StatsModule] Gagal mendapatkan data bahkan setelah menunggu untuk pemain: " .. player.Name)
-		return table.clone(DEFAULT_STATS)
-	end
+    local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
+    if not playerData or not playerData.data then
+        warn("[StatsModule] Gagal mendapatkan data untuk pemain: " .. player.Name)
+        return {}
+    end
 
-	-- Pastikan data statistik ada
-	if not playerData.data.stats then
-		playerData.data.stats = table.clone(DEFAULT_STATS)
-	end
-
-	-- Pastikan semua field default ada (untuk migrasi data lama)
-	local hasChanges = false
-	for key, value in pairs(DEFAULT_STATS) do
-		if playerData.data.stats[key] == nil then
-			playerData.data.stats[key] = value
-			hasChanges = true
+    -- Pastikan sub-tabel stats ada
+    if not playerData.data.stats then
+        local defaultData = require(script.Parent:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
+        playerData.data.stats = {}
+		for k, v in pairs(defaultData.stats) do
+			playerData.data.stats[k] = v
 		end
-	end
+        DataStoreManager:UpdatePlayerData(player, playerData.data)
+    end
 
-	if hasChanges then
-		DataStoreManager:UpdatePlayerData(player, playerData.data)
-	end
-
-	return playerData.data.stats
+    return playerData.data.stats
 end
 
 -- Fungsi untuk menyimpan data statistik pemain
 function StatsModule.SaveData(player, statsData)
-	local playerData = DataStoreManager:GetPlayerData(player)
-	if not playerData or not playerData.data then return end
+    local playerData = DataStoreManager:GetPlayerData(player)
+    if not playerData or not playerData.data then return end
 
-	playerData.data.stats = statsData
-	DataStoreManager:UpdatePlayerData(player, playerData.data)
+    playerData.data.stats = statsData
+    DataStoreManager:UpdatePlayerData(player, playerData.data)
 end
 
 -- =============================================================================

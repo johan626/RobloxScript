@@ -96,7 +96,7 @@ local BoosterModule = require(ModuleScriptServerScriptService:WaitForChild("Boos
 local ShieldModule = require(ModuleScriptServerScriptService:WaitForChild("ShieldModule"))
 local MissionManager = require(ModuleScriptServerScriptService:WaitForChild("MissionManager"))
 local AchievementManager = require(ModuleScriptServerScriptService:WaitForChild("AchievementManager"))
-local DataStoreManager = require(script.Parent.Parent.ModuleScript:WaitForChild("DataStoreManager"))
+local DataStoreManager = require(ModuleScriptServerScriptService:WaitForChild("DataStoreManager"))
 DataStoreManager:Init()
 
 local WaveCountdownEvent = RemoteEvents:WaitForChild("WaveCountdownEvent")
@@ -450,9 +450,9 @@ local function startGameLoop()
 					if lobbyId then
 						local playersToTeleport = game.Players:GetPlayers()
 						if #playersToTeleport > 0 then
-							-- Simpan data sebelum teleport
+							-- Simpan data semua pemain secara sinkron sebelum teleport
 							for _, p in ipairs(playersToTeleport) do
-								DataStoreManager:SavePlayerData(p)
+								DataStoreManager:SavePlayerDataYielding(p)
 							end
 							-- Gunakan pcall untuk keamanan
 							local success, result = pcall(function()
@@ -630,8 +630,8 @@ ExitGameEvent.OnServerEvent:Connect(function(player)
 	local lobbyId = PlaceData["Lobby"]
 
 	if lobbyId then
-		-- Simpan data sebelum teleport
-		DataStoreManager:SavePlayerData(player)
+		-- Simpan data secara sinkron sebelum teleport
+		DataStoreManager:SavePlayerDataYielding(player)
 
 		-- Set debounce
 		teleportingPlayers[player.UserId] = true
@@ -661,31 +661,34 @@ end)
 
 -- Update jumlah pemain ketika pemain bergabung atau keluar
 game.Players.PlayerAdded:Connect(function(player)
-	-- Memulai pemuatan data non-blocking
-	DataStoreManager:LoadPlayerData(player)
-	updatePlayerCount()
+    updatePlayerCount()
 
-	-- Menunggu data siap sebelum melakukan inisialisasi modul
-	DataStoreManager:OnPlayerDataLoaded(player, function(playerData)
-		if not player or not player.Parent then return end -- Pemain mungkin keluar saat data dimuat
+    -- Memulai pemuatan data non-blocking di latar belakang.
+    DataStoreManager:LoadPlayerData(player)
 
-		print("[GameManager] Data siap untuk " .. player.Name .. ", melanjutkan inisialisasi.")
+    -- Inisialisasi sistem lain dalam thread terpisah untuk tidak menahan proses join.
+    task.spawn(function()
+        -- Tunggu hingga data pemain benar-benar dimuat.
+        local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
+        if not player.Parent then return end -- Pemain mungkin keluar saat data sedang dimuat
 
-		-- Inisialisasi leaderstats & points setelah data siap
-		if PointsSystem and type(PointsSystem.SetupPlayer) == "function" then
-			PointsSystem.SetupPlayer(player)
-		end
+        -- Sekarang aman untuk menginisialisasi PointsSystem karena data sudah ada.
+        if PointsSystem and type(PointsSystem.SetupPlayer) == "function" then
+            PointsSystem.SetupPlayer(player)
+        end
+    end)
 
-		-- Kirim mode permainan saat ini ke pemain yang baru bergabung
-		local gameSettingsUpdateEvent = RemoteEvents:FindFirstChild("GameSettingsUpdateEvent")
-		if gameSettingsUpdateEvent then
-			gameSettingsUpdateEvent:FireClient(player, {gameMode = gameMode, difficulty = difficulty})
-		end
-	end)
+    -- Kirim mode permainan saat ini ke pemain yang baru bergabung (ini bisa segera dilakukan).
+    local gameSettingsUpdateEvent = RemoteEvents:FindFirstChild("GameSettingsUpdateEvent")
+    if gameSettingsUpdateEvent then
+        gameSettingsUpdateEvent:FireClient(player, {gameMode = gameMode, difficulty = difficulty})
+    end
 end)
 
 game.Players.PlayerRemoving:Connect(function(player)
-	updatePlayerCount()
+    -- Penyimpanan data pemain ditangani secara otomatis oleh DataStoreManager
+    -- melalui event PlayerRemoving yang terhubung di dalam modul itu sendiri.
+    updatePlayerCount()
 end)
 
 -- Update jumlah pemain ketika status knocked berubah

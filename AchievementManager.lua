@@ -7,7 +7,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DataStoreManager = require(script.Parent:WaitForChild("DataStoreManager"))
 
 -- Modul lain
--- local AchievementConfig = require(script.Parent:WaitForChild("AchievementConfig")) -- Dimuat di dalam fungsi untuk mencegah circular dependency
 local StatsModule = require(script.Parent:WaitForChild("StatsModule"))
 
 local AchievementManager = {}
@@ -25,12 +24,6 @@ achievementEvent.Name = "AchievementUnlocked"
 local getAchievementsFunc = ReplicatedStorage:FindFirstChild("GetAchievementsFunc") or Instance.new("RemoteFunction", ReplicatedStorage)
 getAchievementsFunc.Name = "GetAchievementsFunc"
 
--- Struktur data default
-local DEFAULT_ACHIEVEMENTS = {
-	Completed = {},
-	Progress = {} -- Untuk melacak progres spesifik pencapaian jika perlu
-}
-
 -- =============================================================================
 -- FUNGSI INTI
 -- =============================================================================
@@ -38,19 +31,18 @@ local DEFAULT_ACHIEVEMENTS = {
 function AchievementManager.GetData(player)
 	local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
 	if not playerData or not playerData.data then
-		warn("[AchievementManager] Gagal mendapatkan data bahkan setelah menunggu untuk pemain: " .. player.Name)
-		return table.clone(DEFAULT_ACHIEVEMENTS)
+		warn("[AchievementManager] Gagal mendapatkan data untuk pemain: " .. player.Name)
+		return {}
 	end
 
-	-- Pastikan struktur data pencapaian lengkap untuk mencegah kesalahan
-	if type(playerData.data.achievements) ~= "table" then
-		playerData.data.achievements = table.clone(DEFAULT_ACHIEVEMENTS)
-	end
-	if type(playerData.data.achievements.Completed) ~= "table" then
-		playerData.data.achievements.Completed = {}
-	end
-	if type(playerData.data.achievements.Progress) ~= "table" then
-		playerData.data.achievements.Progress = {}
+	-- Pastikan sub-tabel achievements ada
+	if not playerData.data.achievements then
+		local defaultData = require(script.Parent:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
+		playerData.data.achievements = {}
+		for k, v in pairs(defaultData.achievements) do
+			playerData.data.achievements[k] = v
+		end
+		DataStoreManager:UpdatePlayerData(player, playerData.data)
 	end
 
 	return playerData.data.achievements
@@ -77,8 +69,6 @@ function AchievementManager:UnlockAchievement(player, achievement)
 
 	StatsModule.AddAchievementPoints(player, achievement.APReward)
 	achievementEvent:FireClient(player, achievement)
-
-	-- Logika untuk membuka Title (jika ada) dapat ditambahkan di sini
 end
 
 -- Memeriksa pencapaian berdasarkan pembaruan statistik
@@ -129,7 +119,6 @@ function AchievementManager:ResetWaveSurvivedProgress(player)
 	playerWaveStreaks[player] = 0
 end
 
--- Dipanggil oleh StatsModule atau modul lain saat statistik diperbarui
 function AchievementManager:UpdateStatProgress(player, statName, newValue)
 	self:CheckStatAchievements(player, statName, newValue)
 end
@@ -147,8 +136,6 @@ getAchievementsFunc.OnServerInvoke = function(player)
 	local statsData = StatsModule.GetData(player)
 	local clientAchievements = {}
 
-	-- Logika untuk menampilkan progres pencapaian ke klien
-	-- (Disederhanakan untuk contoh ini)
 	local AchievementConfig = require(script.Parent:WaitForChild("AchievementConfig"))
 	for _, achievement in ipairs(AchievementConfig) do
 		local progress = 0

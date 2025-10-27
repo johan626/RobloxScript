@@ -23,14 +23,10 @@ end
 -- Fungsi untuk memvalidasi data pengaturan yang diterima dari klien
 local function validateSettings(settings)
 	if type(settings) ~= "table" then return nil end
-
-	-- Validasi suara
 	if type(settings.sound) ~= "table" then return nil, "Invalid sound table" end
 	local sound = settings.sound
 	if type(sound.enabled) ~= "boolean" then return nil, "Invalid sound.enabled" end
 	if type(sound.sfxVolume) ~= "number" or not (sound.sfxVolume >= 0 and sound.sfxVolume <= 1) then return nil, "Invalid sfxVolume" end
-
-	-- Validasi kontrol (opsional, tapi jika ada, harus benar)
 	if settings.controls then
 		if type(settings.controls) ~= "table" then return nil, "Invalid controls table" end
 		local controls = settings.controls
@@ -38,33 +34,25 @@ local function validateSettings(settings)
 			return nil, "Invalid fireControlType"
 		end
 	end
-
-	-- Validasi HUD
 	if type(settings.hud) ~= "table" then return nil, "Invalid hud table" end
-	for elementName, data in pairs(settings.hud) do
-		if type(data) ~= "table" then return nil, "Invalid hud element data" end
-		if not validateUDim2(data.pos) or not validateUDim2(data.size) then
-			warn("Data HUD tidak valid untuk elemen: " .. tostring(elementName))
+	for _, data in pairs(settings.hud) do
+		if type(data) ~= "table" or not validateUDim2(data.pos) or not validateUDim2(data.size) then
 			return nil, "Invalid hud UDim2 data"
 		end
 	end
-
 	return settings
 end
-
 
 -- Fungsi untuk mengubah tabel kembali menjadi UDim2
 local function deserializeUDim2(tbl)
 	return UDim2.new(tbl.X.Scale, tbl.X.Offset, tbl.Y.Scale, tbl.Y.Offset)
 end
 
-
 -- Saat klien mengirim pembaruan pengaturan
 UpdateSettingsEvent.OnServerEvent:Connect(function(player, clientSettings)
-	-- Klien sekarang mengirim data yang sudah diserialisasi
 	local validatedSettings, reason = validateSettings(clientSettings)
 	if not validatedSettings then
-		warn("Pembaruan pengaturan ditolak untuk " .. player.Name .. " karena data tidak valid: " .. (reason or "Unknown"))
+		warn("Pembaruan pengaturan ditolak untuk " .. player.Name .. ": " .. (reason or "Unknown"))
 		return
 	end
 
@@ -76,28 +64,31 @@ UpdateSettingsEvent.OnServerEvent:Connect(function(player, clientSettings)
 
 	-- Pastikan tabel pengaturan ada
 	if not playerData.data.settings then
+		local defaultData = require(ServerScriptService.ModuleScript:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
 		playerData.data.settings = {}
+		for k, v in pairs(defaultData.settings) do playerData.data.settings[k] = v end
+		DataStoreManager:UpdatePlayerData(player, playerData.data)
 	end
 
-	-- Gabungkan pengaturan yang divalidasi
 	playerData.data.settings.sound = validatedSettings.sound
 	playerData.data.settings.hud = validatedSettings.hud
-	playerData.data.settings.controls = validatedSettings.controls or { fireControlType = "FireButton" } -- Default jika tidak ada
+	playerData.data.settings.controls = validatedSettings.controls or { fireControlType = "FireButton" }
 
 	DataStoreManager:UpdatePlayerData(player, playerData.data)
 	print("Pengaturan berhasil disimpan untuk " .. player.Name)
 end)
 
-
 -- Fungsi untuk mengirim pengaturan ke pemain
-local function sendSettingsToClient(player)
-	DataStoreManager:OnPlayerDataLoaded(player, function(playerData)
+local function onPlayerAdded(player)
+	task.spawn(function()
+		local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
+		local settingsToSend
+
 		if playerData and playerData.data and playerData.data.settings then
 			local settings = playerData.data.settings
-			-- Ubah kembali data HUD yang disimpan ke format UDim2 sebelum mengirim ke klien
-			local settingsToSend = {
+			settingsToSend = {
 				sound = settings.sound,
-				controls = settings.controls or { fireControlType = "FireButton" }, -- Kirim default jika tidak ada
+				controls = settings.controls or { fireControlType = "FireButton" },
 				hud = {}
 			}
 			if settings.hud then
@@ -108,22 +99,18 @@ local function sendSettingsToClient(player)
 					}
 				end
 			end
-			LoadSettingsEvent:FireClient(player, settingsToSend)
 			print("Pengaturan yang ada telah dikirim ke " .. player.Name)
 		else
-			print("Tidak ada data pengaturan custom untuk " .. player.Name .. ". Klien akan menggunakan default.")
-			-- Kirim pengaturan default jika tidak ada sama sekali
-			LoadSettingsEvent:FireClient(player, {
-				sound = { enabled = true, sfxVolume = 0.8 },
-				controls = { fireControlType = "FireButton" },
-				hud = {}
-			})
+			-- Gunakan default dari DataStoreManager jika tidak ada
+			local defaultData = require(ServerScriptService.ModuleScript:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
+			settingsToSend = defaultData.settings
+			print("Tidak ada data pengaturan custom untuk " .. player.Name .. ". Mengirim default.")
 		end
+		LoadSettingsEvent:FireClient(player, settingsToSend)
 	end)
 end
 
-
-Players.PlayerAdded:Connect(sendSettingsToClient)
+Players.PlayerAdded:Connect(onPlayerAdded)
 for _, player in ipairs(Players:GetPlayers()) do
-	sendSettingsToClient(player)
+	onPlayerAdded(player)
 end

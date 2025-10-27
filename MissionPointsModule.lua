@@ -18,11 +18,6 @@ end
 local getInitialPointsFunc = Instance.new("RemoteFunction", ReplicatedStorage)
 getInitialPointsFunc.Name = "GetInitialMissionPoints"
 
--- Struktur data default
-local DEFAULT_MISSION_POINTS = {
-	MissionPoints = 0
-}
-
 -- =============================================================================
 -- FUNGSI INTI
 -- =============================================================================
@@ -30,31 +25,35 @@ local DEFAULT_MISSION_POINTS = {
 function MissionPointsModule.GetData(player)
 	local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
 	if not playerData or not playerData.data then
-		warn("[MissionPointsModule] Gagal mendapatkan data bahkan setelah menunggu untuk pemain: " .. player.Name)
-		return table.clone(DEFAULT_MISSION_POINTS)
+		warn("[MissionPointsModule] Gagal mendapatkan data untuk pemain: " .. player.Name)
+		return { MissionPoints = 0 }
 	end
 
-	-- Poin misi disimpan di dalam data Inventory
-	if not playerData.data.inventory then
-		playerData.data.inventory = {}
+	-- Poin misi sekarang disimpan di dalam data Stats
+	if not playerData.data.stats then
+		-- Inisialisasi jika tidak ada
+		local defaultData = require(script.Parent:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
+		playerData.data.stats = {}
+		for k, v in pairs(defaultData.stats) do playerData.data.stats[k] = v end
+		DataStoreManager:UpdatePlayerData(player, playerData.data)
 	end
 
-	if playerData.data.inventory.MissionPoints == nil then
-		playerData.data.inventory.MissionPoints = 0
+	if playerData.data.stats.MissionPoints == nil then
+		playerData.data.stats.MissionPoints = 0
 	end
 
-	return { MissionPoints = playerData.data.inventory.MissionPoints }
+	return { MissionPoints = playerData.data.stats.MissionPoints }
 end
 
 function MissionPointsModule.SaveData(player, mpData)
 	local playerData = DataStoreManager:GetPlayerData(player)
 	if not playerData or not playerData.data then return end
 
-	if not playerData.data.inventory then
-		playerData.data.inventory = {}
+	if not playerData.data.stats then
+		playerData.data.stats = {}
 	end
 
-	playerData.data.inventory.MissionPoints = mpData.MissionPoints
+	playerData.data.stats.MissionPoints = mpData.MissionPoints
 	DataStoreManager:UpdatePlayerData(player, playerData.data)
 end
 
@@ -68,9 +67,7 @@ function MissionPointsModule:AddMissionPoints(player, amount)
 	data.MissionPoints += amount
 	self.SaveData(player, data)
 
-	-- Update leaderboard
 	DataStoreManager:UpdateLeaderboard("MPLeaderboard_v1", player.UserId, data.MissionPoints)
-
 	missionPointsChangedEvent:FireClient(player, data.MissionPoints)
 end
 
@@ -96,23 +93,17 @@ getInitialPointsFunc.OnServerInvoke = function(player)
 	return MissionPointsModule:GetMissionPoints(player)
 end
 
-local function initializePlayerData(player)
-	task.spawn(function()
-		local points = MissionPointsModule:GetMissionPoints(player)
-		missionPointsChangedEvent:FireClient(player, points)
-	end)
+local function onPlayerAdded(player)
+    task.spawn(function()
+        local points = MissionPointsModule:GetMissionPoints(player)
+        missionPointsChangedEvent:FireClient(player, points)
+    end)
 end
 
-Players.PlayerAdded:Connect(function(player)
-	DataStoreManager:OnPlayerDataLoaded(player, function()
-		initializePlayerData(player)
-	end)
-end)
+Players.PlayerAdded:Connect(onPlayerAdded)
 
 for _, player in ipairs(Players:GetPlayers()) do
-	DataStoreManager:OnPlayerDataLoaded(player, function()
-		initializePlayerData(player)
-	end)
+    onPlayerAdded(player)
 end
 
 return MissionPointsModule

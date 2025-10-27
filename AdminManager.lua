@@ -5,7 +5,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DataStoreManager = require(script.Parent.Parent.ModuleScript:WaitForChild("DataStoreManager"))
-local AdminConfig = require(script.Parent.Parent.ModuleScript:WaitForChild("AdminConfig"))
+local AdminConfig = require(ReplicatedStorage.ModuleScript:WaitForChild("AdminConfig"))
 
 local AdminManager = {}
 
@@ -49,23 +49,14 @@ requestDataFunc.OnServerInvoke = function(adminPlayer, targetUserId)
 	local data
 
 	if targetPlayer then
-		-- Jika pemain online, gunakan data dari cache
 		data = DataStoreManager:GetPlayerData(targetPlayer)
 	else
-		-- Jika pemain offline, muat data mereka secara sementara
-		-- NOTE: DataStoreManager perlu dimodifikasi untuk mendukung ini
-		-- Untuk saat ini, kita akan mengasumsikan fungsi ini ada:
 		data = DataStoreManager:LoadOfflinePlayerData(targetUserId) 
 	end
 
-	if not data then return nil, "No data found" end
+	if not data or not data.data then return nil, "No data found" end
 
-	-- Admin UI mengharapkan format Stats/Inventory, jadi kita akan sesuaikan
-	return {
-		Stats = data.data.stats,
-		Inventory = data.data.inventory,
-		-- Tambahkan data lain di sini jika perlu
-	}
+	return data.data -- Kirim data mentah
 end
 
 updateDataEvent.OnServerEvent:Connect(function(adminPlayer, targetUserId, newData)
@@ -81,15 +72,13 @@ updateDataEvent.OnServerEvent:Connect(function(adminPlayer, targetUserId, newDat
 		currentData = DataStoreManager:LoadOfflinePlayerData(targetUserId)
 	end
 
-	if not currentData then return end
+	if not currentData or not currentData.data then return end
 
-	-- Gabungkan data baru ke data yang ada
 	local mergedData = deepMerge(currentData.data, newData)
 
 	if targetPlayer then
 		DataStoreManager:UpdatePlayerData(targetPlayer, mergedData)
 	else
-		-- NOTE: Perlu fungsi untuk menyimpan data pemain offline
 		DataStoreManager:SaveOfflinePlayerData(targetUserId, mergedData)
 	end
 
@@ -109,7 +98,7 @@ restoreDataEvent.OnServerEvent:Connect(function(adminPlayer, targetUserId)
 	if type(targetUserId) ~= "number" then return end
 
 	DataStoreManager:RestorePlayerDataFromBackup(adminPlayer, targetUserId)
-	-- Logging sudah ditangani di dalam fungsi Restore
+	-- Logging dapat ditangani di dalam fungsi Restore jika diimplementasikan
 end)
 
 -- =============================================================================

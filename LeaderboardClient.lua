@@ -12,7 +12,7 @@ local avatarCache = {} -- Cache for player avatars
 
 -- Wait for necessary modules and remote objects
 local LeaderboardConfig = require(ReplicatedStorage:WaitForChild("LeaderboardConfig"))
-local remoteFolder = ReplicatedStorage:WaitForChild("RemoteObjects")
+local remoteFolder = ReplicatedStorage:WaitForChild("RemoteEvents")
 local globalCountdownValue = remoteFolder:WaitForChild("LeaderboardCountdown")
 
 local leaderboardUpdaters = {} -- Stores the update function for each leaderboard
@@ -111,7 +111,7 @@ local function createLeaderboardUI(part, title, face)
 	countdownLabel.Text = "Waiting for server..."
 	countdownLabel.TextXAlignment = Enum.TextXAlignment.Center
 	countdownLabel.Parent = mainFrame
-    table.insert(countdownLabels, countdownLabel)
+	table.insert(countdownLabels, countdownLabel)
 
 	local playerRankLabel = Instance.new("TextLabel")
 	playerRankLabel.Name = "PlayerRankLabel"
@@ -390,7 +390,7 @@ end)
 -- Initial display setup for all countdowns
 local initialText = string.format("Next update in: %d s", globalCountdownValue.Value)
 for _, label in ipairs(countdownLabels) do
-    label.Text = initialText
+	label.Text = initialText
 end
 
 print("LeaderboardClient.lua: Initialized successfully with new features.")

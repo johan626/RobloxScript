@@ -53,7 +53,6 @@ getLevelRF.OnServerInvoke = function(player, tool)
 	if not tool or not tool:IsA("Tool") then return 0 end
 	local weaponId = tool:GetAttribute("WeaponId")
 	local level = WeaponUpgradeModule.GetLevel(player, weaponId) or 0
-	tool:SetAttribute("UpgradeLevel", level)
 	return level
 end
 

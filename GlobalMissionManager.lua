@@ -7,7 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
 -- Muat modul yang diperlukan
-local GlobalMissionConfig = require(ReplicatedStorage.ModuleScript:WaitForChild("GlobalMissionConfig"))
+local GlobalMissionConfig = require(ReplicatedStorage.ModuleScript:WaitForChild("GlobeMissionConfig"))
 local MissionPointsModule = require(ServerScriptService.ModuleScript:WaitForChild("MissionPointsModule"))
 local DataStoreManager = require(ServerScriptService.ModuleScript:WaitForChild("DataStoreManager"))
 

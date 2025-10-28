@@ -40,6 +40,13 @@ local function validateSettings(settings)
 			return nil, "Invalid hud UDim2 data"
 		end
 	end
+
+	-- Validasi gameplay (opsional, tapi jika ada, harus benar)
+	if settings.gameplay then
+		if type(settings.gameplay) ~= "table" then return nil, "Invalid gameplay table" end
+		if type(settings.gameplay.shadows) ~= "boolean" then return nil, "Invalid gameplay.shadows" end
+	end
+
 	return settings
 end
 
@@ -73,6 +80,7 @@ UpdateSettingsEvent.OnServerEvent:Connect(function(player, clientSettings)
 	playerData.data.settings.sound = validatedSettings.sound
 	playerData.data.settings.hud = validatedSettings.hud
 	playerData.data.settings.controls = validatedSettings.controls or { fireControlType = "FireButton" }
+	playerData.data.settings.gameplay = validatedSettings.gameplay or { shadows = true } -- Default jika tidak ada
 
 	DataStoreManager:UpdatePlayerData(player, playerData.data)
 	print("Pengaturan berhasil disimpan untuk " .. player.Name)
@@ -89,6 +97,7 @@ local function onPlayerAdded(player)
 			settingsToSend = {
 				sound = settings.sound,
 				controls = settings.controls or { fireControlType = "FireButton" },
+				gameplay = settings.gameplay or { shadows = true },
 				hud = {}
 			}
 			if settings.hud then

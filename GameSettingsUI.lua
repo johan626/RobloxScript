@@ -20,6 +20,7 @@ local BindableEvents = ReplicatedStorage.BindableEvents
 local currentSettings = {
 	sound = { enabled = true, sfxVolume = 0.8 },
 	controls = { fireControlType = "FireButton" },
+	gameplay = { shadows = true },
 	hud = {}
 }
 local temporarySettings = {}
@@ -128,6 +129,11 @@ local hudSection = Instance.new("Frame", contentContainer); hudSection.Name = "H
 local hudTitle = Instance.new("TextLabel", hudSection); hudTitle.Name = "HUDTitle"; hudTitle.Size = UDim2.new(1, 0, 0, 20); hudTitle.Text = "HUD Customization"; hudTitle.Font = Enum.Font.GothamBold; hudTitle.TextColor3 = Color3.fromRGB(200, 200, 200); hudTitle.TextXAlignment = Enum.TextXAlignment.Left; hudTitle.BackgroundTransparency = 1
 local customizeHudButton = Instance.new("TextButton", hudSection); customizeHudButton.Name = "CustomizeHudButton"; customizeHudButton.Size = UDim2.new(1, 0, 0, 30); customizeHudButton.Position = UDim2.new(0,0,0,25); customizeHudButton.BackgroundColor3 = Color3.fromRGB(80, 80, 95); customizeHudButton.Text = "Customize Layout"; customizeHudButton.Font = Enum.Font.Gotham; customizeHudButton.TextColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", customizeHudButton).CornerRadius = UDim.new(0, 6)
 
+-- Gameplay Section
+local gameplaySection = Instance.new("Frame", contentContainer); gameplaySection.Name = "GameplaySection"; gameplaySection.Size = UDim2.new(1, 0, 0, 60); gameplaySection.BackgroundTransparency = 1; gameplaySection.LayoutOrder = 4
+local gameplayTitle = Instance.new("TextLabel", gameplaySection); gameplayTitle.Name = "GameplayTitle"; gameplayTitle.Size = UDim2.new(1, 0, 0, 20); gameplayTitle.Text = "Gameplay Settings"; gameplayTitle.Font = Enum.Font.GothamBold; gameplayTitle.TextColor3 = Color3.fromRGB(200, 200, 200); gameplayTitle.TextXAlignment = Enum.TextXAlignment.Left; gameplayTitle.BackgroundTransparency = 1
+local enableShadowsCheckbox = Instance.new("TextButton", gameplaySection); enableShadowsCheckbox.Name = "EnableShadowsCheckbox"; enableShadowsCheckbox.Size = UDim2.new(1, 0, 0, 25); enableShadowsCheckbox.Position = UDim2.new(0,0,0,25); enableShadowsCheckbox.BackgroundColor3 = Color3.fromRGB(50, 50, 60); enableShadowsCheckbox.Font = Enum.Font.Gotham; enableShadowsCheckbox.TextColor3 = Color3.new(1, 1, 1); enableShadowsCheckbox.TextXAlignment = Enum.TextXAlignment.Left
+
 -- Main Action Buttons
 local actionButtonContainer = Instance.new("Frame", settingsPanel); actionButtonContainer.Name = "ActionButtonContainer"; actionButtonContainer.Size = UDim2.new(1, 0, 0, 50); actionButtonContainer.AnchorPoint = Vector2.new(0.5, 1); actionButtonContainer.Position = UDim2.new(0.5, 0, 1, 0); actionButtonContainer.BackgroundTransparency = 1; actionButtonContainer.ZIndex = 101; local actionListLayout = Instance.new("UIListLayout", actionButtonContainer); actionListLayout.FillDirection = Enum.FillDirection.Horizontal; actionListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center; actionListLayout.Padding = UDim.new(0, 20)
 local btnSimpan = Instance.new("TextButton", actionButtonContainer); btnSimpan.Name = "SaveBtn"; btnSimpan.Size = UDim2.new(0, 120, 0, 40); btnSimpan.Text = "Simpan"; btnSimpan.Font = Enum.Font.GothamBold; btnSimpan.BackgroundColor3 = Color3.fromRGB(0, 170, 90); btnSimpan.TextColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", btnSimpan).CornerRadius = UDim.new(0, 8)
@@ -226,6 +232,9 @@ end
 function updateUiFromSettings(settings)
     local sound = settings.sound
     local controls = settings.controls
+	local gameplay = settings.gameplay
+
+	enableShadowsCheckbox.Text = gameplay and gameplay.shadows and "  ✓  Enable Shadows" or "     Enable Shadows"
 
     enableSoundCheckbox.Text = sound.enabled and "  ✓  Enable Sound" or "     Enable Sound"
     soundSlidersContainer.Visible = sound.enabled
@@ -244,6 +253,12 @@ end
 function applySettings(settings)
     local sound = settings.sound
 	local controls = settings.controls
+	local gameplay = settings.gameplay
+
+	-- Terapkan pengaturan bayangan
+	if gameplay and gameplay.shadows ~= nil then
+		game.Lighting.GlobalShadows = gameplay.shadows
+	end
 
     local globalVolume = sound.enabled and 1 or 0
     AudioManager:SetSFXVolume(sound.sfxVolume * globalVolume)
@@ -332,6 +347,13 @@ handleSliderInput(sfxSliderFrame, sfxSliderBar, function(p) temporarySettings.so
 
 enableSoundCheckbox.MouseButton1Click:Connect(function() temporarySettings.sound.enabled = not temporarySettings.sound.enabled; updateUiFromSettings(temporarySettings); applySettings(temporarySettings) end)
 
+enableShadowsCheckbox.MouseButton1Click:Connect(function()
+	if not temporarySettings.gameplay then temporarySettings.gameplay = { shadows = true } end
+	temporarySettings.gameplay.shadows = not temporarySettings.gameplay.shadows
+	updateUiFromSettings(temporarySettings)
+	applySettings(temporarySettings)
+end)
+
 fireButtonOption.MouseButton1Click:Connect(function()
 	temporarySettings.controls.fireControlType = "FireButton"
 	updateUiFromSettings(temporarySettings)
@@ -400,6 +422,9 @@ LoadSettingsEvent.OnClientEvent:Connect(function(serverSettings)
     end
 	if serverSettings and serverSettings.controls then
 		currentSettings.controls = serverSettings.controls
+	end
+	if serverSettings and serverSettings.gameplay then
+		currentSettings.gameplay = serverSettings.gameplay
 	end
     if serverSettings and serverSettings.hud then
         for name, data in pairs(serverSettings.hud) do

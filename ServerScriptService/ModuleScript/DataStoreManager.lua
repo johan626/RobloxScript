@@ -74,7 +74,10 @@ local DEFAULT_PLAYER_DATA = {
     settings = {
         sound = { enabled = true, sfxVolume = 0.8 },
         controls = { fireControlType = "FireButton" },
-        hud = {}
+        hud = {},
+        gameplay = {
+            shadows = true
+        }
     }
 }
 

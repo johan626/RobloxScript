@@ -661,6 +661,11 @@ end)
 
 -- Update jumlah pemain ketika pemain bergabung atau keluar
 game.Players.PlayerAdded:Connect(function(player)
+	-- PANGGILAN LANGSUNG: Buat leaderstats segera dan secara sinkron.
+	if PointsSystem and type(PointsSystem.SetupPlayer) == "function" then
+		PointsSystem.SetupPlayer(player)
+	end
+
 	updatePlayerCount()
 
 	-- Memulai pemuatan data non-blocking di latar belakang.
@@ -672,10 +677,7 @@ game.Players.PlayerAdded:Connect(function(player)
 		local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
 		if not player.Parent then return end -- Pemain mungkin keluar saat data sedang dimuat
 
-		-- Sekarang aman untuk menginisialisasi PointsSystem karena data sudah ada.
-		if PointsSystem and type(PointsSystem.SetupPlayer) == "function" then
-			PointsSystem.SetupPlayer(player)
-		end
+		-- Tugas lain yang bergantung pada data dapat tetap di sini.
 	end)
 
 	-- Kirim mode permainan saat ini ke pemain yang baru bergabung (ini bisa segera dilakukan).

@@ -569,12 +569,11 @@ game.Players.PlayerAdded:Connect(function(player)
 			setupToolAmmoForPlayer(player, child)
 		end
 	end)
+end)
 
-	PointsSystem.SetupPlayer(player)
-	-- Bersihkan state saat player keluar
-	game.Players.PlayerRemoving:Connect(function(plr)
-		playerAmmo[plr] = nil
-		playerReserveAmmo[plr] = nil
-		lastFireTime[plr] = nil
-	end)
+-- Bersihkan state saat player keluar
+game.Players.PlayerRemoving:Connect(function(plr)
+	playerAmmo[plr] = nil
+	playerReserveAmmo[plr] = nil
+	lastFireTime[plr] = nil
 end)

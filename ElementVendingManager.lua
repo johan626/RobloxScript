@@ -73,11 +73,6 @@ end)
 
 -- Purchase RemoteFunction implementation
 purchaseRF.OnServerInvoke = function(player, elementName)
-	-- safety: ensure PointsSystem setup for player
-	if not PointsSystem.GetPoints(player) then
-		PointsSystem.SetupPlayer(player)
-	end
-
 	local cfg = ElementModule.GetConfig()[elementName]
 	if not cfg then return false, "Element not found" end
 

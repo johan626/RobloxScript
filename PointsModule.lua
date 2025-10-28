@@ -11,40 +11,36 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local LevelManager = require(ServerScriptService.ModuleScript:WaitForChild("LevelModule"))
 
 function PointsSystem.SetupPlayer(player)
-	-- simpan poin internal
-	playerPoints[player] = 0
+    -- simpan poin internal
+    playerPoints[player] = 0
 
-	-- buat folder leaderstats (sementara) dan tiga IntValue
-	if player and player:IsA("Player") then
-		-- jika sudah ada leaderstats, reset nilainya
-		if player:FindFirstChild("leaderstats") then
-			player.leaderstats:Destroy()
-		end
+    if player and player:IsA("Player") then
+        local leaderstats = player:FindFirstChild("leaderstats")
 
-		local leaderstats = Instance.new("Folder")
-		leaderstats.Name = "leaderstats"
-		leaderstats.Parent = player
+        -- Jika folder leaderstats belum ada, buat.
+        if not leaderstats then
+            leaderstats = Instance.new("Folder")
+            leaderstats.Name = "leaderstats"
+            leaderstats.Parent = player
+        end
 
-		local bp = Instance.new("IntValue")
-		bp.Name = "BP"
-		bp.Value = 0
-		bp.Parent = leaderstats
+        -- Fungsi helper untuk membuat atau me-reset stat
+        local function createOrResetStat(name, value)
+            local stat = leaderstats:FindFirstChild(name)
+            if not stat then
+                stat = Instance.new("IntValue")
+                stat.Name = name
+                stat.Parent = leaderstats
+            end
+            stat.Value = value
+        end
 
-		local totalDamage = Instance.new("IntValue")
-		totalDamage.Name = "TotalDamage"
-		totalDamage.Value = 0
-		totalDamage.Parent = leaderstats
-
-		local kills = Instance.new("IntValue")
-		kills.Name = "Kills"
-		kills.Value = 0
-		kills.Parent = leaderstats	
-
-		local knocks = Instance.new("IntValue")
-		knocks.Name = "Knock"
-		knocks.Value = 0
-		knocks.Parent = leaderstats
-	end
+        -- Buat atau reset semua stats yang diperlukan
+        createOrResetStat("BP", 0)
+        createOrResetStat("TotalDamage", 0)
+        createOrResetStat("Kills", 0)
+        createOrResetStat("Knock", 0)
+    end
 end
 
 function PointsSystem.RemovePlayer(player)

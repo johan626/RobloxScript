@@ -351,7 +351,8 @@ local function CreateAdminUI()
 			for _, fieldData in ipairs(foundFields) do
 				local fieldName = fieldData.name
 				local fieldValue = fieldData.value
-				local fieldPath = path .. "/" .. dataKey
+				-- Gunakan dataKey versi lowercase untuk path agar konsisten dengan server
+				local fieldPath = path .. "/" .. string.lower(dataKey)
 				createFieldUI(categoryContent, fieldName, fieldValue, fieldPath)
 			end
 		end

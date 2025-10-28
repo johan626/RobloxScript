@@ -10,7 +10,7 @@ local DataStoreManager = require(script.Parent:WaitForChild("DataStoreManager"))
 local MissionConfig = require(ReplicatedStorage.ModuleScript:WaitForChild("MissionConfig"))
 local MissionPointsModule = require(script.Parent:WaitForChild("MissionPointsModule"))
 local StatsModule = require(script.Parent:WaitForChild("StatsModule"))
-local GlobalMissionManager = require(script.Parent:WaitForChild("GlobalMissionManager"))
+local GlobalMissionManager = require(script.Parent:WaitForChild("GlobeMissionManager"))
 
 local MissionManager = {}
 
@@ -31,35 +31,35 @@ rerollMissionFunc.Name = "RerollMissionFunc"
 -- =============================================================================
 
 function MissionManager.GetData(player)
-    local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
-    if not playerData or not playerData.data then
-        warn("[MissionManager] Gagal mendapatkan data untuk pemain: " .. player.Name)
-        return {}
-    end
+	local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
+	if not playerData or not playerData.data then
+		warn("[MissionManager] Gagal mendapatkan data untuk pemain: " .. player.Name)
+		return {}
+	end
 
-    -- Pastikan sub-tabel missions ada
-    if not playerData.data.missions then
-        local defaultData = require(script.Parent:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
-        playerData.data.missions = {}
+	-- Pastikan sub-tabel missions ada
+	if not playerData.data.missions then
+		local defaultData = require(script.Parent:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
+		playerData.data.missions = {}
 		for k, v in pairs(defaultData.missions) do
 			playerData.data.missions[k] = v
 		end
-        DataStoreManager:UpdatePlayerData(player, playerData.data)
-    end
+		DataStoreManager:UpdatePlayerData(player, playerData.data)
+	end
 
-    return playerData.data.missions
+	return playerData.data.missions
 end
 
 function MissionManager.SaveData(player, missionsData)
-    -- Pastikan data ada sebelum mencoba menyimpan.
-    local playerData = DataStoreManager:GetPlayerData(player)
-    if not playerData or not playerData.data then
-        -- Jika data belum ada, kita tidak bisa menyimpan. Ini mencegah error.
-        return
-    end
+	-- Pastikan data ada sebelum mencoba menyimpan.
+	local playerData = DataStoreManager:GetPlayerData(player)
+	if not playerData or not playerData.data then
+		-- Jika data belum ada, kita tidak bisa menyimpan. Ini mencegah error.
+		return
+	end
 
-    playerData.data.missions = missionsData
-    DataStoreManager:UpdatePlayerData(player, playerData.data)
+	playerData.data.missions = missionsData
+	DataStoreManager:UpdatePlayerData(player, playerData.data)
 end
 
 -- =============================================================================
@@ -247,11 +247,11 @@ end
 
 -- Fungsi yang dipanggil saat pemain bergabung
 local function onPlayerAdded(player)
-    -- Memulai pemeriksaan misi dalam thread baru.
-    -- GetData akan secara internal menunggu data dimuat.
-    task.spawn(function()
-        MissionManager:CheckAndResetMissions(player)
-    end)
+	-- Memulai pemeriksaan misi dalam thread baru.
+	-- GetData akan secara internal menunggu data dimuat.
+	task.spawn(function()
+		MissionManager:CheckAndResetMissions(player)
+	end)
 end
 
 -- Dengarkan event untuk setiap pemain yang bergabung
@@ -259,7 +259,7 @@ Players.PlayerAdded:Connect(onPlayerAdded)
 
 -- Jalankan juga untuk pemain yang mungkin sudah ada saat skrip ini dimuat
 for _, player in ipairs(Players:GetPlayers()) do
-    onPlayerAdded(player)
+	onPlayerAdded(player)
 end
 
 

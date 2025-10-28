@@ -94,16 +94,16 @@ getInitialPointsFunc.OnServerInvoke = function(player)
 end
 
 local function onPlayerAdded(player)
-    task.spawn(function()
-        local points = MissionPointsModule:GetMissionPoints(player)
-        missionPointsChangedEvent:FireClient(player, points)
-    end)
+	task.spawn(function()
+		local points = MissionPointsModule:GetMissionPoints(player)
+		missionPointsChangedEvent:FireClient(player, points)
+	end)
 end
 
 Players.PlayerAdded:Connect(onPlayerAdded)
 
 for _, player in ipairs(Players:GetPlayers()) do
-    onPlayerAdded(player)
+	onPlayerAdded(player)
 end
 
 return MissionPointsModule

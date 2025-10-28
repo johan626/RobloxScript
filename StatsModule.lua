@@ -214,7 +214,6 @@ function StatsModule.ForceSaveAllDirtyLeaderboards()
             savePlayerLeaderboardData(player)
         end
     end
-    dirtyLeaderboardPlayers = {} -- Bersihkan cache sepenuhnya
 end
 
 
@@ -235,7 +234,6 @@ task.spawn(function()
                 table.insert(playersToUpdate, player)
             end
         end
-        dirtyLeaderboardPlayers = {} -- Bersihkan cache
 
         for _, player in ipairs(playersToUpdate) do
 			savePlayerLeaderboardData(player)

@@ -108,9 +108,9 @@ WeaponModule.Weapons = {
 			["Default Skin"] = {
 				MeshId = "rbxassetid://127356815511032",
 				TextureId = "rbxassetid://103157484998651",
-				ADS_Position = Vector3.new(0.52, -0.53, -1),
+				ADS_Position = Vector3.new(0.52, -0.36, -1.1),
 				ADS_Rotation = Vector3.new(0, 0, 0),
-				ADS_Position_Mobile = Vector3.new(0.5, -0.45, -1),
+				ADS_Position_Mobile = Vector3.new(0.52, -0.36, -1.1),
 				ADS_Rotation_Mobile = Vector3.new(0, 0, 0),
 			},
 			["Magma Wyrm"] = {
@@ -134,7 +134,7 @@ WeaponModule.Weapons = {
 		BreathIntensity = 0.1,
 		BreathSpeed = 2,
 		VisualRecoilIntensity = -0.5,
-		VisualRecoilKick = -0.7,
+		VisualRecoilKick = -0.5,
 		VisualRecoilRecovery = 15
 	},
 	["P90"] = {

@@ -14,12 +14,12 @@ local SkinManager = {}
 
 -- Fungsi untuk mendapatkan data inventaris pemain
 function SkinManager.GetInventoryData(player)
-    local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
-    if not playerData or not playerData.data then
-        warn("[SkinManager] Gagal mendapatkan data inventaris untuk pemain: " .. player.Name)
-        return nil
-    end
-    return playerData.data.inventory
+	local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
+	if not playerData or not playerData.data then
+		warn("[SkinManager] Gagal mendapatkan data inventaris untuk pemain: " .. player.Name)
+		return nil
+	end
+	return playerData.data.inventory
 end
 
 -- Fungsi untuk mendapatkan skin yang sedang dipakai pemain untuk senjata tertentu

@@ -71,19 +71,6 @@ local function createBullethole(position, normal)
 	ring.CFrame = core.CFrame * CFrame.new(0, -THICKNESS*0.15, 0) -- sedikit menjorok
 	ring.Parent = folder
 
-	-- kilatan singkat saat tumbukan
-	local flash = Instance.new("PointLight")
-	flash.Brightness = 2.5
-	flash.Range = 6
-	flash.Color = Color3.fromRGB(255, 200, 120)
-	flash.Parent = core
-	task.spawn(function()
-		flash.Brightness = 2.5
-		task.wait(0.04)
-		flash.Brightness = 0
-		flash.Enabled = false
-	end)
-
 	-- attachment untuk partikel
 	local att = Instance.new("Attachment")
 	att.Name = "ImpactAttachment"

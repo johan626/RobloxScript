@@ -36,7 +36,6 @@ local function CreateAdminUI()
 	local requestDataFunc = adminEventsFolder:WaitForChild("AdminRequestData")
 	local updateDataEvent = adminEventsFolder:WaitForChild("AdminUpdateData")
 	local deleteDataEvent = adminEventsFolder:WaitForChild("AdminDeleteData")
-	local restoreDataEvent = adminEventsFolder:WaitForChild("AdminRestoreData")
 
 	-- State untuk data dan konfirmasi
 	local currentData = nil
@@ -374,7 +373,7 @@ local function CreateAdminUI()
 		local button = Instance.new("TextButton")
 		button.Name = name
 		button.Text = text
-		button.Size = size or UDim2.new(0.33, -5, 1, 0) -- Diubah untuk 3 tombol
+		button.Size = size or UDim2.new(0.5, -5, 1, 0) -- Ukuran untuk 2 tombol
 		button.TextColor3 = Color3.new(1, 1, 1)
 		button.Font = Enum.Font.SourceSansBold
 		button.Parent = parent
@@ -384,9 +383,6 @@ local function CreateAdminUI()
 
 	local setDataButton = createButton("SetDataButton", "Set Data", buttonsFrame)
 	setDataButton.BackgroundColor3 = Color3.fromRGB(70, 90, 150)
-
-	local restoreDataButton = createButton("RestoreDataButton", "Restore Data", buttonsFrame)
-	restoreDataButton.BackgroundColor3 = Color3.fromRGB(200, 120, 50) -- Oranye
 
 	local deleteDataButton = createButton("DeleteDataButton", "Delete Data", buttonsFrame)
 	deleteDataButton.BackgroundColor3 = Color3.fromRGB(180, 70, 70)
@@ -552,11 +548,11 @@ local function CreateAdminUI()
 			currentData = data
 
 			-- Build the dynamic UI into the respective tabs
-			if data.Stats then
-				buildDynamicUI(statsPage, "Stats", data.Stats, "")
+			if data.stats then
+				buildDynamicUI(statsPage, "Stats", data.stats, "")
 			end
-			if data.Inventory then
-				buildDynamicUI(inventoryPage, "Inventory", data.Inventory, "")
+			if data.inventory then
+				buildDynamicUI(inventoryPage, "Inventory", data.inventory, "")
 			end
 
 			statusLabel.Text = "Status: Data berhasil dimuat untuk UserID " .. targetUserId
@@ -572,8 +568,6 @@ local function CreateAdminUI()
 			confirmationLabel.Text = "Apakah Anda yakin ingin mengubah data untuk UserID " .. id .. "?"
 		elseif action == "delete" then
 			confirmationLabel.Text = "PERINGATAN: Aksi ini akan menghapus data secara permanen. Apakah Anda yakin ingin menghapus data untuk UserID " .. id .. "?"
-		elseif action == "restore" then
-			confirmationLabel.Text = "PERINGATAN: Aksi ini akan menimpa data pemain saat ini dengan data dari backup terakhir. Lanjutkan?"
 		end
 		confirmationFrame.Visible = true
 	end
@@ -658,12 +652,6 @@ local function CreateAdminUI()
 		end
 	end)
 
-	restoreDataButton.MouseButton1Click:Connect(function()
-		local targetUserId = tonumber(userIdBox.Text)
-		if not targetUserId then statusLabel.Text = "Status: UserID tidak valid."; return end
-		triggerConfirmation("restore", targetUserId)
-	end)
-
 	deleteDataButton.MouseButton1Click:Connect(function()
 		local targetUserId = tonumber(userIdBox.Text)
 		if not targetUserId then statusLabel.Text = "Status: UserID tidak valid."; return end
@@ -679,9 +667,6 @@ local function CreateAdminUI()
 		if pendingAction == "set" then
 			updateDataEvent:FireServer(pendingTargetId, pendingData)
 			statusLabel.Text = "Status: Permintaan perubahan data dikirim."
-		elseif pendingAction == "restore" then
-			restoreDataEvent:FireServer(pendingTargetId)
-			statusLabel.Text = "Status: Permintaan pemulihan data dikirim."
 		elseif pendingAction == "delete" then
 			deleteDataEvent:FireServer(pendingTargetId)
 			statusLabel.Text = "Status: Permintaan hapus data dikirim."

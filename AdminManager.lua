@@ -23,9 +23,6 @@ updateDataEvent.Name = "AdminUpdateData"
 local deleteDataEvent = adminEventsFolder:FindFirstChild("AdminDeleteData") or Instance.new("RemoteEvent", adminEventsFolder)
 deleteDataEvent.Name = "AdminDeleteData"
 
-local restoreDataEvent = adminEventsFolder:FindFirstChild("AdminRestoreData") or Instance.new("RemoteEvent", adminEventsFolder)
-restoreDataEvent.Name = "AdminRestoreData"
-
 -- Fungsi untuk menggabungkan tabel secara rekursif
 local function deepMerge(t1, t2)
 	for k, v in pairs(t2) do
@@ -92,14 +89,6 @@ deleteDataEvent.OnServerEvent:Connect(function(adminPlayer, targetUserId)
 
 	DataStoreManager:DeletePlayerData(targetUserId)
 	DataStoreManager:LogAdminAction(adminPlayer, "delete", targetUserId)
-end)
-
-restoreDataEvent.OnServerEvent:Connect(function(adminPlayer, targetUserId)
-	if not AdminConfig.IsAdmin(adminPlayer) then return end
-	if type(targetUserId) ~= "number" then return end
-
-	DataStoreManager:RestorePlayerDataFromBackup(adminPlayer, targetUserId)
-	-- Logging dapat ditangani di dalam fungsi Restore jika diimplementasikan
 end)
 
 -- =============================================================================

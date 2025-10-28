@@ -406,13 +406,6 @@ function DataStoreManager:LogAdminAction(adminPlayer, action, targetUserId)
 	print(string.format("ADMIN ACTION: %s (%d) melakukan '%s' pada UserId %d", adminPlayer.Name, adminPlayer.UserId, action, targetUserId))
 end
 
-function DataStoreManager:RestorePlayerDataFromBackup(adminPlayer, targetUserId)
-	warn("Fungsi RestorePlayerDataFromBackup belum diimplementasikan.")
-	-- Logika pemulihan dari cadangan akan ditempatkan di sini.
-	self:LogAdminAction(adminPlayer, "restore_attempt", targetUserId)
-	return false
-end
-
 DataStoreManager.DEFAULT_PLAYER_DATA = DEFAULT_PLAYER_DATA
 
 return DataStoreManager

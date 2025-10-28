@@ -10,7 +10,7 @@ local DataStoreManager = require(script.Parent:WaitForChild("DataStoreManager"))
 local MissionConfig = require(ReplicatedStorage.ModuleScript:WaitForChild("MissionConfig"))
 local MissionPointsModule = require(script.Parent:WaitForChild("MissionPointsModule"))
 local StatsModule = require(script.Parent:WaitForChild("StatsModule"))
--- local GlobalMissionManager = require(script.Parent:WaitForChild("GlobalMissionManager"))
+local GlobalMissionManager = require(script.Parent:WaitForChild("GlobalMissionManager"))
 
 local MissionManager = {}
 
@@ -167,7 +167,7 @@ function MissionManager:UpdateMissionProgress(player, updateParams)
 	updateCategory(missionsData.Weekly.Missions)
 	self.SaveData(player, missionsData)
 
-	-- GlobalMissionManager:IncrementProgress(eventType, amount, player)
+	GlobalMissionManager:IncrementProgress(eventType, amount, player)
 end
 
 function MissionManager:ClaimMissionReward(player, missionID)

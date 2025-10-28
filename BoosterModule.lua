@@ -32,8 +32,8 @@ function BoosterModule.GetData(player)
 	if not playerData.data.boosters then
 		local defaultData = require(script.Parent:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
 		playerData.data.boosters = {}
-		for k, v in pairs(defaultData.boosters) do
-			playerData.data.boosters[k] = v
+		for k, v in pairs(defaultData.boosters) do 
+			playerData.data.boosters[k] = v 
 		end
 		DataStoreManager:UpdatePlayerData(player, playerData.data)
 	end
@@ -118,16 +118,16 @@ end
 -- =============================================================================
 
 local function onPlayerAdded(player)
-    task.spawn(function()
-        local data = BoosterModule.GetData(player)
-        BoosterUpdateEvent:FireClient(player, data)
-    end)
+	task.spawn(function()
+		local data = BoosterModule.GetData(player)
+		BoosterUpdateEvent:FireClient(player, data)
+	end)
 end
 
 Players.PlayerAdded:Connect(onPlayerAdded)
 
 for _, player in ipairs(Players:GetPlayers()) do
-    onPlayerAdded(player)
+	onPlayerAdded(player)
 end
 
 ActivateBoosterEvent.OnServerEvent:Connect(function(player, boosterName)

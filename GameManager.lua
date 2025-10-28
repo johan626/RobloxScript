@@ -661,34 +661,34 @@ end)
 
 -- Update jumlah pemain ketika pemain bergabung atau keluar
 game.Players.PlayerAdded:Connect(function(player)
-    updatePlayerCount()
+	updatePlayerCount()
 
-    -- Memulai pemuatan data non-blocking di latar belakang.
-    DataStoreManager:LoadPlayerData(player)
+	-- Memulai pemuatan data non-blocking di latar belakang.
+	DataStoreManager:LoadPlayerData(player)
 
-    -- Inisialisasi sistem lain dalam thread terpisah untuk tidak menahan proses join.
-    task.spawn(function()
-        -- Tunggu hingga data pemain benar-benar dimuat.
-        local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
-        if not player.Parent then return end -- Pemain mungkin keluar saat data sedang dimuat
+	-- Inisialisasi sistem lain dalam thread terpisah untuk tidak menahan proses join.
+	task.spawn(function()
+		-- Tunggu hingga data pemain benar-benar dimuat.
+		local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
+		if not player.Parent then return end -- Pemain mungkin keluar saat data sedang dimuat
 
-        -- Sekarang aman untuk menginisialisasi PointsSystem karena data sudah ada.
-        if PointsSystem and type(PointsSystem.SetupPlayer) == "function" then
-            PointsSystem.SetupPlayer(player)
-        end
-    end)
+		-- Sekarang aman untuk menginisialisasi PointsSystem karena data sudah ada.
+		if PointsSystem and type(PointsSystem.SetupPlayer) == "function" then
+			PointsSystem.SetupPlayer(player)
+		end
+	end)
 
-    -- Kirim mode permainan saat ini ke pemain yang baru bergabung (ini bisa segera dilakukan).
-    local gameSettingsUpdateEvent = RemoteEvents:FindFirstChild("GameSettingsUpdateEvent")
-    if gameSettingsUpdateEvent then
-        gameSettingsUpdateEvent:FireClient(player, {gameMode = gameMode, difficulty = difficulty})
-    end
+	-- Kirim mode permainan saat ini ke pemain yang baru bergabung (ini bisa segera dilakukan).
+	local gameSettingsUpdateEvent = RemoteEvents:FindFirstChild("GameSettingsUpdateEvent")
+	if gameSettingsUpdateEvent then
+		gameSettingsUpdateEvent:FireClient(player, {gameMode = gameMode, difficulty = difficulty})
+	end
 end)
 
 game.Players.PlayerRemoving:Connect(function(player)
-    -- Penyimpanan data pemain ditangani secara otomatis oleh DataStoreManager
-    -- melalui event PlayerRemoving yang terhubung di dalam modul itu sendiri.
-    updatePlayerCount()
+	-- Penyimpanan data pemain ditangani secara otomatis oleh DataStoreManager
+	-- melalui event PlayerRemoving yang terhubung di dalam modul itu sendiri.
+	updatePlayerCount()
 end)
 
 -- Update jumlah pemain ketika status knocked berubah

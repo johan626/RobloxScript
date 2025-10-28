@@ -388,17 +388,54 @@ function DataStoreManager:SaveOfflinePlayerData(userId, data)
 	return success
 end
 
+-- Fungsi bantuan internal untuk menghapus pemain dari satu papan peringkat
+local function _removePlayerFromLeaderboard(leaderboardName, userId)
+	local dsSuccess, dsErr = pcall(function()
+		local orderedDataStore = DataStoreService:GetOrderedDataStore(leaderboardName, ENVIRONMENT)
+		orderedDataStore:RemoveAsync(tostring(userId))
+	end)
+	if not dsSuccess then
+		print(string.format("[DataStoreManager] Info saat menghapus data dari papan peringkat '%s' untuk UserId %d: %s", leaderboardName, userId, tostring(dsErr)))
+	end
+end
+
 function DataStoreManager:DeletePlayerData(userId)
+	-- Hapus data utama pemain
 	local key = "Player_" .. userId
-	local success, err = pcall(function()
-		-- Implementasi "soft delete" dengan memindahkan data ke backup akan lebih aman,
-		-- tapi untuk saat ini kita akan melakukan hard delete sesuai permintaan.
+	local mainDataSuccess, mainDataErr = pcall(function()
 		PlayerDS:RemoveAsync(key)
 	end)
-	if not success then
-		warn("[DataStoreManager] Gagal menghapus data untuk UserId '" .. userId .. "': " .. tostring(err))
+
+	if not mainDataSuccess then
+		warn("[DataStoreManager] Gagal menghapus data utama untuk UserId '" .. userId .. "': " .. tostring(mainDataErr))
 	end
-	return success
+
+	-- Hapus data dari semua papan peringkat statis
+	local LeaderboardConfig = require(game.ReplicatedStorage:WaitForChild("LeaderboardConfig"))
+	for _, config in pairs(LeaderboardConfig) do
+		_removePlayerFromLeaderboard(config.DataStoreName, userId)
+	end
+
+	-- Hapus data dari papan peringkat Misi Global (aktif dan sebelumnya)
+	local success, GlobalMissionConfig = pcall(require, game.ReplicatedStorage.ModuleScript:WaitForChild("GlobalMissionConfig"))
+	if success then
+		local globalMissionState = self:GetGlobalData(GlobalMissionConfig.GLOBAL_DATA_KEY)
+		if globalMissionState then
+			if globalMissionState.ActiveMissionID then
+				local activeLeaderboardName = "GlobalMissionLeaderboard_V2_" .. globalMissionState.ActiveMissionID
+				_removePlayerFromLeaderboard(activeLeaderboardName, userId)
+			end
+			if globalMissionState.PreviousMission and globalMissionState.PreviousMission.ID then
+				local previousLeaderboardName = "GlobalMissionLeaderboard_V2_" .. globalMissionState.PreviousMission.ID
+				_removePlayerFromLeaderboard(previousLeaderboardName, userId)
+			end
+		end
+	else
+		warn("[DataStoreManager] Tidak dapat memuat GlobalMissionConfig untuk menghapus data papan peringkat misi global.")
+	end
+
+	-- Kembalikan status keberhasilan penghapusan data utama
+	return mainDataSuccess
 end
 
 function DataStoreManager:LogAdminAction(adminPlayer, action, targetUserId)

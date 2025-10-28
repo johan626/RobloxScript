@@ -38,7 +38,7 @@ function PointsSystem.SetupPlayer(player)
 		local kills = Instance.new("IntValue")
 		kills.Name = "Kills"
 		kills.Value = 0
-		kills.Parent = leaderstats
+		kills.Parent = leaderstats	
 
 		local knocks = Instance.new("IntValue")
 		knocks.Name = "Knock"
@@ -56,7 +56,15 @@ function PointsSystem.RemovePlayer(player)
 end
 
 function PointsSystem.AddPoints(player, amount)
-	if not playerPoints[player] then return end
+	if not playerPoints[player] then return false end
+
+	-- Jika ini adalah pengurangan (pembelian), periksa apakah poin cukup
+	if amount < 0 then
+		if playerPoints[player] < math.abs(amount) then
+			return false -- Poin tidak cukup
+		end
+	end
+
 	playerPoints[player] += amount
 
 	-- update leaderstats BP bila ada
@@ -73,6 +81,8 @@ function PointsSystem.AddPoints(player, amount)
 	if PointsUpdate then
 		PointsUpdate:FireClient(player, playerPoints[player])
 	end
+
+	return true
 end
 
 function PointsSystem.GetPoints(player)

@@ -12,7 +12,7 @@ local LevelManager = require(ServerScriptService.ModuleScript:WaitForChild("Leve
 
 function PointsSystem.SetupPlayer(player)
 	-- simpan poin internal
-	playerPoints[player] = 10000
+	playerPoints[player] = 0
 
 	-- buat folder leaderstats (sementara) dan tiga IntValue
 	if player and player:IsA("Player") then

@@ -29,17 +29,17 @@ local layoutEditorOriginalVisibility = {} -- To store visibility before entering
 
 -- Custom deep copy function to handle Roblox data types like UDim2
 local function deepCopy(original)
-    local copy = {}
-    for k, v in pairs(original) do
-        if type(v) == "table" then
-            copy[k] = deepCopy(v)
-        elseif typeof(v) == "UDim2" then
-            copy[k] = UDim2.new(v.X.Scale, v.X.Offset, v.Y.Scale, v.Y.Offset)
-        else
-            copy[k] = v
-        end
-    end
-    return copy
+	local copy = {}
+	for k, v in pairs(original) do
+		if type(v) == "table" then
+			copy[k] = deepCopy(v)
+		elseif typeof(v) == "UDim2" then
+			copy[k] = UDim2.new(v.X.Scale, v.X.Offset, v.Y.Scale, v.Y.Offset)
+		else
+			copy[k] = v
+		end
+	end
+	return copy
 end
 
 local AudioManager = {}
@@ -160,87 +160,87 @@ local sfxSlider, sfxSliderBar, sfxSliderFrame = createSlider("SFX", soundSliders
 
 local activeEditors = {}
 function makeDraggable(frame)
-    local dragging, dragStart, startPos, conn
-    frame.InputBegan:Connect(function(input)
-        if frame:GetAttribute("IsResizing") then return end
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true; dragStart = Vector2.new(input.Position.X, input.Position.Y); startPos = frame.Position
-            conn = UserInputService.InputChanged:Connect(function(cInput)
-                if dragging and (cInput.UserInputType == Enum.UserInputType.MouseMovement or cInput.UserInputType == Enum.UserInputType.Touch) then
-                    local delta = Vector2.new(cInput.Position.X, cInput.Position.Y) - dragStart
-                    frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-                end
-            end)
-        end
-    end)
-    frame.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false; if conn then conn:Disconnect() end
-        end
-    end)
+	local dragging, dragStart, startPos, conn
+	frame.InputBegan:Connect(function(input)
+		if frame:GetAttribute("IsResizing") then return end
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true; dragStart = Vector2.new(input.Position.X, input.Position.Y); startPos = frame.Position
+			conn = UserInputService.InputChanged:Connect(function(cInput)
+				if dragging and (cInput.UserInputType == Enum.UserInputType.MouseMovement or cInput.UserInputType == Enum.UserInputType.Touch) then
+					local delta = Vector2.new(cInput.Position.X, cInput.Position.Y) - dragStart
+					frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+				end
+			end)
+		end
+	end)
+	frame.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = false; if conn then conn:Disconnect() end
+		end
+	end)
 end
 
 function makeResizable(frame)
-    local handle = Instance.new("Frame", frame); handle.Name = "ResizeHandle"; handle.AnchorPoint = Vector2.new(1, 1); handle.Size = UDim2.new(0, 20, 0, 20); handle.Position = UDim2.new(1, 0, 1, 0); handle.BackgroundColor3 = Color3.new(1, 1, 1); handle.BackgroundTransparency = 0.2; handle.ZIndex = frame.ZIndex + 2; Instance.new("UICorner", handle).CornerRadius = UDim.new(0, 6)
-    local resizing, startSize, startInputPos, conn
-    handle.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            resizing = true; frame:SetAttribute("IsResizing", true); startInputPos = Vector2.new(input.Position.X, input.Position.Y); startSize = frame.Size
-            conn = UserInputService.InputChanged:Connect(function(cInput)
-                if resizing and (cInput.UserInputType == Enum.UserInputType.MouseMovement or cInput.UserInputType == Enum.UserInputType.Touch) then
-                    local delta = Vector2.new(cInput.Position.X, cInput.Position.Y) - startInputPos
-                    frame.Size = UDim2.new(startSize.X.Scale, startSize.X.Offset + delta.X, startSize.Y.Scale, startSize.Y.Offset + delta.Y)
-                end
-            end)
-        end
-    end)
-    handle.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            resizing = false; frame:SetAttribute("IsResizing", false); if conn then conn:Disconnect() end
-        end
-    end)
-    return handle
+	local handle = Instance.new("Frame", frame); handle.Name = "ResizeHandle"; handle.AnchorPoint = Vector2.new(1, 1); handle.Size = UDim2.new(0, 20, 0, 20); handle.Position = UDim2.new(1, 0, 1, 0); handle.BackgroundColor3 = Color3.new(1, 1, 1); handle.BackgroundTransparency = 0.2; handle.ZIndex = frame.ZIndex + 2; Instance.new("UICorner", handle).CornerRadius = UDim.new(0, 6)
+	local resizing, startSize, startInputPos, conn
+	handle.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			resizing = true; frame:SetAttribute("IsResizing", true); startInputPos = Vector2.new(input.Position.X, input.Position.Y); startSize = frame.Size
+			conn = UserInputService.InputChanged:Connect(function(cInput)
+				if resizing and (cInput.UserInputType == Enum.UserInputType.MouseMovement or cInput.UserInputType == Enum.UserInputType.Touch) then
+					local delta = Vector2.new(cInput.Position.X, cInput.Position.Y) - startInputPos
+					frame.Size = UDim2.new(startSize.X.Scale, startSize.X.Offset + delta.X, startSize.Y.Scale, startSize.Y.Offset + delta.Y)
+				end
+			end)
+		end
+	end)
+	handle.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			resizing = false; frame:SetAttribute("IsResizing", false); if conn then conn:Disconnect() end
+		end
+	end)
+	return handle
 end
 
 function setLayoutEditorMode(enabled)
-    settingsPanel.Visible = not enabled
-    layoutEditorOverlay.Visible = enabled
-    if enabled then
-        layoutEditorOriginalVisibility = {}
-    end
-    for name, element in pairs(hudElements) do
-        if enabled then
-            layoutEditorOriginalVisibility[name] = element.Visible
-            element.Visible = true
-            local ghost = Instance.new("Frame", element); ghost.Name = "EditGhost"; ghost.BackgroundTransparency = 1; ghost.Size = UDim2.new(1,0,1,0); ghost.ZIndex = element.ZIndex + 1; local stroke = Instance.new("UIStroke", ghost); stroke.Thickness = 2; stroke.Color = Color3.fromRGB(80, 200, 255)
-            makeDraggable(element)
-            local handle = makeResizable(element)
-            activeEditors[name] = { ghost = ghost, handle = handle }
-        else
-            if activeEditors[name] then
-                activeEditors[name].ghost:Destroy()
-                activeEditors[name].handle:Destroy()
-                activeEditors[name] = nil
-            end
-            if layoutEditorOriginalVisibility[name] ~= nil then
-                element.Visible = layoutEditorOriginalVisibility[name]
-            end
-        end
-    end
+	settingsPanel.Visible = not enabled
+	layoutEditorOverlay.Visible = enabled
+	if enabled then
+		layoutEditorOriginalVisibility = {}
+	end
+	for name, element in pairs(hudElements) do
+		if enabled then
+			layoutEditorOriginalVisibility[name] = element.Visible
+			element.Visible = true
+			local ghost = Instance.new("Frame", element); ghost.Name = "EditGhost"; ghost.BackgroundTransparency = 1; ghost.Size = UDim2.new(1,0,1,0); ghost.ZIndex = element.ZIndex + 1; local stroke = Instance.new("UIStroke", ghost); stroke.Thickness = 2; stroke.Color = Color3.fromRGB(80, 200, 255)
+			makeDraggable(element)
+			local handle = makeResizable(element)
+			activeEditors[name] = { ghost = ghost, handle = handle }
+		else
+			if activeEditors[name] then
+				activeEditors[name].ghost:Destroy()
+				activeEditors[name].handle:Destroy()
+				activeEditors[name] = nil
+			end
+			if layoutEditorOriginalVisibility[name] ~= nil then
+				element.Visible = layoutEditorOriginalVisibility[name]
+			end
+		end
+	end
 end
 
 function updateUiFromSettings(settings)
-    local sound = settings.sound
-    local controls = settings.controls
+	local sound = settings.sound
+	local controls = settings.controls
 	local gameplay = settings.gameplay
 
 	enableShadowsCheckbox.Text = gameplay and gameplay.shadows and "  ✓  Enable Shadows" or "     Enable Shadows"
 
-    enableSoundCheckbox.Text = sound.enabled and "  ✓  Enable Sound" or "     Enable Sound"
-    soundSlidersContainer.Visible = sound.enabled
-    sfxSliderBar.Size = UDim2.new(sound.sfxVolume, 0, 1, 0)
+	enableSoundCheckbox.Text = sound.enabled and "  ✓  Enable Sound" or "     Enable Sound"
+	soundSlidersContainer.Visible = sound.enabled
+	sfxSliderBar.Size = UDim2.new(sound.sfxVolume, 0, 1, 0)
 
-    -- Update controls UI
+	-- Update controls UI
 	if controls then
 		local isFireButton = controls.fireControlType == "FireButton"
 		fireButtonOption.BackgroundColor3 = isFireButton and Color3.fromRGB(100, 120, 255) or Color3.fromRGB(80, 80, 95)
@@ -251,7 +251,7 @@ function updateUiFromSettings(settings)
 end
 
 function applySettings(settings)
-    local sound = settings.sound
+	local sound = settings.sound
 	local controls = settings.controls
 	local gameplay = settings.gameplay
 
@@ -260,20 +260,20 @@ function applySettings(settings)
 		game.Lighting.GlobalShadows = gameplay.shadows
 	end
 
-    local globalVolume = sound.enabled and 1 or 0
-    AudioManager:SetSFXVolume(sound.sfxVolume * globalVolume)
+	local globalVolume = sound.enabled and 1 or 0
+	AudioManager:SetSFXVolume(sound.sfxVolume * globalVolume)
 
 	if controls then
 		player:SetAttribute("FireControlType", controls.fireControlType)
 	end
 
-    for name, hudSetting in pairs(settings.hud) do
-        local element = hudElements[name]
-        if element and hudSetting and hudSetting.pos and hudSetting.size then
-            element.Position = hudSetting.pos
-            element.Size = hudSetting.size
-        end
-    end
+	for name, hudSetting in pairs(settings.hud) do
+		local element = hudElements[name]
+		if element and hudSetting and hudSetting.pos and hudSetting.size then
+			element.Position = hudSetting.pos
+			element.Size = hudSetting.size
+		end
+	end
 
 	-- Refresh mobile buttons visibility after applying settings
 	local refreshMobileButtonsEvent = BindableEvents:FindFirstChild("RefreshMobileButtons")
@@ -283,65 +283,65 @@ function applySettings(settings)
 end
 
 local function initializeHudDefaults()
-    for _, name in ipairs(TARGET_BUTTON_NAMES) do
-        local element = playerGui:FindFirstChild(name, true)
-        if element then
-            hudElements[name] = element
-            if not defaultHudSettings[name] then
-                defaultHudSettings[name] = {
-                    pos = element.Position,
-                    size = element.Size
-                }
-            end
-            if not currentSettings.hud[name] then
-                currentSettings.hud[name] = {
-                    pos = element.Position,
-                    size = element.Size
-                }
-            end
-        end
-    end
+	for _, name in ipairs(TARGET_BUTTON_NAMES) do
+		local element = playerGui:FindFirstChild(name, true)
+		if element then
+			hudElements[name] = element
+			if not defaultHudSettings[name] then
+				defaultHudSettings[name] = {
+					pos = element.Position,
+					size = element.Size
+				}
+			end
+			if not currentSettings.hud[name] then
+				currentSettings.hud[name] = {
+					pos = element.Position,
+					size = element.Size
+				}
+			end
+		end
+	end
 end
 
 function setSettingsMode(enabled)
-    overlay.Visible = enabled
-    gearBtn.Visible = not enabled
-    settingsPanel.Visible = enabled
-    layoutEditorOverlay.Visible = false
-    if enabled then
-        temporarySettings = deepCopy(currentSettings)
-        updateUiFromSettings(temporarySettings)
-        -- applySettings(temporarySettings) -- Don't apply on open, only on change or save
-    end
+	overlay.Visible = enabled
+	gearBtn.Visible = not enabled
+	settingsPanel.Visible = enabled
+	layoutEditorOverlay.Visible = false
+	if enabled then
+		temporarySettings = deepCopy(currentSettings)
+		updateUiFromSettings(temporarySettings)
+		-- applySettings(temporarySettings) -- Don't apply on open, only on change or save
+	end
 end
 
 local function handleSliderInput(sliderFrame, bar, updateFunc)
-    local function updateValue(input)
-        local size = sliderFrame.AbsoluteSize
-        local inputPos = Vector2.new(input.Position.X, input.Position.Y)
-        local pos = inputPos - sliderFrame.AbsolutePosition
-        local p = math.clamp(pos.X / size.X, 0, 1)
-        bar.Size = UDim2.new(p, 0, 1, 0)
-        updateFunc(p)
-        applySettings(temporarySettings)
-    end
-    sliderFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            updateValue(input)
-            local conn, e_conn
-            conn = UserInputService.InputChanged:Connect(function(ci)
-                if ci.UserInputType == Enum.UserInputType.MouseMovement or ci.UserInputType == Enum.UserInputType.Touch then
-                    updateValue(ci)
-                end
-            end)
-            e_conn = UserInputService.InputEnded:Connect(function(ei)
-                if ei.UserInputType == input.UserInputType then
-                    conn:Disconnect()
-                    e_conn:Disconnect()
-                end
-            end)
-        end
-    end)
+	local function updateValue(input)
+		local size = sliderFrame.AbsoluteSize
+		local inputPos = Vector2.new(input.Position.X, input.Position.Y)
+		local pos = inputPos - sliderFrame.AbsolutePosition
+		local p = math.clamp(pos.X / size.X, 0, 1)
+		bar.Size = UDim2.new(p, 0, 1, 0)
+		updateFunc(p)
+		applySettings(temporarySettings)
+	end
+	sliderFrame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			updateValue(input)
+			local conn, e_conn
+			conn = UserInputService.InputChanged:Connect(function(ci)
+				if ci.UserInputType == Enum.UserInputType.MouseMovement or ci.UserInputType == Enum.UserInputType.Touch then
+					updateValue(ci)
+				end
+			end)
+			e_conn = UserInputService.InputEnded:Connect(function(ei)
+				if ei.UserInputType == input.UserInputType then
+					conn:Disconnect()
+					e_conn:Disconnect()
+				end
+			end)
+		end
+	end)
 end
 handleSliderInput(sfxSliderFrame, sfxSliderBar, function(p) temporarySettings.sound.sfxVolume = p end)
 
@@ -369,73 +369,73 @@ end)
 
 -- Function to serialize settings before sending to server
 local function serializeSettings(settings)
-    local serialized = { sound = settings.sound, controls = settings.controls, hud = {} }
-    for name, data in pairs(settings.hud) do
-        serialized.hud[name] = {
-            pos = { X = { Scale = data.pos.X.Scale, Offset = data.pos.X.Offset }, Y = { Scale = data.pos.Y.Scale, Offset = data.pos.Y.Offset } },
-            size = { X = { Scale = data.size.X.Scale, Offset = data.size.X.Offset }, Y = { Scale = data.size.Y.Scale, Offset = data.size.Y.Offset } }
-        }
-    end
-    return serialized
+	local serialized = { sound = settings.sound, controls = settings.controls, hud = {} }
+	for name, data in pairs(settings.hud) do
+		serialized.hud[name] = {
+			pos = { X = { Scale = data.pos.X.Scale, Offset = data.pos.X.Offset }, Y = { Scale = data.pos.Y.Scale, Offset = data.pos.Y.Offset } },
+			size = { X = { Scale = data.size.X.Scale, Offset = data.size.X.Offset }, Y = { Scale = data.size.Y.Scale, Offset = data.size.Y.Offset } }
+		}
+	end
+	return serialized
 end
 
 -- Button Actions
 gearBtn.MouseButton1Click:Connect(function() setSettingsMode(true) end)
 btnBatal.MouseButton1Click:Connect(function() applySettings(currentSettings); setSettingsMode(false) end)
 btnSimpan.MouseButton1Click:Connect(function()
-    currentSettings=deepCopy(temporarySettings)
-    UpdateSettingsEvent:FireServer(serializeSettings(currentSettings))
-    applySettings(currentSettings)
-    setSettingsMode(false)
+	currentSettings=deepCopy(temporarySettings)
+	UpdateSettingsEvent:FireServer(serializeSettings(currentSettings))
+	applySettings(currentSettings)
+	setSettingsMode(false)
 end)
 customizeHudButton.MouseButton1Click:Connect(function() setLayoutEditorMode(true) end)
 btnBatalLayout.MouseButton1Click:Connect(function()
-    for name, element in pairs(hudElements) do
-        if temporarySettings.hud[name] then
-             element.Position = temporarySettings.hud[name].pos
-             element.Size = temporarySettings.hud[name].size
-        end
-    end
-    setLayoutEditorMode(false)
+	for name, element in pairs(hudElements) do
+		if temporarySettings.hud[name] then
+			element.Position = temporarySettings.hud[name].pos
+			element.Size = temporarySettings.hud[name].size
+		end
+	end
+	setLayoutEditorMode(false)
 end)
 btnSimpanLayout.MouseButton1Click:Connect(function()
-    for name, element in pairs(hudElements) do
-        temporarySettings.hud[name].pos = element.Position
-        temporarySettings.hud[name].size = element.Size
-    end
-    setLayoutEditorMode(false)
+	for name, element in pairs(hudElements) do
+		temporarySettings.hud[name].pos = element.Position
+		temporarySettings.hud[name].size = element.Size
+	end
+	setLayoutEditorMode(false)
 end)
 btnDefaultLayout.MouseButton1Click:Connect(function()
-    for name, element in pairs(hudElements) do
-        if defaultHudSettings[name] then
-            element.Position = defaultHudSettings[name].pos
-            element.Size = defaultHudSettings[name].size
-        end
-    end
+	for name, element in pairs(hudElements) do
+		if defaultHudSettings[name] then
+			element.Position = defaultHudSettings[name].pos
+			element.Size = defaultHudSettings[name].size
+		end
+	end
 end)
 
 
 LoadSettingsEvent.OnClientEvent:Connect(function(serverSettings)
-    initializeHudDefaults()
-    if serverSettings and serverSettings.sound then
-        for k, v in pairs(serverSettings.sound) do currentSettings.sound[k] = v end
-    end
+	initializeHudDefaults()
+	if serverSettings and serverSettings.sound then
+		for k, v in pairs(serverSettings.sound) do currentSettings.sound[k] = v end
+	end
 	if serverSettings and serverSettings.controls then
 		currentSettings.controls = serverSettings.controls
 	end
 	if serverSettings and serverSettings.gameplay then
 		currentSettings.gameplay = serverSettings.gameplay
 	end
-    if serverSettings and serverSettings.hud then
-        for name, data in pairs(serverSettings.hud) do
-            if currentSettings.hud[name] then
-                currentSettings.hud[name].pos = data.pos
-                currentSettings.hud[name].size = data.size
-            end
-        end
-    end
-    applySettings(currentSettings)
-    updateUiFromSettings(currentSettings)
+	if serverSettings and serverSettings.hud then
+		for name, data in pairs(serverSettings.hud) do
+			if currentSettings.hud[name] then
+				currentSettings.hud[name].pos = data.pos
+				currentSettings.hud[name].size = data.size
+			end
+		end
+	end
+	applySettings(currentSettings)
+	updateUiFromSettings(currentSettings)
 end)
 
 task.wait(1)

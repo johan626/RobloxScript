@@ -32,32 +32,32 @@ local dirtyLeaderboardPlayers = {}
 
 -- Fungsi untuk mendapatkan data statistik pemain dari cache DataStoreManager
 function StatsModule.GetData(player)
-    local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
-    if not playerData or not playerData.data then
-        warn("[StatsModule] Gagal mendapatkan data untuk pemain: " .. player.Name)
-        return {}
-    end
+	local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
+	if not playerData or not playerData.data then
+		warn("[StatsModule] Gagal mendapatkan data untuk pemain: " .. player.Name)
+		return {}
+	end
 
-    -- Pastikan sub-tabel stats ada
-    if not playerData.data.stats then
-        local defaultData = require(script.Parent:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
-        playerData.data.stats = {}
+	-- Pastikan sub-tabel stats ada
+	if not playerData.data.stats then
+		local defaultData = require(script.Parent:WaitForChild("DataStoreManager")).DEFAULT_PLAYER_DATA
+		playerData.data.stats = {}
 		for k, v in pairs(defaultData.stats) do
 			playerData.data.stats[k] = v
 		end
-        DataStoreManager:UpdatePlayerData(player, playerData.data)
-    end
+		DataStoreManager:UpdatePlayerData(player, playerData.data)
+	end
 
-    return playerData.data.stats
+	return playerData.data.stats
 end
 
 -- Fungsi untuk menyimpan data statistik pemain
 function StatsModule.SaveData(player, statsData)
-    local playerData = DataStoreManager:GetPlayerData(player)
-    if not playerData or not playerData.data then return end
+	local playerData = DataStoreManager:GetPlayerData(player)
+	if not playerData or not playerData.data then return end
 
-    playerData.data.stats = statsData
-    DataStoreManager:UpdatePlayerData(player, playerData.data)
+	playerData.data.stats = statsData
+	DataStoreManager:UpdatePlayerData(player, playerData.data)
 end
 
 -- =============================================================================
@@ -166,8 +166,8 @@ end
 -- =============================================================================
 
 Players.PlayerRemoving:Connect(function(player)
-    -- Hapus pemain dari cache. Penyimpanan ditangani oleh DataStoreManager.
-    dirtyLeaderboardPlayers[player] = nil
+	-- Hapus pemain dari cache. Penyimpanan ditangani oleh DataStoreManager.
+	dirtyLeaderboardPlayers[player] = nil
 end)
 
 getInitialAPFunc.OnServerInvoke = function(player)
@@ -191,36 +191,36 @@ end
 -- =============================================================================
 
 local function savePlayerLeaderboardData(player)
-    if not dirtyLeaderboardPlayers[player] then return end
+	if not dirtyLeaderboardPlayers[player] then return end
 
-    local data = StatsModule.GetData(player)
-    if data then
-        print(string.format("[StatsModule][Cache] Menyimpan paksa data papan peringkat untuk %s.", player.Name))
-        DataStoreManager:UpdateLeaderboard("KillsLeaderboard_v1", player.UserId, data.TotalKills or 0)
-        DataStoreManager:UpdateLeaderboard("TDLeaderboard_v1", player.UserId, data.TotalDamageDealt or 0)
-        DataStoreManager:UpdateLeaderboard("APLeaderboard_v1", player.UserId, data.AchievementPoints or 0)
-    end
-    dirtyLeaderboardPlayers[player] = nil -- Hapus dari cache setelah disimpan
+	local data = StatsModule.GetData(player)
+	if data then
+		print(string.format("[StatsModule][Cache] Menyimpan paksa data papan peringkat untuk %s.", player.Name))
+		DataStoreManager:UpdateLeaderboard("KillsLeaderboard_v1", player.UserId, data.TotalKills or 0)
+		DataStoreManager:UpdateLeaderboard("TDLeaderboard_v1", player.UserId, data.TotalDamageDealt or 0)
+		DataStoreManager:UpdateLeaderboard("APLeaderboard_v1", player.UserId, data.AchievementPoints or 0)
+	end
+	dirtyLeaderboardPlayers[player] = nil -- Hapus dari cache setelah disimpan
 end
 
 function StatsModule.ForceSavePlayerLeaderboard(player)
-    savePlayerLeaderboardData(player)
+	savePlayerLeaderboardData(player)
 end
 
 function StatsModule.ForceSaveAllDirtyLeaderboards()
-    print("[StatsModule][Cache] Menyimpan paksa semua data papan peringkat yang tertunda...")
-    for player, _ in pairs(dirtyLeaderboardPlayers) do
-        if player.Parent then
-            savePlayerLeaderboardData(player)
-        end
-    end
+	print("[StatsModule][Cache] Menyimpan paksa semua data papan peringkat yang tertunda...")
+	for player, _ in pairs(dirtyLeaderboardPlayers) do
+		if player.Parent then
+			savePlayerLeaderboardData(player)
+		end
+	end
 end
 
 
 -- Loop pembaruan periodik untuk papan peringkat
 task.spawn(function()
-    while true do
-        task.wait(60) -- Jalankan setiap 60 detik
+	while true do
+		task.wait(60) -- Jalankan setiap 60 detik
 
 		local dirtyCount = 0
 		for _ in pairs(dirtyLeaderboardPlayers) do dirtyCount += 1 end
@@ -228,18 +228,18 @@ task.spawn(function()
 
 		print(string.format("[StatsModule][Cache] Memulai pembaruan papan peringkat periodik untuk %d pemain...", dirtyCount))
 
-        local playersToUpdate = {}
-        for player, _ in pairs(dirtyLeaderboardPlayers) do
-            if player.Parent then -- Pastikan pemain masih ada di server
-                table.insert(playersToUpdate, player)
-            end
-        end
+		local playersToUpdate = {}
+		for player, _ in pairs(dirtyLeaderboardPlayers) do
+			if player.Parent then -- Pastikan pemain masih ada di server
+				table.insert(playersToUpdate, player)
+			end
+		end
 
-        for _, player in ipairs(playersToUpdate) do
+		for _, player in ipairs(playersToUpdate) do
 			savePlayerLeaderboardData(player)
-        end
+		end
 		print("[StatsModule][Cache] Pembaruan papan peringkat periodik selesai.")
-    end
+	end
 end)
 
 return StatsModule

@@ -164,8 +164,17 @@ function DataStoreManager:GetOrWaitForPlayerData(player)
 	return playerDataCache[userId]
 end
 
+local StatsModule -- Akan di-require nanti untuk menghindari dependensi sirkular
+
 -- Fungsi internal untuk menyimpan data pemain tunggal
 local function savePlayerDataFunc(userId)
+	-- Panggil penyimpanan paksa untuk papan peringkat SEBELUM memeriksa data utama
+	if not StatsModule then StatsModule = require(script.Parent:WaitForChild("StatsModule")) end
+	local player = Players:GetPlayerByUserId(userId)
+	if player then
+		StatsModule:ForceSavePlayerLeaderboard(player)
+	end
+
 	local cacheEntry = playerDataCache[userId]
 	-- Jangan simpan jika data dikunci, tidak diubah, atau masih dimuat
 	if not cacheEntry or not cacheEntry.isDirty or cacheEntry.isLoading or cacheEntry.saveLocked then
@@ -237,6 +246,10 @@ function DataStoreManager:Init()
 	-- Simpan semua data saat server ditutup
 	game:BindToClose(function()
 		if not RunService:IsStudio() then
+			-- Simpan semua data papan peringkat yang tertunda terlebih dahulu
+			if not StatsModule then StatsModule = require(script.Parent:WaitForChild("StatsModule")) end
+			StatsModule.ForceSaveAllDirtyLeaderboards()
+
 			local saveTasks = {}
 			for userId, _ in pairs(playerDataCache) do
 				table.insert(saveTasks, task.spawn(savePlayerDataFunc, userId))

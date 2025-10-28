@@ -23,6 +23,9 @@ getInitialAPFunc.Name = "GetInitialAchievementPoints"
 local getWeaponStatsFunc = ReplicatedStorage:FindFirstChild("GetWeaponStats") or Instance.new("RemoteFunction", ReplicatedStorage)
 getWeaponStatsFunc.Name = "GetWeaponStats"
 
+-- Cache untuk melacak pemain yang statistik papan peringkatnya perlu diperbarui
+local dirtyLeaderboardPlayers = {}
+
 -- =============================================================================
 -- FUNGSI INTI
 -- =============================================================================
@@ -75,13 +78,16 @@ function StatsModule.IncrementStat(player, key, amount)
 	if not AchievementManager then AchievementManager = require(script.Parent:WaitForChild("AchievementManager")) end
 	AchievementManager:UpdateStatProgress(player, key, newValue)
 
-	-- Update leaderboard secara langsung jika stat ini dilacak
-	if key == "TotalKills" then
-		DataStoreManager:UpdateLeaderboard("KillsLeaderboard_v1", player.UserId, newValue)
-	elseif key == "TotalDamageDealt" then
-		DataStoreManager:UpdateLeaderboard("TDLeaderboard_v1", player.UserId, newValue)
-	elseif key == "AchievementPoints" then
-		DataStoreManager:UpdateLeaderboard("APLeaderboard_v1", player.UserId, newValue)
+	-- Tandai pemain sebagai "kotor" jika statistik papan peringkat berubah
+	if key == "TotalKills" or key == "TotalDamageDealt" or key == "AchievementPoints" then
+		if not dirtyLeaderboardPlayers[player] then
+			print(string.format("[StatsModule][Cache] Menandai %s untuk pembaruan papan peringkat.", player.Name))
+		end
+		dirtyLeaderboardPlayers[player] = true
+	end
+
+	-- Kirim event untuk Achievement Points secara langsung
+	if key == "AchievementPoints" then
 		apChangedEvent:FireClient(player, data[key])
 	end
 end
@@ -160,6 +166,8 @@ end
 -- =============================================================================
 
 Players.PlayerRemoving:Connect(function(player)
+    -- Hapus pemain dari cache. Penyimpanan ditangani oleh DataStoreManager.
+    dirtyLeaderboardPlayers[player] = nil
 end)
 
 getInitialAPFunc.OnServerInvoke = function(player)
@@ -177,5 +185,63 @@ getWeaponStatsFunc.OnServerInvoke = function(player)
 	table.sort(sortedStats, function(a, b) return a.Kills > b.Kills end)
 	return sortedStats
 end
+
+-- =============================================================================
+-- FUNGSI PENYIMPANAN PAPAN PERINGKAT
+-- =============================================================================
+
+local function savePlayerLeaderboardData(player)
+    if not dirtyLeaderboardPlayers[player] then return end
+
+    local data = StatsModule.GetData(player)
+    if data then
+        print(string.format("[StatsModule][Cache] Menyimpan paksa data papan peringkat untuk %s.", player.Name))
+        DataStoreManager:UpdateLeaderboard("KillsLeaderboard_v1", player.UserId, data.TotalKills or 0)
+        DataStoreManager:UpdateLeaderboard("TDLeaderboard_v1", player.UserId, data.TotalDamageDealt or 0)
+        DataStoreManager:UpdateLeaderboard("APLeaderboard_v1", player.UserId, data.AchievementPoints or 0)
+    end
+    dirtyLeaderboardPlayers[player] = nil -- Hapus dari cache setelah disimpan
+end
+
+function StatsModule.ForceSavePlayerLeaderboard(player)
+    savePlayerLeaderboardData(player)
+end
+
+function StatsModule.ForceSaveAllDirtyLeaderboards()
+    print("[StatsModule][Cache] Menyimpan paksa semua data papan peringkat yang tertunda...")
+    for player, _ in pairs(dirtyLeaderboardPlayers) do
+        if player.Parent then
+            savePlayerLeaderboardData(player)
+        end
+    end
+    dirtyLeaderboardPlayers = {} -- Bersihkan cache sepenuhnya
+end
+
+
+-- Loop pembaruan periodik untuk papan peringkat
+task.spawn(function()
+    while true do
+        task.wait(60) -- Jalankan setiap 60 detik
+
+		local dirtyCount = 0
+		for _ in pairs(dirtyLeaderboardPlayers) do dirtyCount += 1 end
+		if dirtyCount == 0 then continue end
+
+		print(string.format("[StatsModule][Cache] Memulai pembaruan papan peringkat periodik untuk %d pemain...", dirtyCount))
+
+        local playersToUpdate = {}
+        for player, _ in pairs(dirtyLeaderboardPlayers) do
+            if player.Parent then -- Pastikan pemain masih ada di server
+                table.insert(playersToUpdate, player)
+            end
+        end
+        dirtyLeaderboardPlayers = {} -- Bersihkan cache
+
+        for _, player in ipairs(playersToUpdate) do
+			savePlayerLeaderboardData(player)
+        end
+		print("[StatsModule][Cache] Pembaruan papan peringkat periodik selesai.")
+    end
+end)
 
 return StatsModule

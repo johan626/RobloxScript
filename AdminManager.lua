@@ -4,8 +4,9 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 local DataStoreManager = require(script.Parent.Parent.ModuleScript:WaitForChild("DataStoreManager"))
-local AdminConfig = require(ReplicatedStorage.ModuleScript:WaitForChild("AdminConfig"))
+local AdminConfig = require(ServerScriptService.ModuleScript:WaitForChild("AdminConfig"))
 
 local AdminManager = {}
 

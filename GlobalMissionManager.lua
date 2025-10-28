@@ -218,10 +218,10 @@ getGlobalMissionState.OnServerInvoke = function(player)
 	if not config then return nil end
 
 	local playerContribution = 0
-	local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
-	if playerData and playerData.data and playerData.data.globalMissions[config.ID] then
-		playerContribution = playerData.data.globalMissions[config.ID].Contribution
-	end
+	-- Ambil kontribusi langsung dari leaderboard untuk sinkronisasi sempurna
+	local leaderboardName = LEADERBOARD_PREFIX .. config.ID
+	local score, _ = DataStoreManager:GetPlayerRankInLeaderboard(leaderboardName, player.UserId)
+	playerContribution = score or 0
 
 	return {
 		Description = config.Description,

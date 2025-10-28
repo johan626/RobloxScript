@@ -61,11 +61,11 @@ function CoinsManager.GetData(player)
 end
 
 function CoinsManager.SaveData(player, inventoryData)
-    local playerData = DataStoreManager:GetPlayerData(player)
-    if not playerData or not playerData.data then return end
+	local playerData = DataStoreManager:GetPlayerData(player)
+	if not playerData or not playerData.data then return end
 
-    playerData.data.inventory = inventoryData
-    DataStoreManager:UpdatePlayerData(player, playerData.data)
+	playerData.data.inventory = inventoryData
+	DataStoreManager:UpdatePlayerData(player, playerData.data)
 end
 
 -- =============================================================================
@@ -123,18 +123,18 @@ end
 -- =============================================================================
 
 local function onPlayerAdded(player)
-    -- Memulai inisialisasi dalam thread baru.
-    -- GetData akan secara internal menunggu data dimuat.
-    task.spawn(function()
-        local data = CoinsManager.GetData(player)
-        CoinsUpdateEvent:FireClient(player, data.Coins)
-    end)
+	-- Memulai inisialisasi dalam thread baru.
+	-- GetData akan secara internal menunggu data dimuat.
+	task.spawn(function()
+		local data = CoinsManager.GetData(player)
+		CoinsUpdateEvent:FireClient(player, data.Coins)
+	end)
 end
 
 Players.PlayerAdded:Connect(onPlayerAdded)
 
 for _, player in ipairs(Players:GetPlayers()) do
-    onPlayerAdded(player)
+	onPlayerAdded(player)
 end
 
 return CoinsManager

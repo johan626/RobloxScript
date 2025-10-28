@@ -19,11 +19,6 @@ local RemoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
 local missionProgressUpdatedEvent = RemoteEvents:WaitForChild("MissionProgressUpdated")
 local missionsResetEvent = RemoteEvents:WaitForChild("MissionsReset")
 
-if RemoteEvents:FindFirstChild("RerollMissionFunc") then
-	RemoteEvents.RerollMissionFunc:Destroy()
-end
-local rerollMissionFunc = Instance.new("RemoteFunction", RemoteEvents)
-rerollMissionFunc.Name = "RerollMissionFunc"
 
 
 -- =============================================================================
@@ -123,12 +118,12 @@ function MissionManager:CheckAndResetMissions(player)
 	local wasReset = false
 
 	if self:_shouldResetDaily(missionsData.Daily.LastReset, currentTime) then
-		missionsData.Daily = { Missions = self:_generateNewMissions(player, "Daily"), LastReset = currentTime, RerollUsed = false }
+		missionsData.Daily = { Missions = self:_generateNewMissions(player, "Daily"), LastReset = currentTime }
 		wasReset = true
 	end
 
 	if self:_shouldResetWeekly(missionsData.Weekly.LastReset, currentTime) then
-		missionsData.Weekly = { Missions = self:_generateNewMissions(player, "Weekly"), LastReset = currentTime, RerollUsed = false }
+		missionsData.Weekly = { Missions = self:_generateNewMissions(player, "Weekly"), LastReset = currentTime }
 		wasReset = true
 	end
 
@@ -198,11 +193,6 @@ function MissionManager:ClaimMissionReward(player, missionID)
 	return { Success = true, Reward = config.Reward }
 end
 
-function MissionManager:RerollMission(player, missionID)
-	-- Implementasi reroll disederhanakan, dapat diperluas jika diperlukan
-	return { Success = false, Reason = "Fitur Reroll sedang dalam pengembangan." }
-end
-
 function MissionManager:GetMissionDataForClient(player)
 	local missionsData = self.GetData(player)
 	if not missionsData then return nil end
@@ -262,9 +252,5 @@ for _, player in ipairs(Players:GetPlayers()) do
 	onPlayerAdded(player)
 end
 
-
-rerollMissionFunc.OnServerInvoke = function(player, missionID)
-	return MissionManager:RerollMission(player, missionID)
-end
 
 return MissionManager

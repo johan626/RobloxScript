@@ -193,17 +193,6 @@ claimButtonTemplate.TextColor3 = Color3.fromRGB(255, 255, 255)
 local claimCorner = Instance.new("UICorner", claimButtonTemplate)
 claimCorner.CornerRadius = UDim.new(0, 8)
 
-local rerollButtonTemplate = Instance.new("TextButton", missionTemplate)
-rerollButtonTemplate.Name = "RerollButton"
-rerollButtonTemplate.Size = UDim2.new(0.25, -5, 0.4, 0)
-rerollButtonTemplate.Position = UDim2.new(0.75, 0, 0.55, 0)
-rerollButtonTemplate.Font = Enum.Font.SourceSans
-rerollButtonTemplate.Text = "Ganti Misi"
-rerollButtonTemplate.TextSize = 14
-rerollButtonTemplate.BackgroundColor3 = Color3.fromRGB(142, 68, 173) -- Ungu
-rerollButtonTemplate.TextColor3 = Color3.fromRGB(255, 255, 255)
-local rerollCorner = Instance.new("UICorner", rerollButtonTemplate)
-rerollCorner.CornerRadius = UDim.new(0, 8)
 
 -- Parent setelah semua anak dibuat
 missionTemplate.Parent = missionContainer
@@ -215,7 +204,6 @@ missionTemplate.Parent = missionContainer
 local RemoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
 local getMissionData = RemoteEvents:WaitForChild("GetMissionData")
 local claimMissionReward = RemoteEvents:WaitForChild("ClaimMissionReward")
-local rerollMission = RemoteEvents:WaitForChild("RerollMission")
 local missionProgressUpdated = RemoteEvents:WaitForChild("MissionProgressUpdated")
 local missionsReset = RemoteEvents:WaitForChild("MissionsReset")
 
@@ -227,7 +215,7 @@ local missionContainerConnection = nil -- Untuk mengelola koneksi event
 
 -- Fungsi findMissionConfig dihapus karena tidak diperlukan lagi.
 
-local function updateMissionFrame(frame, missionID, missionInfo, rerollUsed)
+local function updateMissionFrame(frame, missionID, missionInfo)
 	-- Semua info sekarang ada di `missionInfo`
 	frame.Description.Text = missionInfo.Description
 	frame.Reward.Text = string.format("Hadiah: %d MP", missionInfo.Reward.Value)
@@ -252,11 +240,6 @@ local function updateMissionFrame(frame, missionID, missionInfo, rerollUsed)
 		claimBtn.Interactable = false
 	end
 
-	-- Logika untuk tombol Reroll
-	local rerollBtn = frame.RerollButton
-	rerollBtn.Name = missionID
-	-- Tampilkan tombol hanya jika reroll belum digunakan DAN misi belum selesai/diklaim
-	rerollBtn.Visible = not rerollUsed and not missionInfo.Completed and not missionInfo.Claimed
 end
 
 local function populateMissions()
@@ -271,13 +254,12 @@ local function populateMissions()
 
 	local missionData = (currentTab == "Daily") and currentMissionData.Daily or currentMissionData.Weekly
 	local missionsToShow = missionData.Missions
-	local rerollUsed = missionData.RerollUsed
 
 	for id, missionInfo in pairs(missionsToShow) do
 		local frame = missionTemplate:Clone()
 		frame.Name = id
 		frame.Visible = true
-		updateMissionFrame(frame, id, missionInfo, rerollUsed)
+		updateMissionFrame(frame, id, missionInfo)
 		frame.Parent = missionContainer
 	end
 end
@@ -303,7 +285,7 @@ local function handleClaimResponse(frame, missionID, result)
 		local missionData = (currentTab == "Daily") and currentMissionData.Daily or currentMissionData.Weekly
 		missionData.Missions[missionID].Claimed = true
 
-		updateMissionFrame(frame, missionID, missionData.Missions[missionID], missionData.RerollUsed)
+		updateMissionFrame(frame, missionID, missionData.Missions[missionID])
 
 		local reward = result.Reward
 		local rewardText = string.format("Anda menerima: %d Mission Points!", reward.Value)
@@ -311,26 +293,6 @@ local function handleClaimResponse(frame, missionID, result)
 	else
 		frame.ClaimButton.Interactable = true
 		warn("Gagal mengklaim hadiah: ", result and result.Reason or "Tidak ada respons")
-	end
-end
-
-local function handleRerollResponse(result)
-	if result and result.Success then
-		local missionData = (currentTab == "Daily") and currentMissionData.Daily or currentMissionData.Weekly
-
-		-- Hapus data misi lama, tambahkan yang baru
-		missionData.Missions[result.OldMissionID] = nil
-		missionData.Missions[result.NewMissionID] = result.NewMissionData
-		missionData.RerollUsed = true
-
-		-- Perbarui seluruh UI untuk menyembunyikan semua tombol reroll
-		populateMissions()
-
-		StarterGui:SetCore("SendNotification", {Title = "Misi Diganti!", Text = "Anda mendapat misi baru.", Duration = 3})
-	else
-		warn("Gagal reroll misi: ", result and result.Reason or "Tidak ada respons")
-		-- Jika gagal, muat ulang data untuk mengembalikan UI ke keadaan semula
-		populateMissions()
 	end
 end
 
@@ -357,32 +319,6 @@ local function setupConnections()
 			end)
 		end
 
-		local rerollButton = child:FindFirstChild("RerollButton")
-		if rerollButton then
-			rerollButton.MouseButton1Click:Connect(function()
-				local missionID = child.Name
-				-- Tampilkan konfirmasi
-				StarterGui:SetCore("SendNotification", {
-					Title = "Konfirmasi",
-					Text = "Anda yakin ingin mengganti misi ini? Kesempatan ini tidak akan kembali.",
-					Button1 = "Ya",
-					Button2 = "Batal",
-					Callback = function(buttonText)
-						if buttonText == "Ya" then
-							-- Nonaktifkan semua tombol reroll sementara
-							for _, frame in ipairs(missionContainer:GetChildren()) do
-								if frame:IsA("Frame") and frame:FindFirstChild("RerollButton") then
-									frame.RerollButton.Interactable = false
-								end
-							end
-
-							local success, result = pcall(function() return rerollMission:InvokeServer(missionID) end)
-							handleRerollResponse(result)
-						end
-					end
-				})
-			end)
-		end
 	end)
 end
 

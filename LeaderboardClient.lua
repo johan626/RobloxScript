@@ -12,7 +12,7 @@ local avatarCache = {} -- Cache for player avatars
 
 -- Wait for necessary modules and remote objects
 local LeaderboardConfig = require(ReplicatedStorage:WaitForChild("LeaderboardConfig"))
-local remoteFolder = ReplicatedStorage:WaitForChild("RemoteObjects")
+local remoteFolder = ReplicatedStorage:WaitForChild("RemoteFunctions")
 local globalCountdownValue = remoteFolder:WaitForChild("LeaderboardCountdown")
 
 local leaderboardUpdaters = {} -- Stores the update function for each leaderboard

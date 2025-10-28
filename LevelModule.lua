@@ -32,27 +32,27 @@ local function GetXPForNextLevel(level)
 end
 
 function LevelManager.GetData(player)
-    local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
-    if not playerData or not playerData.data then
-        warn("[LevelManager] Gagal mendapatkan data bahkan setelah menunggu untuk pemain: " .. player.Name)
-        return table.clone(DEFAULT_LEVEL_DATA)
-    end
+	local playerData = DataStoreManager:GetOrWaitForPlayerData(player)
+	if not playerData or not playerData.data then
+		warn("[LevelManager] Gagal mendapatkan data bahkan setelah menunggu untuk pemain: " .. player.Name)
+		return table.clone(DEFAULT_LEVEL_DATA)
+	end
 
-    -- Data level sekarang ada di bawah 'leveling'
-    if not playerData.data.leveling then
-        playerData.data.leveling = table.clone(DEFAULT_LEVEL_DATA)
-        DataStoreManager:UpdatePlayerData(player, playerData.data)
-    end
+	-- Data level sekarang ada di bawah 'leveling'
+	if not playerData.data.leveling then
+		playerData.data.leveling = table.clone(DEFAULT_LEVEL_DATA)
+		DataStoreManager:UpdatePlayerData(player, playerData.data)
+	end
 
-    return playerData.data.leveling
+	return playerData.data.leveling
 end
 
 function LevelManager.SaveData(player, levelData)
-    local playerData = DataStoreManager:GetPlayerData(player)
-    if not playerData or not playerData.data then return end
+	local playerData = DataStoreManager:GetPlayerData(player)
+	if not playerData or not playerData.data then return end
 
-    playerData.data.leveling = levelData
-    DataStoreManager:UpdatePlayerData(player, playerData.data)
+	playerData.data.leveling = levelData
+	DataStoreManager:UpdatePlayerData(player, playerData.data)
 end
 
 -- =============================================================================
@@ -88,19 +88,19 @@ end
 -- =============================================================================
 
 local function onPlayerAdded(player)
-    -- Memulai inisialisasi dalam thread baru.
-    -- GetData akan secara internal menunggu data dimuat.
-    task.spawn(function()
-        local data = LevelManager.GetData(player)
-        local xpNeeded = GetXPForNextLevel(data.Level)
-        LevelUpdateEvent:FireClient(player, data.Level, data.XP, xpNeeded)
-    end)
+	-- Memulai inisialisasi dalam thread baru.
+	-- GetData akan secara internal menunggu data dimuat.
+	task.spawn(function()
+		local data = LevelManager.GetData(player)
+		local xpNeeded = GetXPForNextLevel(data.Level)
+		LevelUpdateEvent:FireClient(player, data.Level, data.XP, xpNeeded)
+	end)
 end
 
 Players.PlayerAdded:Connect(onPlayerAdded)
 
 for _, player in ipairs(Players:GetPlayers()) do
-    onPlayerAdded(player)
+	onPlayerAdded(player)
 end
 
 return LevelManager

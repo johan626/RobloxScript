@@ -38,16 +38,24 @@ buttonGui.Parent = playerGui
 local openButton = Instance.new("TextButton")
 openButton.Name = "OpenMission"
 openButton.Text = "📜 Misi"
-openButton.Size = UDim2.new(0, 120, 0, 40)
-openButton.AnchorPoint = Vector2.new(0, 1)
-openButton.Position = UDim2.new(0.13, 0, 0.98, 0) -- Di sebelah tombol reward
+openButton.AnchorPoint = Vector2.new(0, 0.5)
+openButton.Size = UDim2.new(0.15, 0, 0.1, 0)
+openButton.Position = UDim2.new(0.01, 0, 0.5, 0) -- Di sebelah tombol reward
 openButton.Font = Enum.Font.SourceSansBold
 openButton.TextSize = 18
 openButton.BackgroundColor3 = Color3.fromRGB(243, 156, 18) -- Oranye
+openButton.TextScaled = true
 openButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 openButton.Parent = buttonGui
 local openCorner = Instance.new("UICorner", openButton)
 openCorner.CornerRadius = UDim.new(0, 8)
+
+local padding = Instance.new("UIPadding")
+padding.PaddingTop = UDim.new(0.15, 0)
+padding.PaddingLeft = UDim.new(0.15, 0)
+padding.PaddingBottom = UDim.new(0.15, 0)
+padding.PaddingRight = UDim.new(0.15, 0)
+padding.Parent = openButton
 
 -- Frame Utama
 local mainFrame = Instance.new("Frame")
@@ -265,19 +273,19 @@ local function populateMissions()
 end
 
 local function switchTab(tabName)
-    currentTab = tabName
-    if tabName == "Daily" then
-        dailyTab.BackgroundColor3 = Color3.fromRGB(60, 64, 78)
-        dailyTab.TextColor3 = Color3.fromRGB(255, 255, 255)
-        weeklyTab.BackgroundColor3 = Color3.fromRGB(45, 48, 59)
-        weeklyTab.TextColor3 = Color3.fromRGB(200, 200, 200)
-    else
-        weeklyTab.BackgroundColor3 = Color3.fromRGB(60, 64, 78)
-        weeklyTab.TextColor3 = Color3.fromRGB(255, 255, 255)
-        dailyTab.BackgroundColor3 = Color3.fromRGB(45, 48, 59)
-        dailyTab.TextColor3 = Color3.fromRGB(200, 200, 200)
-    end
-    populateMissions()
+	currentTab = tabName
+	if tabName == "Daily" then
+		dailyTab.BackgroundColor3 = Color3.fromRGB(60, 64, 78)
+		dailyTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+		weeklyTab.BackgroundColor3 = Color3.fromRGB(45, 48, 59)
+		weeklyTab.TextColor3 = Color3.fromRGB(200, 200, 200)
+	else
+		weeklyTab.BackgroundColor3 = Color3.fromRGB(60, 64, 78)
+		weeklyTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+		dailyTab.BackgroundColor3 = Color3.fromRGB(45, 48, 59)
+		dailyTab.TextColor3 = Color3.fromRGB(200, 200, 200)
+	end
+	populateMissions()
 end
 
 local function handleClaimResponse(frame, missionID, result)
@@ -323,27 +331,27 @@ local function setupConnections()
 end
 
 local function openUI()
-    local success, result = pcall(function() return getMissionData:InvokeServer() end)
-    if not success or not result then
-        warn("Gagal mendapatkan data misi: ", result)
-        return
-    end
+	local success, result = pcall(function() return getMissionData:InvokeServer() end)
+	if not success or not result then
+		warn("Gagal mendapatkan data misi: ", result)
+		return
+	end
 
-    currentMissionData = result
-    screenGui.Enabled = true
-    mainFrame.Visible = true
-    setupConnections() -- Atur koneksi event saat UI dibuka
-    switchTab("Daily") -- Default ke tab harian
+	currentMissionData = result
+	screenGui.Enabled = true
+	mainFrame.Visible = true
+	setupConnections() -- Atur koneksi event saat UI dibuka
+	switchTab("Daily") -- Default ke tab harian
 end
 
 local function closeUI()
-    mainFrame.Visible = false
-    screenGui.Enabled = false
-    -- Hentikan koneksi event saat UI ditutup untuk mencegah kebocoran memori
-    if missionContainerConnection then
-        missionContainerConnection:Disconnect()
-        missionContainerConnection = nil
-    end
+	mainFrame.Visible = false
+	screenGui.Enabled = false
+	-- Hentikan koneksi event saat UI ditutup untuk mencegah kebocoran memori
+	if missionContainerConnection then
+		missionContainerConnection:Disconnect()
+		missionContainerConnection = nil
+	end
 end
 
 openButton.MouseButton1Click:Connect(openUI)

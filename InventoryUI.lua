@@ -35,9 +35,9 @@ inventoryButton.AnchorPoint = Vector2.new(0.5, 1)
 inventoryButton.Size = UDim2.new(0.2, 0, 0.1, 0)
 inventoryButton.Position = UDim2.new(0.5, 0, 0.98, 0)
 inventoryButton.Text = "Inventory"
-inventoryButton.Font = Enum.Font.SourceSansBold
+inventoryButton.Font = Enum.Font.GothamSemibold
 inventoryButton.TextSize = 20
-inventoryButton.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
+inventoryButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 inventoryButton.TextColor3 = Color3.new(1, 1, 1)
 local btnCorner = Instance.new("UICorner", inventoryButton)
 btnCorner.CornerRadius = UDim.new(0, 8)
@@ -48,9 +48,9 @@ mainFrame.Parent = inventoryScreenGui
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.Size = UDim2.new(0.8, 0, 0.8, 0)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+mainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 mainFrame.BorderSizePixel = 1
-mainFrame.BorderColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.BorderColor3 = Color3.fromRGB(60, 60, 60)
 mainFrame.Active = true
 mainFrame.Visible = false
 local frameCorner = Instance.new("UICorner", mainFrame)
@@ -63,9 +63,9 @@ aspectRatioConstraint.DominantAxis = Enum.DominantAxis.Width
 local title = Instance.new("TextLabel", mainFrame)
 title.Size = UDim2.new(1, 0, 0.1, 0)
 title.Text = "INVENTORY"
-title.Font = Enum.Font.Creepster
-title.TextSize = 36
-title.TextColor3 = Color3.fromRGB(180, 20, 20)
+title.Font = Enum.Font.GothamSemibold
+title.TextSize = 28
+title.TextColor3 = Color3.fromRGB(240, 240, 240)
 title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 local titleCorner = Instance.new("UICorner", title)
 titleCorner.CornerRadius = UDim.new(0, 8)
@@ -74,9 +74,9 @@ local backButton = Instance.new("TextButton", mainFrame)
 backButton.Size = UDim2.new(0.1, 0, 0.08, 0)
 backButton.Position = UDim2.new(0.02, 0, 0.01, 0)
 backButton.Text = "Back"
-backButton.Font = Enum.Font.SourceSans
+backButton.Font = Enum.Font.GothamSemibold
 backButton.TextSize = 16
-backButton.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
+backButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 backButton.TextColor3 = Color3.new(1, 1, 1)
 local backCorner = Instance.new("UICorner", backButton)
 backCorner.CornerRadius = UDim.new(0, 6)
@@ -97,9 +97,9 @@ local skinsTabButton = Instance.new("TextButton", tabsFrame)
 skinsTabButton.Name = "SkinsTab"
 skinsTabButton.Size = UDim2.new(0.2, 0, 0.8, 0)
 skinsTabButton.Text = "Skins"
-skinsTabButton.Font = Enum.Font.SourceSansBold
-skinsTabButton.TextSize = 18
-skinsTabButton.BackgroundColor3 = Color3.fromRGB(180, 20, 20)
+skinsTabButton.Font = Enum.Font.GothamSemibold
+skinsTabButton.TextSize = 16
+skinsTabButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 skinsTabButton.TextColor3 = Color3.new(1, 1, 1)
 local skinsCorner = Instance.new("UICorner", skinsTabButton)
 skinsCorner.CornerRadius = UDim.new(0, 6)
@@ -108,10 +108,10 @@ local boostersTabButton = Instance.new("TextButton", tabsFrame)
 boostersTabButton.Name = "BoostersTab"
 boostersTabButton.Size = UDim2.new(0.2, 0, 0.8, 0)
 boostersTabButton.Text = "Boosters"
-boostersTabButton.Font = Enum.Font.SourceSansBold
-boostersTabButton.TextSize = 18
-boostersTabButton.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
-boostersTabButton.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+boostersTabButton.Font = Enum.Font.GothamSemibold
+boostersTabButton.TextSize = 16
+boostersTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+boostersTabButton.TextColor3 = Color3.fromRGB(160, 160, 160)
 local boostersCorner = Instance.new("UICorner", boostersTabButton)
 boostersCorner.CornerRadius = UDim.new(0, 6)
 
@@ -146,7 +146,7 @@ contentFrame.AnchorPoint = Vector2.new(0, 0)
 contentFrame.BackgroundTransparency = 1
 local contentLayout = Instance.new("UIListLayout", contentFrame)
 contentLayout.FillDirection = Enum.FillDirection.Horizontal
-contentLayout.Padding = UDim.new(0, 0)
+contentLayout.Padding = UDim.new(0, 10)
 contentLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 
 local leftColumn = Instance.new("Frame", contentFrame)
@@ -156,7 +156,7 @@ leftColumn.BackgroundTransparency = 1
 leftColumn.LayoutOrder = 1
 local leftColumnLayout = Instance.new("UIListLayout", leftColumn)
 leftColumnLayout.FillDirection = Enum.FillDirection.Vertical
-leftColumnLayout.Padding = UDim.new(0, 10)
+leftColumnLayout.Padding = UDim.new(0, 12)
 
 local categoryFilterFrame = Instance.new("Frame", leftColumn)
 categoryFilterFrame.Name = "CategoryFilterFrame"
@@ -171,12 +171,12 @@ cf_layout.VerticalAlignment = Enum.VerticalAlignment.Center
 local searchBar = Instance.new("TextBox", leftColumn)
 searchBar.Name = "SearchBar"
 searchBar.Size = UDim2.new(1, 0, 0, 30)
-searchBar.Font = Enum.Font.SourceSans
+searchBar.Font = Enum.Font.Gotham
 searchBar.TextSize = 14
 searchBar.PlaceholderText = "Search for a weapon..."
 searchBar.Text = ""
 searchBar.TextColor3 = Color3.new(1, 1, 1)
-searchBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+searchBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 searchBar.ClearTextOnFocus = false
 local sb_corner = Instance.new("UICorner", searchBar)
 sb_corner.CornerRadius = UDim.new(0, 6)
@@ -200,8 +200,9 @@ wl_padding.PaddingBottom = UDim.new(0, 5)
 
 local separator1 = Instance.new("Frame", contentFrame)
 separator1.Name = "Separator1"
-separator1.Size = UDim2.new(0.005, 0, 1, 0)
-separator1.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+separator1.Size = UDim2.new(0.005, 0, 0.9, 0)
+separator1.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+separator1.BackgroundTransparency = 0.5
 separator1.BorderSizePixel = 0
 separator1.LayoutOrder = 2
 
@@ -213,8 +214,9 @@ middleColumn.LayoutOrder = 3
 
 local separator2 = Instance.new("Frame", contentFrame)
 separator2.Name = "Separator2"
-separator2.Size = UDim2.new(0.005, 0, 1, 0)
-separator2.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+separator2.Size = UDim2.new(0.005, 0, 0.9, 0)
+separator2.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+separator2.BackgroundTransparency = 0.5
 separator2.BorderSizePixel = 0
 separator2.LayoutOrder = 4
 
@@ -230,10 +232,10 @@ rightColumnLayout.SortOrder = Enum.SortOrder.LayoutOrder
 local weaponTitleLabel = Instance.new("TextLabel", rightColumn)
 weaponTitleLabel.Name = "WeaponTitleLabel"
 weaponTitleLabel.Size = UDim2.new(1, 0, 0, 40)
-weaponTitleLabel.Font = Enum.Font.Creepster
+weaponTitleLabel.Font = Enum.Font.GothamBold
 weaponTitleLabel.Text = "SELECT A WEAPON"
-weaponTitleLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-weaponTitleLabel.TextSize = 32
+weaponTitleLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+weaponTitleLabel.TextSize = 26
 weaponTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 weaponTitleLabel.BackgroundTransparency = 1
 weaponTitleLabel.LayoutOrder = 1
@@ -258,13 +260,13 @@ local function createStatBar(name, parent)
 	local title = Instance.new("TextLabel", statFrame)
 	title.Size = UDim2.new(1, 0, 0, 12)
 	title.Text = string.upper(name)
-	title.Font = Enum.Font.SourceSansBold
-	title.TextColor3 = Color3.fromRGB(180, 180, 180)
+	title.Font = Enum.Font.GothamSemibold
+	title.TextColor3 = Color3.fromRGB(200, 200, 200)
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.BackgroundTransparency = 1
 	local barTrack = Instance.new("Frame", statFrame)
 	barTrack.Size = UDim2.new(1, 0, 0, 8)
-	barTrack.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	barTrack.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 	local trackCorner = Instance.new("UICorner", barTrack)
 	trackCorner.CornerRadius = UDim.new(1, 0)
 	local barFill = Instance.new("Frame", barTrack)
@@ -284,16 +286,16 @@ local skinsTitle = Instance.new("TextLabel", rightColumn)
 skinsTitle.Name = "SkinsTitle"
 skinsTitle.Size = UDim2.new(1, 0, 0, 20)
 skinsTitle.Text = "AVAILABLE SKINS"
-skinsTitle.Font = Enum.Font.SourceSansBold
+skinsTitle.Font = Enum.Font.GothamBold
 skinsTitle.TextSize = 16
-skinsTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+skinsTitle.TextColor3 = Color3.fromRGB(220, 220, 220)
 skinsTitle.BackgroundTransparency = 1
 skinsTitle.LayoutOrder = 3
 
 local skinListFrame = Instance.new("ScrollingFrame", rightColumn)
 skinListFrame.Name = "SkinListFrame"
 skinListFrame.Size = UDim2.new(1, 0, 0, 100)
-skinListFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+skinListFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 skinListFrame.BackgroundTransparency = 0.5
 skinListFrame.BorderSizePixel = 0
 skinListFrame.LayoutOrder = 4
@@ -309,19 +311,44 @@ local equipButton = Instance.new("TextButton", rightColumn)
 equipButton.Name = "EquipButton"
 equipButton.Size = UDim2.new(1, 0, 0, 40)
 equipButton.Text = "EQUIP SKIN"
-equipButton.Font = Enum.Font.SourceSansBold
-equipButton.TextSize = 18
-equipButton.BackgroundColor3 = Color3.fromRGB(130, 130, 130)
+equipButton.Font = Enum.Font.GothamBold
+equipButton.TextSize = 16
+equipButton.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
 equipButton.TextColor3 = Color3.new(1, 1, 1)
 equipButton.LayoutOrder = 5
 local equipCorner = Instance.new("UICorner", equipButton)
 equipCorner.CornerRadius = UDim.new(0, 8)
 equipButton.AutoButtonColor = false
 
+-- Add hover and press animations for the equip button
+equipButton.MouseEnter:Connect(function()
+	if equipButton.AutoButtonColor then
+		TweenService:Create(equipButton, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(100, 100, 100)}):Play()
+	end
+end)
+
+equipButton.MouseLeave:Connect(function()
+	if equipButton.AutoButtonColor then
+		TweenService:Create(equipButton, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(80, 80, 80)}):Play()
+	end
+end)
+
+equipButton.MouseButton1Down:Connect(function()
+	if equipButton.AutoButtonColor then
+		TweenService:Create(equipButton, TweenInfo.new(0.1), {Size = UDim2.new(1, 0, 0, 36)}):Play()
+	end
+end)
+
+equipButton.MouseButton1Up:Connect(function()
+	if equipButton.AutoButtonColor then
+		TweenService:Create(equipButton, TweenInfo.new(0.1), {Size = UDim2.new(1, 0, 0, 40)}):Play()
+	end
+end)
+
 local viewportFrame = Instance.new("ViewportFrame", middleColumn)
 viewportFrame.Name = "ViewportFrame"
 viewportFrame.Size = UDim2.new(1, 0, 1, 0)
-viewportFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+viewportFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 viewportFrame.BorderSizePixel = 0
 viewportFrame.LightColor = Color3.new(1, 1, 1)
 viewportFrame.LightDirection = Vector3.new(-1, -1, -1)
@@ -353,7 +380,7 @@ sliderTrack.Visible = false
 local sliderFill = Instance.new("Frame", sliderTrack)
 sliderFill.Name = "SliderFill"
 sliderFill.Size = UDim2.new(0.5, 0, 1, 0)
-sliderFill.BackgroundColor3 = Color3.fromRGB(180, 20, 20)
+sliderFill.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
 sliderFill.BorderSizePixel = 0
 local fillCorner = Instance.new("UICorner", sliderFill)
 fillCorner.CornerRadius = UDim.new(0, 5)
@@ -437,7 +464,7 @@ local function updateBoosterTab()
 			local entryFrame = Instance.new("Frame")
 			entryFrame.Name = boosterName
 			entryFrame.Size = UDim2.new(0.95, 0, 0, 90)
-			entryFrame.BackgroundColor3 = Color3.fromRGB(48, 48, 56)
+			entryFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 			entryFrame.BorderSizePixel = 0
 			entryFrame.Parent = inventoryScrollingFrame
 			local corner = Instance.new("UICorner", entryFrame)
@@ -447,7 +474,7 @@ local function updateBoosterTab()
 			iconFrame.Name = "IconFrame"
 			iconFrame.Size = UDim2.new(0, 50, 0, 50)
 			iconFrame.Position = UDim2.new(0, 10, 0.5, -25)
-			iconFrame.BackgroundColor3 = Color3.fromRGB(38, 38, 44)
+			iconFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 			iconFrame.Parent = entryFrame
 			local iconCorner = Instance.new("UICorner", iconFrame)
 			iconCorner.CornerRadius = UDim.new(0, 8)
@@ -476,9 +503,9 @@ local function updateBoosterTab()
 			local nameLabel = Instance.new("TextLabel")
 			nameLabel.Name = "NameLabel"
 			nameLabel.Size = UDim2.new(1, 0, 0, 20)
-			nameLabel.Font = Enum.Font.GothamMedium
+			nameLabel.Font = Enum.Font.GothamBold
 			nameLabel.TextSize = 16
-			nameLabel.TextColor3 = Color3.new(1,1,1)
+			nameLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
 			nameLabel.Text = (boosterInfo.Name or boosterName) .. " (x" .. count .. ")"
 			nameLabel.TextXAlignment = Enum.TextXAlignment.Left
 			nameLabel.BackgroundTransparency = 1
@@ -490,7 +517,7 @@ local function updateBoosterTab()
 			descLabel.Size = UDim2.new(1, 0, 0, 36)
 			descLabel.Font = Enum.Font.Gotham
 			descLabel.TextSize = 12
-			descLabel.TextColor3 = Color3.fromRGB(181, 181, 181)
+			descLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 			descLabel.Text = boosterInfo.Description or ""
 			descLabel.TextWrapped = true
 			descLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -511,10 +538,10 @@ local function updateBoosterTab()
 
 			if boosterData.Active == boosterName then
 				equipButton.Text = "EQUIPPED"
-				equipButton.BackgroundColor3 = Color3.fromRGB(87, 242, 135)
+				equipButton.BackgroundColor3 = Color3.fromRGB(88, 101, 242) -- Modern Blue
 			else
 				equipButton.Text = "EQUIP"
-				equipButton.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+				equipButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 			end
 
 			equipButton.MouseButton1Click:Connect(function()
@@ -600,14 +627,13 @@ local function updateStatsDisplay(weaponName)
 	local ammoPercent = math.clamp(data.MaxAmmo / MAX_AMMO, 0, 1)
 	local recoilPercent = 1 - math.clamp(data.Recoil / MAX_RECOIL, 0, 1)
 	local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local newBarColor = Color3.fromRGB(200, 200, 200)
 	TweenService:Create(damageBar, tweenInfo, {Size = UDim2.new(damagePercent, 0, 1, 0)}):Play()
 	TweenService:Create(ammoBar, tweenInfo, {Size = UDim2.new(ammoPercent, 0, 1, 0)}):Play()
 	TweenService:Create(recoilBar, tweenInfo, {Size = UDim2.new(recoilPercent, 0, 1, 0)}):Play()
-	local lowColor = Color3.fromRGB(180, 20, 20)
-	local highColor = Color3.fromRGB(80, 180, 80)
-	damageBar.BackgroundColor3 = lowColor:Lerp(highColor, damagePercent)
-	ammoBar.BackgroundColor3 = lowColor:Lerp(highColor, ammoPercent)
-	recoilBar.BackgroundColor3 = lowColor:Lerp(highColor, recoilPercent)
+	damageBar.BackgroundColor3 = newBarColor
+	ammoBar.BackgroundColor3 = newBarColor
+	recoilBar.BackgroundColor3 = newBarColor
 end
 
 local function updateSkinList()
@@ -635,11 +661,11 @@ local function updateSkinList()
 		elseif selectedSkin == equippedSkin then
 			equipButton.Text = "EQUIPPED"
 			equipButton.AutoButtonColor = false
-			equipButton.BackgroundColor3 = Color3.fromRGB(0, 170, 81)
+			equipButton.BackgroundColor3 = Color3.fromRGB(88, 101, 242) -- Modern Blue
 		else
 			equipButton.Text = "EQUIP " .. string.upper(selectedSkin)
 			equipButton.AutoButtonColor = true
-			equipButton.BackgroundColor3 = Color3.fromRGB(180, 20, 20)
+			equipButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 		end
 	end
 	local function resetAllBorders()
@@ -647,7 +673,7 @@ local function updateSkinList()
 			if btn:IsA("ImageButton") and btn:FindFirstChild("UIStroke") then
 				local btnBorder = btn:FindFirstChild("UIStroke")
 				if btn.Name == equippedSkin then
-					btnBorder.Color = Color3.fromRGB(0, 200, 100)
+					btnBorder.Color = Color3.fromRGB(88, 101, 242) -- Modern Blue
 					btnBorder.Thickness = 3
 				else
 					btnBorder.Color = Color3.fromRGB(80, 80, 80)
@@ -680,7 +706,7 @@ local function updateSkinList()
 				selectedSkin = skinName
 				updatePreview(selectedWeapon, selectedSkin)
 				resetAllBorders()
-				border.Color = Color3.fromRGB(220, 50, 50)
+				border.Color = Color3.fromRGB(120, 131, 255) -- Lighter Modern Blue for selection
 				border.Thickness = 3
 				setEquipButtonState()
 			end)
@@ -715,17 +741,17 @@ function updateWeaponList(categoryFilter, searchFilter)
 		weaponButton.Name = weaponName
 		weaponButton.Size = UDim2.new(1, -10, 0, 40)
 		weaponButton.Text = weaponName
-		weaponButton.Font = Enum.Font.SourceSans
+		weaponButton.Font = Enum.Font.Gotham
 		weaponButton.TextSize = 16
 		weaponButton.TextColor3 = Color3.new(1, 1, 1)
-		weaponButton.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
+		weaponButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 		weaponButton.Parent = weaponListFrame
 		weaponButton.MouseButton1Click:Connect(function()
 			selectedWeapon = weaponName
 			for _, btn in ipairs(weaponListFrame:GetChildren()) do
-				if btn:IsA("TextButton") then btn.BackgroundColor3 = Color3.fromRGB(85, 85, 85) end
+				if btn:IsA("TextButton") then btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60) end
 			end
-			weaponButton.BackgroundColor3 = Color3.fromRGB(80, 25, 25)
+			weaponButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 			updateStatsDisplay(weaponName)
 			updateSkinList()
 			local equippedSkin = inventoryData.Skins.Equipped[selectedWeapon]
@@ -739,7 +765,7 @@ local function createCategoryButtons()
 	local function highlightActiveButton()
 		for name, button in pairs(categoryButtons) do
 			if name == selectedCategory then
-				button.BackgroundColor3 = Color3.fromRGB(180, 20, 20)
+				button.BackgroundColor3 = Color3.fromRGB(88, 101, 242) -- Modern Blue
 				button.TextColor3 = Color3.new(1, 1, 1)
 			else
 				button.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
@@ -755,7 +781,7 @@ local function createCategoryButtons()
 		local categoryButton = Instance.new("TextButton")
 		categoryButton.Name = categoryName
 		categoryButton.Text = categoryName
-		categoryButton.Font = Enum.Font.SourceSans
+		categoryButton.Font = Enum.Font.Gotham
 		categoryButton.TextSize = 12
 		local btnCorner = Instance.new("UICorner", categoryButton)
 		btnCorner.CornerRadius = UDim.new(0, 6)
@@ -779,16 +805,16 @@ local function switchTab(tabName)
 	if tabName == "Skins" then
 		skinsContentFrame.Visible = true
 		boostersContentFrame.Visible = false
-		skinsTabButton.BackgroundColor3 = Color3.fromRGB(180, 20, 20)
+		skinsTabButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 		skinsTabButton.TextColor3 = Color3.new(1, 1, 1)
-		boostersTabButton.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
-		boostersTabButton.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+		boostersTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+		boostersTabButton.TextColor3 = Color3.fromRGB(160, 160, 160)
 	elseif tabName == "Boosters" then
 		skinsContentFrame.Visible = false
 		boostersContentFrame.Visible = true
-		skinsTabButton.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
-		skinsTabButton.TextColor3 = Color3.new(0.8, 0.8, 0.8)
-		boostersTabButton.BackgroundColor3 = Color3.fromRGB(180, 20, 20)
+		skinsTabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+		skinsTabButton.TextColor3 = Color3.fromRGB(160, 160, 160)
+		boostersTabButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 		boostersTabButton.TextColor3 = Color3.new(1, 1, 1)
 	end
 end

@@ -70,8 +70,9 @@ lobbyScreenGui.Enabled = false -- Initially hidden
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Parent = lobbyScreenGui
-mainFrame.Size = UDim2.new(0, 850, 0, 500) -- Larger size
-mainFrame.Position = UDim2.new(0.5, -425, 0.5, -250)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+mainFrame.Size = UDim2.new(0.75, 0, 0.9, 0) -- Larger size
+mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainFrame.BackgroundColor3 = Style.Colors.Background
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -90,12 +91,20 @@ stroke.Parent = mainFrame
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Name = "TitleLabel"
 titleLabel.Parent = mainFrame
-titleLabel.Size = UDim2.new(1, 0, 0, 60) -- Taller header
+titleLabel.Size = UDim2.new(1, 0, 0.134, 0) -- Taller header
 titleLabel.BackgroundColor3 = Style.Colors.Primary
-titleLabel.Text = "LOBBY"
+titleLabel.Text = "Lobby"
 titleLabel.Font = Style.Fonts.Header
 titleLabel.TextColor3 = Style.Colors.TextHeader
 titleLabel.TextSize = Style.Sizes.Header
+titleLabel.TextScaled = true
+
+local UIPaddingTitleLabel = Instance.new("UIPadding")
+UIPaddingTitleLabel.PaddingTop = UDim.new(0.15, 0)
+UIPaddingTitleLabel.PaddingLeft = UDim.new(0.15, 0)
+UIPaddingTitleLabel.PaddingRight = UDim.new(0.15, 0)
+UIPaddingTitleLabel.PaddingBottom = UDim.new(0.15, 0)
+UIPaddingTitleLabel.Parent = titleLabel
 
 local titleCorner = Instance.new("UICorner")
 titleCorner.CornerRadius = Style.Radius
@@ -106,8 +115,8 @@ titleCorner.Parent = titleLabel
 local navFrame = Instance.new("Frame")
 navFrame.Name = "NavigationFrame"
 navFrame.Parent = mainFrame
-navFrame.Size = UDim2.new(0, 200, 1, -60) -- Left sidebar
-navFrame.Position = UDim2.new(0, 0, 0, 60)
+navFrame.Size = UDim2.new(0.267, 0, 0.866, 0) -- Left sidebar
+navFrame.Position = UDim2.new(0, 0, 0.134, 0)
 navFrame.BackgroundColor3 = Style.Colors.Primary
 navFrame.BorderSizePixel = 0
 
@@ -117,14 +126,14 @@ buttonLayout.FillDirection = Enum.FillDirection.Vertical
 buttonLayout.SortOrder = Enum.SortOrder.LayoutOrder
 buttonLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 buttonLayout.Padding = UDim.new(0, 10)
-buttonLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+buttonLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 
 -- Content area for the sub-frames
 local contentFrame = Instance.new("Frame")
 contentFrame.Name = "ContentFrame"
 contentFrame.Parent = mainFrame
-contentFrame.Size = UDim2.new(1, -200, 1, -60)
-contentFrame.Position = UDim2.new(0, 200, 0, 60)
+contentFrame.Size = UDim2.new(0.733, 0, 0.866, 0)
+contentFrame.Position = UDim2.new(0.267, 0, 0.134, 0)
 contentFrame.BackgroundColor3 = Style.Colors.Background
 contentFrame.BorderSizePixel = 0
 
@@ -202,24 +211,28 @@ local function createDifficultySelector(parentFrame, onSelectionChanged)
 	difficultyFrame.Name = "DifficultySelector"
 	difficultyFrame.Size = UDim2.new(1, 0, 0, 60)
 	difficultyFrame.BackgroundTransparency = 1
+	difficultyFrame.LayoutOrder = 1
 
 	local label = Instance.new("TextLabel", difficultyFrame)
-	label.Size = UDim2.new(1, 0, 0, 20)
+	label.Size = UDim2.new(1, 0, 0.333, 0)
 	label.Text = "Difficulty"
 	label.Font = Style.Fonts.Body
 	label.TextSize = Style.Sizes.Body
 	label.TextColor3 = Style.Colors.Text
 	label.BackgroundTransparency = 1
-	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.TextXAlignment = Enum.TextXAlignment.Center
+	label.TextScaled = true
 
 	local buttonsFrame = Instance.new("Frame", difficultyFrame)
 	buttonsFrame.Name = "DifficultyButtons"
-	buttonsFrame.Size = UDim2.new(1, 0, 1, -25)
-	buttonsFrame.Position = UDim2.new(0, 0, 0, 25)
+	buttonsFrame.Size = UDim2.new(1, 0, 0.583, 0)
+	buttonsFrame.Position = UDim2.new(0, 0, 0.417, 0)
 	buttonsFrame.BackgroundTransparency = 1
 	local gridLayout = Instance.new("UIGridLayout", buttonsFrame)
-	gridLayout.CellPadding = UDim2.new(0, 5, 0, 5)
-	gridLayout.CellSize = UDim2.new(0, 80, 0, 35) -- Larger buttons
+	gridLayout.CellPadding = UDim2.new(0.01, 0, 0,01, 0)
+	gridLayout.CellSize = UDim2.new(0.15, 0, 1, 0) -- Larger buttons
+	gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 	local difficulties = {"Easy", "Normal", "Hard", "Expert", "Hell", "Crazy"}
 	local selectedDifficulty = "Easy" -- Default
@@ -257,14 +270,22 @@ end
 -- Populate CreateRoomFrame
 local function populateCreateRoomFrame()
 	local title = Instance.new("TextLabel", createRoomFrame)
-	title.Size = UDim2.new(1, -40, 0, 50)
-	title.Position = UDim2.new(0, 20, 0, 10)
+	title.Size = UDim2.new(1, 0, 0.155, 0)
+	title.Position = UDim2.new(0, 0, 0, 0)
 	title.Text = "Create a New Room"
 	title.Font = Style.Fonts.Header
 	title.TextSize = Style.Sizes.Subheader
 	title.TextColor3 = Style.Colors.TextHeader
 	title.BackgroundTransparency = 1
-	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextXAlignment = Enum.TextXAlignment.Center
+	title.TextScaled = true
+	
+	local UIPaddingTitle = Instance.new("UIPadding")
+	UIPaddingTitle.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingTitle.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingTitle.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingTitle.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingTitle.Parent = title
 
 	local backButton = Instance.new("TextButton", createRoomFrame)
 	backButton.Size = UDim2.new(0, 80, 0, 35)
@@ -283,11 +304,14 @@ local function populateCreateRoomFrame()
 
 	--[[ Re-layout the options ]]
 	local optionsFrame = Instance.new("Frame", createRoomFrame)
-	optionsFrame.Size = UDim2.new(1, -40, 1, -140)
-	optionsFrame.Position = UDim2.new(0, 20, 0, 70)
+	optionsFrame.Size = UDim2.new(0.927, 0, 0.772, 0)
+	optionsFrame.Position = UDim2.new(0.036, 0, 0.18, 0)
 	optionsFrame.BackgroundTransparency = 1
 	local listLayout = Instance.new("UIListLayout", optionsFrame)
 	listLayout.Padding = UDim.new(0, 15)
+	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	listLayout.Padding = UDim.new(0, 0)
+	listLayout.VerticalFlex = Enum.UIFlexAlignment.SpaceAround
 
 	-- Room Name
 	local roomNameLabel = Instance.new("TextLabel", optionsFrame)
@@ -298,6 +322,7 @@ local function populateCreateRoomFrame()
 	roomNameLabel.TextColor3 = Style.Colors.Text
 	roomNameLabel.BackgroundTransparency = 1
 	roomNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	roomNameLabel.LayoutOrder = 3
 
 	local roomNameInput = Instance.new("TextBox", optionsFrame)
 	roomNameInput.Size = UDim2.new(1, 0, 0, 40)
@@ -307,8 +332,16 @@ local function populateCreateRoomFrame()
 	roomNameInput.PlaceholderColor3 = Style.Colors.TextMuted
 	roomNameInput.TextColor3 = Style.Colors.Text
 	roomNameInput.BackgroundColor3 = Style.Colors.Secondary
+	roomNameInput.LayoutOrder = 4
+	roomNameInput.TextScaled = true
 	local roomNameCorner = Instance.new("UICorner", roomNameInput)
 	roomNameCorner.CornerRadius = Style.Radius
+	local UIPaddingroomNameInput = Instance.new("UIPadding")
+	UIPaddingroomNameInput.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingroomNameInput.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingroomNameInput.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingroomNameInput.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingroomNameInput.Parent = roomNameInput
 
 	-- Max Players
 	local playerCountLabel = Instance.new("TextLabel", optionsFrame)
@@ -319,20 +352,31 @@ local function populateCreateRoomFrame()
 	playerCountLabel.TextColor3 = Style.Colors.Text
 	playerCountLabel.BackgroundTransparency = 1
 	playerCountLabel.TextXAlignment = Enum.TextXAlignment.Left
+	playerCountLabel.LayoutOrder = 5
 
 	local playerCountInput = Instance.new("TextBox", optionsFrame)
-	playerCountInput.Size = UDim2.new(0, 100, 0, 40)
+	playerCountInput.Size = UDim2.new(0.306, 0, 0.129, 0)
 	playerCountInput.Font = Style.Fonts.Body
-	playerCountInput.Text = "4"
+	playerCountInput.Text = ""
+	playerCountInput.PlaceholderText = "Enter player count..."
 	playerCountInput.TextColor3 = Style.Colors.Text
 	playerCountInput.BackgroundColor3 = Style.Colors.Secondary
+	playerCountInput.LayoutOrder = 6
+	playerCountInput.TextScaled = true
 	local inputCorner = Instance.new("UICorner", playerCountInput)
 	inputCorner.CornerRadius = Style.Radius
+	local UIPaddingplayerCountInput = Instance.new("UIPadding")
+	UIPaddingplayerCountInput.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingplayerCountInput.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingplayerCountInput.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingplayerCountInput.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingplayerCountInput.Parent = playerCountInput
 
 	-- Toggles (Private & Mode) in a horizontal frame
 	local togglesFrame = Instance.new("Frame", optionsFrame)
 	togglesFrame.Size = UDim2.new(1, 0, 0, 40)
 	togglesFrame.BackgroundTransparency = 1
+	togglesFrame.LayoutOrder = 2
 	local gridLayout = Instance.new("UIGridLayout", togglesFrame)
 	gridLayout.CellSize = UDim2.new(0.5, -5, 1, 0)
 	gridLayout.CellPadding = UDim2.new(0, 10, 0, 0)
@@ -378,12 +422,12 @@ local function populateCreateRoomFrame()
 	local difficultySelector = createDifficultySelector(optionsFrame, function(difficulty)
 		selectedDifficulty = difficulty
 	end)
-	difficultySelector.LayoutOrder = 5
+	difficultySelector.LayoutOrder = 1
 
 	-- Confirm Button
 	local confirmButton = Instance.new("TextButton", createRoomFrame)
-	confirmButton.Size = UDim2.new(1, -40, 0, 50)
-	confirmButton.Position = UDim2.new(0, 20, 1, -70)
+	confirmButton.Size = UDim2.new(0.384, 0, 0.138, 0)
+	confirmButton.Position = UDim2.new(0.575, 0, 0.814, 0)
 	confirmButton.Text = "Confirm & Create"
 	confirmButton.Font = Style.Fonts.Header
 	confirmButton.TextSize = Style.Sizes.Subheader
@@ -426,14 +470,21 @@ end
 -- Populate JoinRoomFrame
 local function populateJoinRoomFrame()
 	local title = Instance.new("TextLabel", joinRoomFrame)
-	title.Size = UDim2.new(1, -40, 0, 50)
-	title.Position = UDim2.new(0, 20, 0, 10)
+	title.Size = UDim2.new(1, 0, 0.155, 0)
+	title.Position = UDim2.new(0, 0, 0, 0)
 	title.Text = "Join a Room"
 	title.Font = Style.Fonts.Header
 	title.TextSize = Style.Sizes.Subheader
 	title.TextColor3 = Style.Colors.TextHeader
 	title.BackgroundTransparency = 1
-	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextXAlignment = Enum.TextXAlignment.Center
+	title.TextScaled = true
+	local UIPaddingTitle = Instance.new("UIPadding")
+	UIPaddingTitle.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingTitle.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingTitle.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingTitle.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingTitle.Parent = title
 
 	local backButton = Instance.new("TextButton", joinRoomFrame)
 	backButton.Size = UDim2.new(0, 80, 0, 35)
@@ -450,22 +501,31 @@ local function populateJoinRoomFrame()
 	end)
 
 	local publicRoomsLabel = Instance.new("TextLabel", joinRoomFrame)
-	publicRoomsLabel.Size = UDim2.new(1, -40, 0, 20)
-	publicRoomsLabel.Position = UDim2.new(0, 20, 0, 70)
+	publicRoomsLabel.Size = UDim2.new(0.927, 0, 0.078, 0)
+	publicRoomsLabel.Position = UDim2.new(0.036, 0, 0.142, 0)
 	publicRoomsLabel.Text = "Public Rooms"
 	publicRoomsLabel.Font = Style.Fonts.Body
 	publicRoomsLabel.TextSize = Style.Sizes.Body
 	publicRoomsLabel.TextColor3 = Style.Colors.Text
 	publicRoomsLabel.BackgroundTransparency = 1
-	publicRoomsLabel.TextXAlignment = Enum.TextXAlignment.Left
+	publicRoomsLabel.TextXAlignment = Enum.TextXAlignment.Center
+	publicRoomsLabel.TextScaled = true
+	local UIPaddingpublicRoomsLabel = Instance.new("UIPadding")
+	UIPaddingpublicRoomsLabel.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingpublicRoomsLabel.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingpublicRoomsLabel.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingpublicRoomsLabel.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingpublicRoomsLabel.Parent = publicRoomsLabel
 
 	local scrollingFrame = Instance.new("ScrollingFrame", joinRoomFrame)
-	scrollingFrame.Size = UDim2.new(1, -40, 1, -200)
-	scrollingFrame.Position = UDim2.new(0, 20, 0, 100)
+	scrollingFrame.Size = UDim2.new(0.927, 0, 0.543, 0)
+	scrollingFrame.Position = UDim2.new(0.036, 0, 0.228, 0)
 	scrollingFrame.BackgroundColor3 = Style.Colors.Primary
 	scrollingFrame.BorderSizePixel = 0
+	scrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 	local listLayout = Instance.new("UIListLayout", scrollingFrame)
-	listLayout.Padding = UDim.new(0, 5)
+	listLayout.Padding = UDim.new(0.03, 0)
 	listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	local scrollingCorner = Instance.new("UICorner", scrollingFrame)
 	scrollingCorner.CornerRadius = Style.Radius
@@ -474,35 +534,51 @@ local function populateJoinRoomFrame()
 
 	-- Join with Code Section
 	local joinCodeFrame = Instance.new("Frame", joinRoomFrame)
-	joinCodeFrame.Size = UDim2.new(1, -40, 0, 50)
-	joinCodeFrame.Position = UDim2.new(0, 20, 1, -70)
+	joinCodeFrame.Size = UDim2.new(0.927, 0, 0.228, 0)
+	joinCodeFrame.Position = UDim2.new(0.036, 0, 0.772, 0)
 	joinCodeFrame.BackgroundTransparency = 1
-	local grid = Instance.new("UIGridLayout", joinCodeFrame)
-	grid.CellSize = UDim2.new(0.7, -5, 1, 0)
-	grid.CellPadding = UDim2.new(0, 10, 0, 0)
 
 	local roomCodeInput = Instance.new("TextBox", joinCodeFrame)
 	roomCodeInput.Name = "roomCodeInput"
-	roomCodeInput.Size = UDim2.new(1, 0, 1, 0)
+	roomCodeInput.AnchorPoint = Vector2.new(0, 0.5)
+	roomCodeInput.Size = UDim2.new(0.414, 0, 0.599, 0)
+	roomCodeInput.Position = UDim2.new(0, 0, 0.5, 0)
 	roomCodeInput.PlaceholderText = "Enter Room Code..."
+	roomCodeInput.Text = ""
 	roomCodeInput.PlaceholderColor3 = Style.Colors.TextMuted
 	roomCodeInput.Font = Style.Fonts.Body
 	roomCodeInput.TextSize = Style.Sizes.Body
 	roomCodeInput.TextColor3 = Style.Colors.Text
 	roomCodeInput.BackgroundColor3 = Style.Colors.Secondary
+	roomCodeInput.TextScaled = true
 	local codeCorner = Instance.new("UICorner", roomCodeInput)
 	codeCorner.CornerRadius = Style.Radius
+	local UIPaddingroomCodeInput = Instance.new("UIPadding")
+	UIPaddingroomCodeInput.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingroomCodeInput.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingroomCodeInput.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingroomCodeInput.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingroomCodeInput.Parent = roomCodeInput
 
 	local joinWithCodeButton = Instance.new("TextButton", joinCodeFrame)
 	joinWithCodeButton.Name = "joinWithCodeButton"
-	joinWithCodeButton.Size = UDim2.new(1, 0, 1, 0)
+	joinWithCodeButton.AnchorPoint = Vector2.new(1, 0.5)
+	joinWithCodeButton.Position = UDim2.new(1, 0, 0.5, 0)
+	joinWithCodeButton.Size = UDim2.new(0.414, 0, 0.599, 0)
 	joinWithCodeButton.Text = "Join"
 	joinWithCodeButton.Font = Style.Fonts.Body
 	joinWithCodeButton.TextSize = Style.Sizes.Body
 	joinWithCodeButton.BackgroundColor3 = Style.Colors.Accent
 	joinWithCodeButton.TextColor3 = Style.Colors.TextHeader
+	joinWithCodeButton.TextScaled = true
 	local joinCorner = Instance.new("UICorner", joinWithCodeButton)
 	joinCorner.CornerRadius = Style.Radius
+	local UIPaddingjoinWithCodeButton = Instance.new("UIPadding")
+	UIPaddingjoinWithCodeButton.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingjoinWithCodeButton.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingjoinWithCodeButton.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingjoinWithCodeButton.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingjoinWithCodeButton.Parent = joinWithCodeButton
 
 	connectJoinWithCodeButton()
 end
@@ -568,8 +644,8 @@ local function updatePreGameLobby(roomData)
 		playerFrame.Parent = preGameLobbyPlayerList
 
 		local playerLabel = Instance.new("TextLabel")
-		playerLabel.Size = UDim2.new(1, -80, 0.6, 0)
-		playerLabel.Position = UDim2.new(0, 15, 0, 0)
+		playerLabel.Size = UDim2.new(1, 0, 0.6, 0)
+		playerLabel.Position = UDim2.new(0, 0, 0, 0)
 		playerLabel.Parent = playerFrame
 
 		local displayText = string.format("[Lv. %d] %s", playerData.Level or 1, playerData.Name)
@@ -582,17 +658,25 @@ local function updatePreGameLobby(roomData)
 		playerLabel.TextColor3 = Style.Colors.TextHeader
 		playerLabel.TextXAlignment = Enum.TextXAlignment.Left
 		playerLabel.BackgroundTransparency = 1
+		playerLabel.TextScaled = true
 
 		local boosterLabel = Instance.new("TextLabel")
 		boosterLabel.Name = "BoosterLabel"
-		boosterLabel.Size = UDim2.new(1, -20, 0.4, 0)
-		boosterLabel.Position = UDim2.new(0, 15, 0.6, 0)
+		boosterLabel.Size = UDim2.new(1, 0, 0.4, 0)
+		boosterLabel.Position = UDim2.new(0, 0, 0.6, 0)
 		boosterLabel.Font = Style.Fonts.Light
 		boosterLabel.TextSize = Style.Sizes.Small
 		boosterLabel.TextColor3 = Style.Colors.Gold
 		boosterLabel.BackgroundTransparency = 1
-		boosterLabel.TextXAlignment = Enum.TextXAlignment.Left
+		boosterLabel.TextXAlignment = Enum.TextXAlignment.Center
+		boosterLabel.TextScaled = true
 		boosterLabel.Parent = playerFrame
+		local UIPaddingboosterLabel = Instance.new("UIPadding")
+		UIPaddingboosterLabel.PaddingTop = UDim.new(0.15, 0)
+		UIPaddingboosterLabel.PaddingLeft = UDim.new(0.15, 0)
+		UIPaddingboosterLabel.PaddingRight = UDim.new(0.15, 0)
+		UIPaddingboosterLabel.PaddingBottom = UDim.new(0.15, 0)
+		UIPaddingboosterLabel.Parent = boosterLabel
 
 		local boosterIcon = Instance.new("ImageLabel")
 		boosterIcon.Name = "BoosterIcon"
@@ -717,56 +801,87 @@ end
 
 local function populateMatchmakingFrame()
 	local title = Instance.new("TextLabel", matchmakingFrame)
-	title.Size = UDim2.new(1, -40, 0, 50)
-	title.Position = UDim2.new(0, 20, 0, 10)
+	title.Size = UDim2.new(1, 0, 0.156, 0)
+	title.Position = UDim2.new(0, 0, 0, 0)
 	title.Text = "Matchmaking"
 	title.Font = Style.Fonts.Header
 	title.TextSize = Style.Sizes.Subheader
 	title.TextColor3 = Style.Colors.TextHeader
 	title.BackgroundTransparency = 1
-	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextXAlignment = Enum.TextXAlignment.Center
+	title.TextScaled = true
+	local UIPaddingtitle = Instance.new("UIPadding")
+	UIPaddingtitle.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingtitle.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingtitle.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingtitle.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingtitle.Parent = title
 
 	local optionsFrame = Instance.new("Frame", matchmakingFrame)
-	optionsFrame.Size = UDim2.new(1, -40, 1, -140)
-	optionsFrame.Position = UDim2.new(0, 20, 0, 70)
+	optionsFrame.Size = UDim2.new(0.927, 0, 0.591, 0)
+	optionsFrame.Position = UDim2.new(0.036, 0, 0.182, 0)
 	optionsFrame.BackgroundTransparency = 1
 	local listLayout = Instance.new("UIListLayout", optionsFrame)
-	listLayout.Padding = UDim.new(0, 15)
+	listLayout.Padding = UDim.new(0, 0)
+	listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	listLayout.VerticalFlex = Enum.UIFlexAlignment.SpaceAround
+	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 	-- Elements for starting a search
 	local startElements = {}
 
 	local playerCountLabel = Instance.new("TextLabel", optionsFrame)
-	playerCountLabel.Size = UDim2.new(1, 0, 0, 20)
+	playerCountLabel.Size = UDim2.new(1, 0, 0.088, 0)
 	playerCountLabel.Text = "Players (2-8)"
 	playerCountLabel.Font = Style.Fonts.Body
 	playerCountLabel.TextSize = Style.Sizes.Body
 	playerCountLabel.TextColor3 = Style.Colors.Text
 	playerCountLabel.BackgroundTransparency = 1
-	playerCountLabel.TextXAlignment = Enum.TextXAlignment.Left
+	playerCountLabel.TextXAlignment = Enum.TextXAlignment.Center
+	playerCountLabel.TextScaled = true
+	playerCountLabel.LayoutOrder = 3
 	table.insert(startElements, playerCountLabel)
 
 	local playerCountInput = Instance.new("TextBox", optionsFrame)
-	playerCountInput.Size = UDim2.new(0, 100, 0, 40)
+	playerCountInput.Size = UDim2.new(0.197, 0, 0.176, 0)
 	playerCountInput.Font = Style.Fonts.Body
-	playerCountInput.Text = "4"
+	playerCountInput.Text = ""
 	playerCountInput.TextColor3 = Style.Colors.Text
 	playerCountInput.BackgroundColor3 = Style.Colors.Secondary
+	playerCountInput.TextScaled = true
+	playerCountInput.LayoutOrder = 4
+	playerCountInput.TextXAlignment = Enum.TextXAlignment.Center
+	playerCountInput.PlaceholderText = "Input player count..."
 	local inputCorner = Instance.new("UICorner", playerCountInput)
 	inputCorner.CornerRadius = Style.Radius
 	table.insert(startElements, playerCountInput)
+	local UIPaddingplayerCountInput = Instance.new("UIPadding")
+	UIPaddingplayerCountInput.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingplayerCountInput.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingplayerCountInput.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingplayerCountInput.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingplayerCountInput.Parent = playerCountInput
 
 	local matchmakingMode = "Story" -- Default mode
 	local modeButton = Instance.new("TextButton", optionsFrame)
-	modeButton.Size = UDim2.new(1, 0, 0, 40)
+	modeButton.Size = UDim2.new(1, 0, 0.176, 0)
 	modeButton.Text = "Mode: Story"
 	modeButton.Font = Style.Fonts.Body
 	modeButton.TextSize = Style.Sizes.Body
 	modeButton.BackgroundColor3 = Style.Colors.Secondary
 	modeButton.TextColor3 = Style.Colors.Text
+	modeButton.LayoutOrder = 2
+	modeButton.TextScaled = true
+	modeButton.TextXAlignment = Enum.TextXAlignment.Center
 	local modeCorner = Instance.new("UICorner", modeButton)
 	modeCorner.CornerRadius = Style.Radius
 	table.insert(startElements, modeButton)
+	local UIPaddingmodeButton = Instance.new("UIPadding")
+	UIPaddingmodeButton.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingmodeButton.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingmodeButton.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingmodeButton.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingmodeButton.Parent = modeButton
 
 	modeButton.MouseButton1Click:Connect(function()
 		if matchmakingMode == "Story" then
@@ -784,41 +899,64 @@ local function populateMatchmakingFrame()
 	table.insert(startElements, difficultySelector)
 
 	local startButton = Instance.new("TextButton", matchmakingFrame)
-	startButton.Size = UDim2.new(1, -40, 0, 50)
-	startButton.Position = UDim2.new(0, 20, 1, -70)
+	startButton.Size = UDim2.new(0.32, 0, 0.13, 0)
+	startButton.Position = UDim2.new(0.339, 0, 0.818, 0)
 	startButton.Text = "Start Search"
 	startButton.Font = Style.Fonts.Header
 	startButton.TextSize = Style.Sizes.Subheader
 	startButton.BackgroundColor3 = Style.Colors.Accent
 	startButton.TextColor3 = Style.Colors.TextHeader
+	startButton.TextScaled = true
+	startButton.TextXAlignment = Enum.TextXAlignment.Center
 	local startCorner = Instance.new("UICorner", startButton)
 	startCorner.CornerRadius = Style.Radius
 	table.insert(startElements, startButton)
+	local UIPaddingstartButton = Instance.new("UIPadding")
+	UIPaddingstartButton.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingstartButton.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingstartButton.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingstartButton.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingstartButton.Parent = startButton
 
 	-- Elements for when searching is in progress
 	local searchingElements = {}
 	local searchingLabel = Instance.new("TextLabel", matchmakingFrame)
-	searchingLabel.Size = UDim2.new(1, 0, 0.5, 0)
-	searchingLabel.Position = UDim2.new(0, 0, 0.2, 0)
+	searchingLabel.Size = UDim2.new(1, 0, 0.531, 0)
+	searchingLabel.Position = UDim2.new(0, 0, 0.234, 0)
 	searchingLabel.Text = "Searching for players..."
 	searchingLabel.Font = Style.Fonts.Header
 	searchingLabel.TextSize = Style.Sizes.Subheader
 	searchingLabel.TextColor3 = Style.Colors.Text
 	searchingLabel.BackgroundTransparency = 1
 	searchingLabel.Visible = false
+	searchingLabel.TextScaled = true
+	searchingLabel.TextXAlignment = Enum.TextXAlignment.Center
 	table.insert(searchingElements, searchingLabel)
+	local UIPaddingsearchingLabel = Instance.new("UIPadding")
+	UIPaddingsearchingLabel.PaddingTop = UDim.new(0.3, 0)
+	UIPaddingsearchingLabel.PaddingLeft = UDim.new(0.3, 0)
+	UIPaddingsearchingLabel.PaddingRight = UDim.new(0.3, 0)
+	UIPaddingsearchingLabel.PaddingBottom = UDim.new(0.3, 0)
+	UIPaddingsearchingLabel.Parent = searchingLabel
 
 	local cancelButton = Instance.new("TextButton", matchmakingFrame)
-	cancelButton.Size = UDim2.new(1, -40, 0, 50)
-	cancelButton.Position = UDim2.new(0, 20, 1, -70)
+	cancelButton.Size = UDim2.new(0.922, 0, 0.127, 0)
+	cancelButton.Position = UDim2.new(0.039, 0, 0.823, 0)
 	cancelButton.Text = "Cancel Search"
 	cancelButton.Font = Style.Fonts.Header
 	cancelButton.TextSize = Style.Sizes.Subheader
 	cancelButton.BackgroundColor3 = Style.Colors.Danger
 	cancelButton.TextColor3 = Style.Colors.TextHeader
+	cancelButton.TextScaled = true
 	local cancelCorner = Instance.new("UICorner", cancelButton)
 	cancelCorner.CornerRadius = Style.Radius
 	cancelButton.Visible = false
+	local UIPaddingcancelButton = Instance.new("UIPadding")
+	UIPaddingcancelButton.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingcancelButton.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingcancelButton.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingcancelButton.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingcancelButton.Parent = cancelButton
 	table.insert(searchingElements, cancelButton)
 
 	-- Store elements for later access
@@ -845,76 +983,121 @@ end
 local function populatePreGameLobbyFrame()
 	-- Main container for player cards
 	local playerList = Instance.new("ScrollingFrame", preGameLobbyFrame)
-	playerList.Size = UDim2.new(0.7, -15, 1, -80)
-	playerList.Position = UDim2.new(0, 10, 0, 10)
+	playerList.Size = UDim2.new(0.673, 0, 0.792, 0)
+	playerList.Position = UDim2.new(0.018, 0, 0.026, 0)
 	playerList.BackgroundColor3 = Style.Colors.Background
 	playerList.BorderSizePixel = 0
-	local gridLayout = Instance.new("UIGridLayout", playerList)
-	gridLayout.CellPadding = UDim2.new(0, 10, 0, 10)
-	gridLayout.CellSize = UDim2.new(0.5, -5, 0, 70)
+	playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	playerList.CanvasSize = UDim2.new(0, 0, 0, 0)
+	playerList.ScrollBarThickness = 7
 	preGameLobbyPlayerList = playerList
+	local UIListLayoutplayerList = Instance.new("UIListLayout")
+	UIListLayoutplayerList.Padding = UDim.new(0, 0)
+	UIListLayoutplayerList.Parent = playerList
 
 	-- Sidebar for room info and actions
 	local sidebar = Instance.new("Frame", preGameLobbyFrame)
-	sidebar.Size = UDim2.new(0.3, -15, 1, -80)
-	sidebar.Position = UDim2.new(0.7, 0, 0, 10)
+	sidebar.Size = UDim2.new(0.3, 0, 0.844, 0)
+	sidebar.Position = UDim2.new(0.7, 0, 0, 0)
 	sidebar.BackgroundTransparency = 1
+	local UIListLayoutsidebar = Instance.new("UIListLayout")
+	UIListLayoutsidebar.Padding = UDim.new(0, 0)
+	UIListLayoutsidebar.SortOrder = Enum.SortOrder.LayoutOrder
+	UIListLayoutsidebar.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	UIListLayoutsidebar.VerticalFlex = Enum.UIFlexAlignment.SpaceAround
+	UIListLayoutsidebar.Parent = sidebar
 
 	local title = Instance.new("TextLabel", sidebar)
 	title.Name = "TitleLabel"
-	title.Size = UDim2.new(1, 0, 0, 30)
+	title.Size = UDim2.new(1, 0, 0.15, 0)
 	title.Text = "LOBBY"
 	title.Font = Style.Fonts.Header
 	title.TextSize = Style.Sizes.Header
 	title.TextColor3 = Style.Colors.TextHeader
 	title.BackgroundTransparency = 1
+	title.LayoutOrder = 1
+	title.TextScaled = true
+	local UIPaddingtitle = Instance.new("UIPadding")
+	UIPaddingtitle.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingtitle.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingtitle.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingtitle.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingtitle.Parent = title
 
 	local roomCodeLabel = Instance.new("TextLabel", sidebar)
 	roomCodeLabel.Name = "RoomCodeLabel"
-	roomCodeLabel.Size = UDim2.new(1, 0, 0, 20)
-	roomCodeLabel.Position = UDim2.new(0, 0, 0, 35)
+	roomCodeLabel.Size = UDim2.new(1, 0, 0.1, 0)
 	roomCodeLabel.Font = Style.Fonts.Light
 	roomCodeLabel.Text = "Room Code: ..."
 	roomCodeLabel.TextSize = Style.Sizes.Small
 	roomCodeLabel.TextColor3 = Style.Colors.TextMuted
 	roomCodeLabel.BackgroundTransparency = 1
 	roomCodeLabel.Visible = false
+	roomCodeLabel.LayoutOrder = 2
+	roomCodeLabel.TextScaled = true
 	preGameLobbyRoomCodeLabel = roomCodeLabel
+	local UIPaddingroomCodeLabel = Instance.new("UIPadding")
+	UIPaddingroomCodeLabel.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingroomCodeLabel.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingroomCodeLabel.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingroomCodeLabel.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingroomCodeLabel.Parent = roomCodeLabel
 
 	local gameModeLabel = Instance.new("TextLabel", sidebar)
 	gameModeLabel.Name = "GameModeLabel"
-	gameModeLabel.Size = UDim2.new(1, 0, 0, 20)
-	gameModeLabel.Position = UDim2.new(0, 0, 0, 60)
+	gameModeLabel.Size = UDim2.new(1, 0, 0.1, 0)
 	gameModeLabel.Font = Style.Fonts.Body
 	gameModeLabel.Text = "Mode: ..."
 	gameModeLabel.TextSize = Style.Sizes.Body
 	gameModeLabel.TextColor3 = Style.Colors.Text
 	gameModeLabel.BackgroundTransparency = 1
+	gameModeLabel.LayoutOrder = 3
+	gameModeLabel.TextScaled = true
+	local UIPaddinggameModeLabel = Instance.new("UIPadding")
+	UIPaddinggameModeLabel.PaddingTop = UDim.new(0.15, 0)
+	UIPaddinggameModeLabel.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddinggameModeLabel.PaddingRight = UDim.new(0.15, 0)
+	UIPaddinggameModeLabel.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddinggameModeLabel.Parent = gameModeLabel
 
 	local difficultyLabel = Instance.new("TextLabel", sidebar)
 	difficultyLabel.Name = "DifficultyLabel"
-	difficultyLabel.Size = UDim2.new(1, 0, 0, 20)
-	difficultyLabel.Position = UDim2.new(0, 0, 0, 85)
+	difficultyLabel.Size = UDim2.new(1, 0, 0.1, 0)
 	difficultyLabel.Font = Style.Fonts.Body
 	difficultyLabel.Text = "Difficulty: ..."
 	difficultyLabel.TextSize = Style.Sizes.Body
 	difficultyLabel.TextColor3 = Style.Colors.Text
 	difficultyLabel.BackgroundTransparency = 1
+	difficultyLabel.LayoutOrder = 4
+	difficultyLabel.TextScaled = true
+	local UIPaddingdifficultyLabel = Instance.new("UIPadding")
+	UIPaddingdifficultyLabel.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingdifficultyLabel.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingdifficultyLabel.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingdifficultyLabel.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingdifficultyLabel.Parent = difficultyLabel
 
 	local leaveButton = Instance.new("TextButton", sidebar)
 	leaveButton.Name = "LeaveButton"
-	leaveButton.Size = UDim2.new(1, 0, 0, 40)
-	leaveButton.Position = UDim2.new(0, 0, 1, -50)
+	leaveButton.Size = UDim2.new(0.8, 0, 0.1, 0)
 	leaveButton.Text = "Leave"
 	leaveButton.Font = Style.Fonts.Body
 	leaveButton.TextSize = Style.Sizes.Body
 	leaveButton.BackgroundColor3 = Style.Colors.Danger
 	leaveButton.TextColor3 = Style.Colors.TextHeader
+	leaveButton.TextScaled = true
+	leaveButton.LayoutOrder = 5
 	local leaveCorner = Instance.new("UICorner", leaveButton)
 	leaveCorner.CornerRadius = Style.Radius
 	leaveButton.MouseButton1Click:Connect(function()
 		if leaveButton.AutoButtonColor then lobbyRemote:FireServer("leaveRoom") end
 	end)
+	local UIPaddingleaveButton = Instance.new("UIPadding")
+	UIPaddingleaveButton.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingleaveButton.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingleaveButton.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingleaveButton.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingleaveButton.Parent = leaveButton
 
 	-- Bottom bar for status and start button
 	local bottomBar = Instance.new("Frame", preGameLobbyFrame)
@@ -990,40 +1173,51 @@ end)
 -- Populate SoloFrame
 local function populateSoloFrame()
 	local title = Instance.new("TextLabel", soloFrame)
-	title.Size = UDim2.new(1, -40, 0, 50)
-	title.Position = UDim2.new(0, 20, 0, 10)
+	title.Size = UDim2.new(1, 0, 0.151, 0)
+	title.Position = UDim2.new(0, 0, 0, 0)
 	title.Text = "Play Solo"
 	title.Font = Style.Fonts.Header
 	title.TextSize = Style.Sizes.Subheader
 	title.TextColor3 = Style.Colors.TextHeader
 	title.BackgroundTransparency = 1
-	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextXAlignment = Enum.TextXAlignment.Center
+	title.TextScaled = true
+	local UIPaddingtitle = Instance.new("UIPadding")
+	UIPaddingtitle.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingtitle.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingtitle.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingtitle.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingtitle.Parent = title
 
 	local optionsFrame = Instance.new("Frame", soloFrame)
-	optionsFrame.Size = UDim2.new(1, -40, 1, -140)
-	optionsFrame.Position = UDim2.new(0, 20, 0, 70)
+	optionsFrame.Size = UDim2.new(0.922, 0, 0.646, 0)
+	optionsFrame.Position = UDim2.new(0.039, 0, 0.177, 0)
 	optionsFrame.BackgroundTransparency = 1
 	local listLayout = Instance.new("UIListLayout", optionsFrame)
-	listLayout.Padding = UDim.new(0, 15)
+	listLayout.Padding = UDim.new(0.03, 0)
+	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 	local selectedMode = "Story"
 	local selectedDifficulty = "Easy"
 
 	local modeLabel = Instance.new("TextLabel", optionsFrame)
-	modeLabel.Size = UDim2.new(1, 0, 0, 20)
+	modeLabel.Size = UDim2.new(1, 0, 0.078, 0)
 	modeLabel.Text = "Game Mode"
 	modeLabel.Font = Style.Fonts.Body
 	modeLabel.TextSize = Style.Sizes.Body
 	modeLabel.TextColor3 = Style.Colors.Text
 	modeLabel.BackgroundTransparency = 1
-	modeLabel.TextXAlignment = Enum.TextXAlignment.Left
+	modeLabel.TextXAlignment = Enum.TextXAlignment.Center
+	modeLabel.TextScaled = true
+	modeLabel.LayoutOrder = 2
 
 	local modeButtonsFrame = Instance.new("Frame", optionsFrame)
 	modeButtonsFrame.Size = UDim2.new(1, 0, 0, 40)
 	modeButtonsFrame.BackgroundTransparency = 1
-	local grid = Instance.new("UIGridLayout", modeButtonsFrame)
-	grid.CellSize = UDim2.new(0.5, -5, 1, 0)
-	grid.CellPadding = UDim2.new(0, 10, 0, 0)
+	modeButtonsFrame.LayoutOrder = 3
+	local UIListLayoutmodeButtonsFrame = Instance.new("UIListLayout", modeButtonsFrame)
+	UIListLayoutmodeButtonsFrame.Padding = UDim.new(0.01, 0)
+	UIListLayoutmodeButtonsFrame.FillDirection = Enum.FillDirection.Horizontal
 
 	local storyButton = Instance.new("TextButton", modeButtonsFrame)
 	storyButton.Text = "Story"
@@ -1031,13 +1225,19 @@ local function populateSoloFrame()
 	endlessButton.Text = "Endless"
 
 	for _, button in ipairs({storyButton, endlessButton}) do
-		button.Size = UDim2.new(1,0,1,0)
+		button.Size = UDim2.new(0.5,0,1,0)
 		button.Font = Style.Fonts.Body
 		button.TextSize = Style.Sizes.Body
 		button.TextColor3 = Style.Colors.Text
 		button.BackgroundColor3 = Style.Colors.Secondary
+		button.TextScaled = true
 		local corner = Instance.new("UICorner", button)
 		corner.CornerRadius = Style.Radius
+		local UIPaddingbutton = Instance.new("UIPadding", button)
+		UIPaddingbutton.PaddingTop = UDim.new(0.15, 0)
+		UIPaddingbutton.PaddingLeft = UDim.new(0.15, 0)
+		UIPaddingbutton.PaddingRight = UDim.new(0.15, 0)
+		UIPaddingbutton.PaddingBottom = UDim.new(0.15, 0)
 	end
 
 	storyButton.MouseButton1Click:Connect(function()
@@ -1058,15 +1258,22 @@ local function populateSoloFrame()
 	end)
 
 	local startSoloButton = Instance.new("TextButton", soloFrame)
-	startSoloButton.Size = UDim2.new(1, -40, 0, 50)
-	startSoloButton.Position = UDim2.new(0, 20, 1, -70)
+	startSoloButton.Size = UDim2.new(0.922, 0, 0.126, 0)
+	startSoloButton.Position = UDim2.new(0.039, 0, 0.824, 0)
 	startSoloButton.Text = "Start Solo Game"
 	startSoloButton.Font = Style.Fonts.Header
 	startSoloButton.TextSize = Style.Sizes.Subheader
 	startSoloButton.BackgroundColor3 = Style.Colors.Success
 	startSoloButton.TextColor3 = Style.Colors.Background
+	startSoloButton.TextScaled = true
 	local startCorner = Instance.new("UICorner", startSoloButton)
 	startCorner.CornerRadius = Style.Radius
+	local UIPaddingstartSoloButton = Instance.new("UIPadding")
+	UIPaddingstartSoloButton.PaddingTop = UDim.new(0.15, 0)
+	UIPaddingstartSoloButton.PaddingLeft = UDim.new(0.15, 0)
+	UIPaddingstartSoloButton.PaddingRight = UDim.new(0.15, 0)
+	UIPaddingstartSoloButton.PaddingBottom = UDim.new(0.15, 0)
+	UIPaddingstartSoloButton.Parent = startSoloButton
 
 	startSoloButton.MouseButton1Click:Connect(function()
 		lobbyRemote:FireServer("startSoloGame", { gameMode = selectedMode, difficulty = selectedDifficulty })

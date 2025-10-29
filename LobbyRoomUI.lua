@@ -9,6 +9,38 @@ local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 
+--[[
+	STYLE GUIDE
+	This table centralizes the UI's appearance for consistency.
+]]
+local Style = {
+	Colors = {
+		Background = Color3.fromRGB(28, 29, 34),          -- Dark grey, almost black
+		Primary = Color3.fromRGB(39, 41, 48),            -- Slightly lighter grey for frames
+		Secondary = Color3.fromRGB(58, 61, 70),          -- Grey for buttons, inputs
+		Accent = Color3.fromRGB(0, 170, 255),            -- Bright blue for highlights
+		Success = Color3.fromRGB(88, 255, 120),          -- Green for "start", "confirm"
+		Danger = Color3.fromRGB(255, 80, 80),            -- Red for "kick", "leave"
+		Text = Color3.fromRGB(230, 230, 230),            -- Off-white for body text
+		TextHeader = Color3.fromRGB(255, 255, 255),      -- Pure white for titles
+		TextMuted = Color3.fromRGB(150, 150, 150),      -- Grey for subtitles, placeholders
+		Gold = Color3.fromRGB(255, 196, 0)               -- For special highlights like boosters
+	},
+	Fonts = {
+		Header = Enum.Font.SourceSansBold,
+		Body = Enum.Font.SourceSans,
+		Light = Enum.Font.SourceSansLight
+	},
+	Sizes = {
+		Header = 28,
+		Subheader = 22,
+		Body = 18,
+		Small = 14
+	},
+	Radius = UDim.new(0, 8)
+}
+
+
 -- Wait for the ProximityPrompt to exist in the workspace
 local lobbyRoomPart = workspace:WaitForChild("LobbyRoom")
 local proximityPrompt = lobbyRoomPart:WaitForChild("ProximityPrompt")
@@ -34,57 +66,83 @@ lobbyScreenGui.Name = "LobbyScreenGui"
 lobbyScreenGui.Parent = player:WaitForChild("PlayerGui")
 lobbyScreenGui.Enabled = false -- Initially hidden
 
--- Main Frame
+-- Main Frame (Redesigned: larger and more modern)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Parent = lobbyScreenGui
-mainFrame.Size = UDim2.new(0, 400, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-mainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+mainFrame.Size = UDim2.new(0, 850, 0, 500) -- Larger size
+mainFrame.Position = UDim2.new(0.5, -425, 0.5, -250)
+mainFrame.BackgroundColor3 = Style.Colors.Background
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 
 local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 8)
+corner.CornerRadius = Style.Radius
 corner.Parent = mainFrame
+
+-- Add a subtle border/stroke to the main frame
+local stroke = Instance.new("UIStroke")
+stroke.Color = Style.Colors.Accent
+stroke.Thickness = 1
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = mainFrame
 
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Name = "TitleLabel"
 titleLabel.Parent = mainFrame
-titleLabel.Size = UDim2.new(1, 0, 0, 50)
-titleLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-titleLabel.Text = "Lobby"
-titleLabel.Font = Enum.Font.SourceSansBold
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.TextSize = 24
+titleLabel.Size = UDim2.new(1, 0, 0, 60) -- Taller header
+titleLabel.BackgroundColor3 = Style.Colors.Primary
+titleLabel.Text = "LOBBY"
+titleLabel.Font = Style.Fonts.Header
+titleLabel.TextColor3 = Style.Colors.TextHeader
+titleLabel.TextSize = Style.Sizes.Header
 
 local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 8)
+titleCorner.CornerRadius = Style.Radius
 titleCorner.Parent = titleLabel
 
 -- Buttons
+-- Redesigned Navigation/Button area
+local navFrame = Instance.new("Frame")
+navFrame.Name = "NavigationFrame"
+navFrame.Parent = mainFrame
+navFrame.Size = UDim2.new(0, 200, 1, -60) -- Left sidebar
+navFrame.Position = UDim2.new(0, 0, 0, 60)
+navFrame.BackgroundColor3 = Style.Colors.Primary
+navFrame.BorderSizePixel = 0
+
 local buttonLayout = Instance.new("UIListLayout")
-buttonLayout.Parent = mainFrame
+buttonLayout.Parent = navFrame
 buttonLayout.FillDirection = Enum.FillDirection.Vertical
 buttonLayout.SortOrder = Enum.SortOrder.LayoutOrder
 buttonLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 buttonLayout.Padding = UDim.new(0, 10)
-buttonLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+buttonLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+
+-- Content area for the sub-frames
+local contentFrame = Instance.new("Frame")
+contentFrame.Name = "ContentFrame"
+contentFrame.Parent = mainFrame
+contentFrame.Size = UDim2.new(1, -200, 1, -60)
+contentFrame.Position = UDim2.new(0, 200, 0, 60)
+contentFrame.BackgroundColor3 = Style.Colors.Background
+contentFrame.BorderSizePixel = 0
+
 
 local function createButton(text, order)
 	local button = Instance.new("TextButton")
 	button.Name = text .. "Button"
-	button.Parent = mainFrame
+	button.Parent = navFrame -- Buttons are now in the nav frame
 	button.LayoutOrder = order
-	button.Size = UDim2.new(0, 200, 0, 50)
-	button.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+	button.Size = UDim2.new(1, -20, 0, 45) -- Responsive width
+	button.BackgroundColor3 = Style.Colors.Secondary
 	button.Text = text
-	button.Font = Enum.Font.SourceSansBold
-	button.TextColor3 = Color3.fromRGB(255, 255, 255)
-	button.TextSize = 20
+	button.Font = Style.Fonts.Body
+	button.TextColor3 = Style.Colors.Text
+	button.TextSize = Style.Sizes.Body
 
 	local btnCorner = Instance.new("UICorner")
-	btnCorner.CornerRadius = UDim.new(0, 8)
+	btnCorner.CornerRadius = Style.Radius
 	btnCorner.Parent = button
 
 	return button
@@ -95,52 +153,47 @@ local joinRoomButton = createButton("Join Room", 2)
 local matchmakingButton = createButton("Matchmaking", 3)
 local soloButton = createButton("Solo", 4)
 
--- Sub-Frames for different actions
-local createRoomFrame = Instance.new("Frame")
-createRoomFrame.Name = "CreateRoomFrame"
-createRoomFrame.Parent = mainFrame
-createRoomFrame.Size = UDim2.new(1, 0, 1, 0)
-createRoomFrame.Position = UDim2.new(0, 0, 0, 0)
-createRoomFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-createRoomFrame.BorderSizePixel = 0
-createRoomFrame.Visible = false -- Hidden by default
+-- Sub-Frames for different actions (now parented to contentFrame)
+local function createSubFrame(name)
+	local frame = Instance.new("Frame")
+	frame.Name = name
+	frame.Parent = contentFrame -- Parented to the new content area
+	frame.Size = UDim2.new(1, 0, 1, 0)
+	frame.Position = UDim2.new(0, 0, 0, 0)
+	frame.BackgroundColor3 = Style.Colors.Background -- Use style color
+	frame.BorderSizePixel = 0
+	frame.Visible = false -- Hidden by default
+	return frame
+end
 
-local joinRoomFrame = createRoomFrame:Clone()
-joinRoomFrame.Name = "JoinRoomFrame"
-joinRoomFrame.Parent = mainFrame
-joinRoomFrame.Visible = false
-
-local matchmakingFrame = createRoomFrame:Clone()
-matchmakingFrame.Name = "MatchmakingFrame"
-matchmakingFrame.Parent = mainFrame
-matchmakingFrame.Visible = false
-
-local preGameLobbyFrame = createRoomFrame:Clone()
-preGameLobbyFrame.Name = "PreGameLobbyFrame"
-preGameLobbyFrame.Parent = mainFrame
-preGameLobbyFrame.Visible = false
-
-local soloFrame = createRoomFrame:Clone()
-soloFrame.Name = "SoloFrame"
-soloFrame.Parent = mainFrame
-soloFrame.Visible = false
+local createRoomFrame = createSubFrame("CreateRoomFrame")
+local joinRoomFrame = createSubFrame("JoinRoomFrame")
+local matchmakingFrame = createSubFrame("MatchmakingFrame")
+local preGameLobbyFrame = createSubFrame("PreGameLobbyFrame")
+local soloFrame = createSubFrame("SoloFrame")
 
 -- Function to switch between frames
+local currentFrame = nil
 local function switchFrame(frameToShow)
-	-- Make buttons visible/invisible
-	createRoomButton.Visible = (frameToShow == nil)
-	joinRoomButton.Visible = (frameToShow == nil)
-	matchmakingButton.Visible = (frameToShow == nil)
-	soloButton.Visible = (frameToShow == nil)
-
-	for _, child in ipairs(mainFrame:GetChildren()) do
+	-- Hide all sub-frames in the content area
+	for _, child in ipairs(contentFrame:GetChildren()) do
 		if child:IsA("Frame") then
 			child.Visible = false
 		end
 	end
+
+	-- Update navigation button appearances
+	for _, button in ipairs(navFrame:GetChildren()) do
+		if button:IsA("TextButton") then
+			local isSelected = (frameToShow and frameToShow.Name == button.Name:gsub("Button", "Frame"))
+			button.BackgroundColor3 = isSelected and Style.Colors.Accent or Style.Colors.Secondary
+		end
+	end
+
 	if frameToShow then
 		frameToShow.Visible = true
 	end
+	currentFrame = frameToShow
 end
 
 -- Helper function to create a difficulty selector UI
@@ -153,9 +206,9 @@ local function createDifficultySelector(parentFrame, onSelectionChanged)
 	local label = Instance.new("TextLabel", difficultyFrame)
 	label.Size = UDim2.new(1, 0, 0, 20)
 	label.Text = "Difficulty"
-	label.Font = Enum.Font.SourceSans
-	label.TextSize = 18
-	label.TextColor3 = Color3.new(1, 1, 1)
+	label.Font = Style.Fonts.Body
+	label.TextSize = Style.Sizes.Body
+	label.TextColor3 = Style.Colors.Text
 	label.BackgroundTransparency = 1
 	label.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -166,7 +219,7 @@ local function createDifficultySelector(parentFrame, onSelectionChanged)
 	buttonsFrame.BackgroundTransparency = 1
 	local gridLayout = Instance.new("UIGridLayout", buttonsFrame)
 	gridLayout.CellPadding = UDim2.new(0, 5, 0, 5)
-	gridLayout.CellSize = UDim2.new(0, 55, 0, 30)
+	gridLayout.CellSize = UDim2.new(0, 80, 0, 35) -- Larger buttons
 
 	local difficulties = {"Easy", "Normal", "Hard", "Expert", "Hell", "Crazy"}
 	local selectedDifficulty = "Easy" -- Default
@@ -176,18 +229,18 @@ local function createDifficultySelector(parentFrame, onSelectionChanged)
 		local button = Instance.new("TextButton", buttonsFrame)
 		button.Name = diffName
 		button.Text = diffName
-		button.Font = Enum.Font.SourceSans
-		button.TextSize = 12
-		button.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
-		button.TextColor3 = Color3.new(1, 1, 1)
+		button.Font = Style.Fonts.Body
+		button.TextSize = Style.Sizes.Small
+		button.BackgroundColor3 = Style.Colors.Secondary
+		button.TextColor3 = Style.Colors.Text
 		local corner = Instance.new("UICorner", button)
-		corner.CornerRadius = UDim.new(0, 4)
+		corner.CornerRadius = UDim.new(0, 6)
 		buttons[diffName] = button
 
 		button.MouseButton1Click:Connect(function()
 			selectedDifficulty = diffName
 			for name, btn in pairs(buttons) do
-				btn.BackgroundColor3 = (name == diffName) and Color3.fromRGB(0, 170, 81) or Color3.fromRGB(85, 85, 85)
+				btn.BackgroundColor3 = (name == diffName) and Style.Colors.Accent or Style.Colors.Secondary
 			end
 			if onSelectionChanged then
 				onSelectionChanged(selectedDifficulty)
@@ -196,7 +249,7 @@ local function createDifficultySelector(parentFrame, onSelectionChanged)
 	end
 
 	-- Set default selection
-	buttons["Easy"].BackgroundColor3 = Color3.fromRGB(0, 170, 81)
+	buttons["Easy"].BackgroundColor3 = Style.Colors.Accent
 
 	return difficultyFrame
 end
@@ -204,82 +257,96 @@ end
 -- Populate CreateRoomFrame
 local function populateCreateRoomFrame()
 	local title = Instance.new("TextLabel", createRoomFrame)
-	title.Size = UDim2.new(1, 0, 0, 50)
-	title.Text = "Create Room"
-	title.Font = Enum.Font.SourceSansBold
-	title.TextSize = 20
-	title.TextColor3 = Color3.new(1, 1, 1)
-	title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	title.Size = UDim2.new(1, -40, 0, 50)
+	title.Position = UDim2.new(0, 20, 0, 10)
+	title.Text = "Create a New Room"
+	title.Font = Style.Fonts.Header
+	title.TextSize = Style.Sizes.Subheader
+	title.TextColor3 = Style.Colors.TextHeader
+	title.BackgroundTransparency = 1
+	title.TextXAlignment = Enum.TextXAlignment.Left
 
 	local backButton = Instance.new("TextButton", createRoomFrame)
-	backButton.Size = UDim2.new(0, 50, 0, 30)
-	backButton.Position = UDim2.new(0, 10, 0, 10)
+	backButton.Size = UDim2.new(0, 80, 0, 35)
+	backButton.Position = UDim2.new(1, -100, 0, 20)
 	backButton.Text = "Back"
-	backButton.Font = Enum.Font.SourceSans
-	backButton.TextSize = 16
-	backButton.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
-	backButton.TextColor3 = Color3.new(1, 1, 1)
+	backButton.Font = Style.Fonts.Body
+	backButton.TextSize = Style.Sizes.Body
+	backButton.BackgroundColor3 = Style.Colors.Secondary
+	backButton.TextColor3 = Style.Colors.Text
 	local backCorner = Instance.new("UICorner", backButton)
-	backCorner.CornerRadius = UDim.new(0, 6)
+	backCorner.CornerRadius = Style.Radius
 
 	backButton.MouseButton1Click:Connect(function()
 		switchFrame(nil) -- Go back to main menu
 	end)
 
-	-- Player count slider would be complex to create from scratch.
-	-- Let's use a simple TextBox for now for player count.
-	local roomNameLabel = Instance.new("TextLabel", createRoomFrame)
-	roomNameLabel.Size = UDim2.new(0, 200, 0, 20)
-	roomNameLabel.Position = UDim2.new(0.5, -100, 0.2, 0)
-	roomNameLabel.Text = "Room Name (Optional):"
-	roomNameLabel.Font = Enum.Font.SourceSans
-	roomNameLabel.TextSize = 18
-	roomNameLabel.TextColor3 = Color3.new(1, 1, 1)
+	--[[ Re-layout the options ]]
+	local optionsFrame = Instance.new("Frame", createRoomFrame)
+	optionsFrame.Size = UDim2.new(1, -40, 1, -140)
+	optionsFrame.Position = UDim2.new(0, 20, 0, 70)
+	optionsFrame.BackgroundTransparency = 1
+	local listLayout = Instance.new("UIListLayout", optionsFrame)
+	listLayout.Padding = UDim.new(0, 15)
+
+	-- Room Name
+	local roomNameLabel = Instance.new("TextLabel", optionsFrame)
+	roomNameLabel.Size = UDim2.new(1, 0, 0, 20)
+	roomNameLabel.Text = "Room Name (Optional)"
+	roomNameLabel.Font = Style.Fonts.Body
+	roomNameLabel.TextSize = Style.Sizes.Body
+	roomNameLabel.TextColor3 = Style.Colors.Text
 	roomNameLabel.BackgroundTransparency = 1
 	roomNameLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-	local roomNameInput = Instance.new("TextBox", createRoomFrame)
-	roomNameInput.Size = UDim2.new(0, 200, 0, 30)
-	roomNameInput.Position = UDim2.new(0.5, -100, 0.2, 25)
-	roomNameInput.Font = Enum.Font.SourceSans
+	local roomNameInput = Instance.new("TextBox", optionsFrame)
+	roomNameInput.Size = UDim2.new(1, 0, 0, 40)
+	roomNameInput.Font = Style.Fonts.Body
 	roomNameInput.Text = ""
 	roomNameInput.PlaceholderText = "Enter a name..."
-	roomNameInput.TextColor3 = Color3.new(1,1,1)
-	roomNameInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	roomNameInput.PlaceholderColor3 = Style.Colors.TextMuted
+	roomNameInput.TextColor3 = Style.Colors.Text
+	roomNameInput.BackgroundColor3 = Style.Colors.Secondary
 	local roomNameCorner = Instance.new("UICorner", roomNameInput)
-	roomNameCorner.CornerRadius = UDim.new(0, 6)
+	roomNameCorner.CornerRadius = Style.Radius
 
-	local playerCountLabel = Instance.new("TextLabel", createRoomFrame)
-	playerCountLabel.Size = UDim2.new(0, 200, 0, 20)
-	playerCountLabel.Position = UDim2.new(0.5, -100, 0.4, 0)
-	playerCountLabel.Text = "Max Players (2-8):"
-	playerCountLabel.Font = Enum.Font.SourceSans
-	playerCountLabel.TextSize = 18
-	playerCountLabel.TextColor3 = Color3.new(1, 1, 1)
+	-- Max Players
+	local playerCountLabel = Instance.new("TextLabel", optionsFrame)
+	playerCountLabel.Size = UDim2.new(1, 0, 0, 20)
+	playerCountLabel.Text = "Max Players (2-8)"
+	playerCountLabel.Font = Style.Fonts.Body
+	playerCountLabel.TextSize = Style.Sizes.Body
+	playerCountLabel.TextColor3 = Style.Colors.Text
 	playerCountLabel.BackgroundTransparency = 1
 	playerCountLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-	local playerCountInput = Instance.new("TextBox", createRoomFrame)
-	playerCountInput.Size = UDim2.new(0, 100, 0, 30)
-	playerCountInput.Position = UDim2.new(0.5, -100, 0.4, 25)
-	playerCountInput.Font = Enum.Font.SourceSans
+	local playerCountInput = Instance.new("TextBox", optionsFrame)
+	playerCountInput.Size = UDim2.new(0, 100, 0, 40)
+	playerCountInput.Font = Style.Fonts.Body
 	playerCountInput.Text = "4"
-	playerCountInput.TextColor3 = Color3.new(1,1,1)
-	playerCountInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	playerCountInput.TextColor3 = Style.Colors.Text
+	playerCountInput.BackgroundColor3 = Style.Colors.Secondary
 	local inputCorner = Instance.new("UICorner", playerCountInput)
-	inputCorner.CornerRadius = UDim.new(0, 6)
+	inputCorner.CornerRadius = Style.Radius
+
+	-- Toggles (Private & Mode) in a horizontal frame
+	local togglesFrame = Instance.new("Frame", optionsFrame)
+	togglesFrame.Size = UDim2.new(1, 0, 0, 40)
+	togglesFrame.BackgroundTransparency = 1
+	local gridLayout = Instance.new("UIGridLayout", togglesFrame)
+	gridLayout.CellSize = UDim2.new(0.5, -5, 1, 0)
+	gridLayout.CellPadding = UDim2.new(0, 10, 0, 0)
 
 	local isPrivate = false
-	local privateToggle = Instance.new("TextButton", createRoomFrame)
-	privateToggle.Size = UDim2.new(0, 200, 0, 30)
-	privateToggle.Position = UDim2.new(0.5, -100, 0.7, 0)
+	local privateToggle = Instance.new("TextButton", togglesFrame)
+	privateToggle.Size = UDim2.new(1, 0, 1, 0)
 	privateToggle.Text = "Room: Public"
-	privateToggle.Font = Enum.Font.SourceSans
-	privateToggle.TextSize = 18
-	privateToggle.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
-	privateToggle.TextColor3 = Color3.new(1, 1, 1)
+	privateToggle.Font = Style.Fonts.Body
+	privateToggle.TextSize = Style.Sizes.Body
+	privateToggle.BackgroundColor3 = Style.Colors.Secondary
+	privateToggle.TextColor3 = Style.Colors.Text
 	local privateCorner = Instance.new("UICorner", privateToggle)
-	privateCorner.CornerRadius = UDim.new(0, 6)
+	privateCorner.CornerRadius = Style.Radius
 
 	privateToggle.MouseButton1Click:Connect(function()
 		isPrivate = not isPrivate
@@ -287,16 +354,15 @@ local function populateCreateRoomFrame()
 	end)
 
 	local gameMode = "Story" -- Default mode
-	local modeButton = Instance.new("TextButton", createRoomFrame)
-	modeButton.Size = UDim2.new(0, 200, 0, 30)
-	modeButton.Position = UDim2.new(0.5, -100, 0.5, 25)
+	local modeButton = Instance.new("TextButton", togglesFrame)
+	modeButton.Size = UDim2.new(1, 0, 1, 0)
 	modeButton.Text = "Mode: Story"
-	modeButton.Font = Enum.Font.SourceSans
-	modeButton.TextSize = 18
-	modeButton.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
-	modeButton.TextColor3 = Color3.new(1, 1, 1)
+	modeButton.Font = Style.Fonts.Body
+	modeButton.TextSize = Style.Sizes.Body
+	modeButton.BackgroundColor3 = Style.Colors.Secondary
+	modeButton.TextColor3 = Style.Colors.Text
 	local modeCorner = Instance.new("UICorner", modeButton)
-	modeCorner.CornerRadius = UDim.new(0, 6)
+	modeCorner.CornerRadius = Style.Radius
 
 	modeButton.MouseButton1Click:Connect(function()
 		if gameMode == "Story" then
@@ -307,22 +373,24 @@ local function populateCreateRoomFrame()
 		modeButton.Text = "Mode: " .. gameMode
 	end)
 
+	-- Difficulty Selector
 	local selectedDifficulty = "Easy"
-	local difficultySelector = createDifficultySelector(createRoomFrame, function(difficulty)
+	local difficultySelector = createDifficultySelector(optionsFrame, function(difficulty)
 		selectedDifficulty = difficulty
 	end)
-	difficultySelector.Position = UDim2.new(0.5, -100, 0.55, 0)
+	difficultySelector.LayoutOrder = 5
 
+	-- Confirm Button
 	local confirmButton = Instance.new("TextButton", createRoomFrame)
-	confirmButton.Size = UDim2.new(0, 150, 0, 40)
-	confirmButton.Position = UDim2.new(0.5, -75, 0.85, 0)
+	confirmButton.Size = UDim2.new(1, -40, 0, 50)
+	confirmButton.Position = UDim2.new(0, 20, 1, -70)
 	confirmButton.Text = "Confirm & Create"
-	confirmButton.Font = Enum.Font.SourceSansBold
-	confirmButton.TextSize = 18
-	confirmButton.BackgroundColor3 = Color3.fromRGB(0, 170, 81)
-	confirmButton.TextColor3 = Color3.new(1, 1, 1)
+	confirmButton.Font = Style.Fonts.Header
+	confirmButton.TextSize = Style.Sizes.Subheader
+	confirmButton.BackgroundColor3 = Style.Colors.Success
+	confirmButton.TextColor3 = Style.Colors.Background
 	local confirmCorner = Instance.new("UICorner", confirmButton)
-	confirmCorner.CornerRadius = UDim.new(0, 8)
+	confirmCorner.CornerRadius = Style.Radius
 
 	confirmButton.MouseButton1Click:Connect(function()
 		local settings = {
@@ -358,65 +426,83 @@ end
 -- Populate JoinRoomFrame
 local function populateJoinRoomFrame()
 	local title = Instance.new("TextLabel", joinRoomFrame)
-	title.Size = UDim2.new(1, 0, 0, 50)
-	title.Text = "Join Room"
-	title.Font = Enum.Font.SourceSansBold
-	title.TextSize = 20
-	title.TextColor3 = Color3.new(1, 1, 1)
-	title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	title.Size = UDim2.new(1, -40, 0, 50)
+	title.Position = UDim2.new(0, 20, 0, 10)
+	title.Text = "Join a Room"
+	title.Font = Style.Fonts.Header
+	title.TextSize = Style.Sizes.Subheader
+	title.TextColor3 = Style.Colors.TextHeader
+	title.BackgroundTransparency = 1
+	title.TextXAlignment = Enum.TextXAlignment.Left
 
 	local backButton = Instance.new("TextButton", joinRoomFrame)
-	backButton.Size = UDim2.new(0, 50, 0, 30)
-	backButton.Position = UDim2.new(0, 10, 0, 10)
+	backButton.Size = UDim2.new(0, 80, 0, 35)
+	backButton.Position = UDim2.new(1, -100, 0, 20)
 	backButton.Text = "Back"
-	-- ... (styling)
+	backButton.Font = Style.Fonts.Body
+	backButton.TextSize = Style.Sizes.Body
+	backButton.BackgroundColor3 = Style.Colors.Secondary
+	backButton.TextColor3 = Style.Colors.Text
+	local backCorner = Instance.new("UICorner", backButton)
+	backCorner.CornerRadius = Style.Radius
 	backButton.MouseButton1Click:Connect(function()
 		switchFrame(nil)
 	end)
 
 	local publicRoomsLabel = Instance.new("TextLabel", joinRoomFrame)
-	publicRoomsLabel.Size = UDim2.new(1, -20, 0, 20)
-	publicRoomsLabel.Position = UDim2.new(0, 10, 0, 55)
+	publicRoomsLabel.Size = UDim2.new(1, -40, 0, 20)
+	publicRoomsLabel.Position = UDim2.new(0, 20, 0, 70)
 	publicRoomsLabel.Text = "Public Rooms"
+	publicRoomsLabel.Font = Style.Fonts.Body
+	publicRoomsLabel.TextSize = Style.Sizes.Body
+	publicRoomsLabel.TextColor3 = Style.Colors.Text
+	publicRoomsLabel.BackgroundTransparency = 1
 	publicRoomsLabel.TextXAlignment = Enum.TextXAlignment.Left
-	-- ... (styling)
 
 	local scrollingFrame = Instance.new("ScrollingFrame", joinRoomFrame)
-	scrollingFrame.Size = UDim2.new(1, -20, 0.5, -60)
-	scrollingFrame.Position = UDim2.new(0, 10, 0, 80)
-	scrollingFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	scrollingFrame.Size = UDim2.new(1, -40, 1, -200)
+	scrollingFrame.Position = UDim2.new(0, 20, 0, 100)
+	scrollingFrame.BackgroundColor3 = Style.Colors.Primary
+	scrollingFrame.BorderSizePixel = 0
 	local listLayout = Instance.new("UIListLayout", scrollingFrame)
 	listLayout.Padding = UDim.new(0, 5)
+	listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	local scrollingCorner = Instance.new("UICorner", scrollingFrame)
+	scrollingCorner.CornerRadius = Style.Radius
 
-	-- TAMBAHKAN BARIS INI
 	joinRoomScrollingFrame = scrollingFrame
 
-	-- Placeholder for room entry
-	local function createRoomEntry(roomName, playerCount)
-		local entry = Instance.new("TextButton", scrollingFrame)
-		entry.Size = UDim2.new(1, 0, 0, 40)
-		entry.Text = string.format("%s (%s)", roomName, playerCount)
-		-- ... (styling)
-		return entry
-	end
+	-- Join with Code Section
+	local joinCodeFrame = Instance.new("Frame", joinRoomFrame)
+	joinCodeFrame.Size = UDim2.new(1, -40, 0, 50)
+	joinCodeFrame.Position = UDim2.new(0, 20, 1, -70)
+	joinCodeFrame.BackgroundTransparency = 1
+	local grid = Instance.new("UIGridLayout", joinCodeFrame)
+	grid.CellSize = UDim2.new(0.7, -5, 1, 0)
+	grid.CellPadding = UDim2.new(0, 10, 0, 0)
 
-	-- Example entries are now removed, will be populated dynamically
-	-- createRoomEntry("Cool Room 1", "3/8")
-	-- createRoomEntry("Another Room", "1/4")
-
-	local roomCodeInput = Instance.new("TextBox", joinRoomFrame)
+	local roomCodeInput = Instance.new("TextBox", joinCodeFrame)
 	roomCodeInput.Name = "roomCodeInput"
-	roomCodeInput.Size = UDim2.new(0.6, -15, 0, 40)
-	roomCodeInput.Position = UDim2.new(0, 10, 1, -50)
-	roomCodeInput.PlaceholderText = "Enter Room Code"
-	-- ... (styling)
+	roomCodeInput.Size = UDim2.new(1, 0, 1, 0)
+	roomCodeInput.PlaceholderText = "Enter Room Code..."
+	roomCodeInput.PlaceholderColor3 = Style.Colors.TextMuted
+	roomCodeInput.Font = Style.Fonts.Body
+	roomCodeInput.TextSize = Style.Sizes.Body
+	roomCodeInput.TextColor3 = Style.Colors.Text
+	roomCodeInput.BackgroundColor3 = Style.Colors.Secondary
+	local codeCorner = Instance.new("UICorner", roomCodeInput)
+	codeCorner.CornerRadius = Style.Radius
 
-	local joinWithCodeButton = Instance.new("TextButton", joinRoomFrame)
+	local joinWithCodeButton = Instance.new("TextButton", joinCodeFrame)
 	joinWithCodeButton.Name = "joinWithCodeButton"
-	joinWithCodeButton.Size = UDim2.new(0.4, -15, 0, 40)
-	joinWithCodeButton.Position = UDim2.new(0.6, 0, 1, -50)
+	joinWithCodeButton.Size = UDim2.new(1, 0, 1, 0)
 	joinWithCodeButton.Text = "Join"
-	-- ... (styling)
+	joinWithCodeButton.Font = Style.Fonts.Body
+	joinWithCodeButton.TextSize = Style.Sizes.Body
+	joinWithCodeButton.BackgroundColor3 = Style.Colors.Accent
+	joinWithCodeButton.TextColor3 = Style.Colors.TextHeader
+	local joinCorner = Instance.new("UICorner", joinWithCodeButton)
+	joinCorner.CornerRadius = Style.Radius
 
 	connectJoinWithCodeButton()
 end
@@ -437,7 +523,7 @@ local function updatePreGameLobby(roomData)
 	if not preGameLobbyPlayerList or not preGameLobbyRoomCodeLabel then return end
 
 	-- Update Room Name display
-	local titleLabel = preGameLobbyFrame:FindFirstChild("TitleLabel") or preGameLobbyFrame:FindFirstChild("TextLabel")
+	local titleLabel = preGameLobbyFrame:FindFirstChild("TitleLabel")
 	if titleLabel then
 		titleLabel.Text = roomData.roomName or "Lobby"
 	end
@@ -452,35 +538,20 @@ local function updatePreGameLobby(roomData)
 
 	-- Update Game Mode display
 	local gameModeLabel = preGameLobbyFrame:FindFirstChild("GameModeLabel")
-	if not gameModeLabel then
-		gameModeLabel = Instance.new("TextLabel")
-		gameModeLabel.Name = "GameModeLabel"
-		gameModeLabel.Size = UDim2.new(1, 0, 0, 20)
-		gameModeLabel.Position = UDim2.new(0, 0, 0, 55)
-		gameModeLabel.Font = Enum.Font.SourceSans
+	if gameModeLabel then
 		gameModeLabel.Text = "Mode: " .. (roomData.gameMode or "Story")
-		gameModeLabel.TextSize = 16
-		gameModeLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-		gameModeLabel.BackgroundTransparency = 1
-		gameModeLabel.TextXAlignment = Enum.TextXAlignment.Center
-		gameModeLabel.Parent = preGameLobbyFrame
 	end
-	gameModeLabel.Text = "Mode: " .. (roomData.gameMode or "Story")
 
 	-- Update Difficulty display
 	local difficultyLabel = preGameLobbyFrame:FindFirstChild("DifficultyLabel")
-	if not difficultyLabel then
-		difficultyLabel = gameModeLabel:Clone()
-		difficultyLabel.Name = "DifficultyLabel"
-		difficultyLabel.Parent = preGameLobbyFrame
-		difficultyLabel.Position = UDim2.new(0, 0, 0, 75)
+	if difficultyLabel then
+		difficultyLabel.Text = "Difficulty: " .. (roomData.difficulty or "Easy")
 	end
-	difficultyLabel.Text = "Difficulty: " .. (roomData.difficulty or "Easy")
 
 
 	-- Clear old player list
 	for _, child in ipairs(preGameLobbyPlayerList:GetChildren()) do
-		if not child:IsA("UIListLayout") then
+		if not child:IsA("UIGridLayout") then
 			child:Destroy()
 		end
 	end
@@ -490,77 +561,74 @@ local function updatePreGameLobby(roomData)
 	-- Add new player labels
 	for _, playerData in ipairs(roomData.players) do
 		local playerFrame = Instance.new("Frame")
-		playerFrame.Size = UDim2.new(1, -10, 0, 50) -- Increased height to accommodate booster text
-		playerFrame.BackgroundTransparency = 1
+		playerFrame.Size = UDim2.new(1, 0, 0, 70)
+		playerFrame.BackgroundColor3 = Style.Colors.Primary
+		local corner = Instance.new("UICorner", playerFrame)
+		corner.CornerRadius = Style.Radius
 		playerFrame.Parent = preGameLobbyPlayerList
 
 		local playerLabel = Instance.new("TextLabel")
-		playerLabel.Size = UDim2.new(1, 0, 0.6, 0)
+		playerLabel.Size = UDim2.new(1, -80, 0.6, 0)
+		playerLabel.Position = UDim2.new(0, 15, 0, 0)
 		playerLabel.Parent = playerFrame
 
 		local displayText = string.format("[Lv. %d] %s", playerData.Level or 1, playerData.Name)
 		if playerData.Name == roomData.hostName then
 			displayText = displayText .. " (Host)"
 		end
-		playerLabel.Text = " " .. displayText
-
-		playerLabel.Font = Enum.Font.SourceSans
-		playerLabel.TextSize = 18
-		playerLabel.TextColor3 = Color3.new(1,1,1)
+		playerLabel.Text = displayText
+		playerLabel.Font = Style.Fonts.Body
+		playerLabel.TextSize = Style.Sizes.Body
+		playerLabel.TextColor3 = Style.Colors.TextHeader
 		playerLabel.TextXAlignment = Enum.TextXAlignment.Left
-		playerLabel.BackgroundColor3 = Color3.fromRGB(55,55,55)
-		local corner = Instance.new("UICorner", playerLabel)
-		corner.CornerRadius = UDim.new(0, 4)
+		playerLabel.BackgroundTransparency = 1
 
 		local boosterLabel = Instance.new("TextLabel")
 		boosterLabel.Name = "BoosterLabel"
-		boosterLabel.Size = UDim2.new(1, 0, 0.4, 0)
-		boosterLabel.Position = UDim2.new(0, 0, 0.6, 0)
-		boosterLabel.Font = Enum.Font.SourceSans
-		boosterLabel.TextSize = 14
-		boosterLabel.TextColor3 = Color3.fromRGB(200, 200, 0)
+		boosterLabel.Size = UDim2.new(1, -20, 0.4, 0)
+		boosterLabel.Position = UDim2.new(0, 15, 0.6, 0)
+		boosterLabel.Font = Style.Fonts.Light
+		boosterLabel.TextSize = Style.Sizes.Small
+		boosterLabel.TextColor3 = Style.Colors.Gold
 		boosterLabel.BackgroundTransparency = 1
 		boosterLabel.TextXAlignment = Enum.TextXAlignment.Left
 		boosterLabel.Parent = playerFrame
 
 		local boosterIcon = Instance.new("ImageLabel")
 		boosterIcon.Name = "BoosterIcon"
-		boosterIcon.Size = UDim2.new(0, 18, 0, 18) -- Small square for the icon
-		boosterIcon.Position = UDim2.new(0, 5, 0.5, -9)
+		boosterIcon.Size = UDim2.new(0, 16, 0, 16)
+		boosterIcon.Position = UDim2.new(0, 0, 0.5, -8)
 		boosterIcon.BackgroundTransparency = 1
 		boosterIcon.Parent = boosterLabel
 
 		if playerData.ActiveBooster and BoosterConfig[playerData.ActiveBooster] then
 			boosterLabel.Text = "   " .. BoosterConfig[playerData.ActiveBooster].Name
-			-- NOTE: BoosterConfig does not currently contain image asset IDs.
-			-- When available, set the image here, e.g.:
-			-- boosterIcon.Image = "rbxassetid://" .. BoosterConfig[playerData.ActiveBooster].IconAssetId
+			boosterIcon.Visible = true
 		else
-			boosterLabel.Text = ""
+			boosterLabel.Text = "No booster active"
 			boosterIcon.Visible = false
 		end
 		playerBoosterLabels[playerData.UserId] = boosterLabel
 		playerBoosterIcons[playerData.UserId] = boosterIcon
 
 
-		-- Add Kick Button if the local player is the host and the current player is not the host
+		-- Add Kick Button
 		local isHost = (player.Name == roomData.hostName)
 		if isHost and playerData.Name ~= player.Name then
 			local kickButton = Instance.new("TextButton")
 			kickButton.Name = "KickButton"
-			kickButton.Size = UDim2.new(0, 50, 0.8, 0)
-			kickButton.Position = UDim2.new(1, -55, 0.1, 0)
+			kickButton.Size = UDim2.new(0, 60, 1, -20)
+			kickButton.Position = UDim2.new(1, -70, 0, 10)
 			kickButton.Text = "Kick"
-			kickButton.Font = Enum.Font.SourceSans
-			kickButton.TextSize = 14
-			kickButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-			kickButton.TextColor3 = Color3.new(1, 1, 1)
+			kickButton.Font = Style.Fonts.Body
+			kickButton.TextSize = Style.Sizes.Small
+			kickButton.BackgroundColor3 = Style.Colors.Danger
+			kickButton.TextColor3 = Style.Colors.TextHeader
 			local kickCorner = Instance.new("UICorner", kickButton)
-			kickCorner.CornerRadius = UDim.new(0, 4)
-			kickButton.Parent = playerLabel
+			kickCorner.CornerRadius = UDim.new(0, 6)
+			kickButton.Parent = playerFrame
 
 			kickButton.MouseButton1Click:Connect(function()
-				print(string.format("Host sending request to kick player with UserId: %d", playerData.UserId))
 				kickPlayerEvent:FireServer(playerData.UserId)
 			end)
 		end
@@ -571,17 +639,15 @@ local function updatePreGameLobby(roomData)
 
 	-- Handle Start Game button visibility and state
 	local startGameButton = preGameLobbyFrame:FindFirstChild("StartGameButton")
-
 	if startGameButton then
 		startGameButton.Visible = isHost
-
 		if isHost then
-			startGameButton.AutoButtonColor = isFull -- Enable click feedback only when full
+			startGameButton.AutoButtonColor = isFull
 			if isFull then
-				startGameButton.BackgroundColor3 = Color3.fromRGB(0, 170, 81) -- Green (active)
+				startGameButton.BackgroundColor3 = Style.Colors.Success
 				startGameButton.Text = "Start Game"
 			else
-				startGameButton.BackgroundColor3 = Color3.fromRGB(130, 130, 130) -- Grey (disabled)
+				startGameButton.BackgroundColor3 = Style.Colors.Secondary
 				startGameButton.Text = string.format("%d/%d Players", #roomData.players, roomData.maxPlayers)
 			end
 		end
@@ -596,7 +662,7 @@ local function updatePreGameLobby(roomData)
 				preGameLobbyCountdownLabel.Text = "Waiting for Host..."
 			end
 		else
-			preGameLobbyCountdownLabel.Text = "Waiting for players..."
+			preGameLobbyCountdownLabel.Text = "Waiting for more players..."
 		end
 	end
 end
@@ -650,43 +716,56 @@ local function resetPreGameLobbyButton()
 end
 
 local function populateMatchmakingFrame()
-	local backButton = Instance.new("TextButton", matchmakingFrame)
-	backButton.Name = "BackButton"
-	backButton.Size = UDim2.new(0, 50, 0, 30)
-	backButton.Position = UDim2.new(0, 10, 0, 10)
-	backButton.Text = "Back"
-	-- ... styling
-
 	local title = Instance.new("TextLabel", matchmakingFrame)
-	title.Size = UDim2.new(1, 0, 0, 50)
+	title.Size = UDim2.new(1, -40, 0, 50)
+	title.Position = UDim2.new(0, 20, 0, 10)
 	title.Text = "Matchmaking"
-	-- ... styling
+	title.Font = Style.Fonts.Header
+	title.TextSize = Style.Sizes.Subheader
+	title.TextColor3 = Style.Colors.TextHeader
+	title.BackgroundTransparency = 1
+	title.TextXAlignment = Enum.TextXAlignment.Left
+
+	local optionsFrame = Instance.new("Frame", matchmakingFrame)
+	optionsFrame.Size = UDim2.new(1, -40, 1, -140)
+	optionsFrame.Position = UDim2.new(0, 20, 0, 70)
+	optionsFrame.BackgroundTransparency = 1
+	local listLayout = Instance.new("UIListLayout", optionsFrame)
+	listLayout.Padding = UDim.new(0, 15)
 
 	-- Elements for starting a search
 	local startElements = {}
-	local playerCountLabel = Instance.new("TextLabel", matchmakingFrame)
-	playerCountLabel.Size = UDim2.new(0, 200, 0, 30)
-	playerCountLabel.Position = UDim2.new(0.5, -100, 0.3, 0)
-	playerCountLabel.Text = "Players (2-8):"
+
+	local playerCountLabel = Instance.new("TextLabel", optionsFrame)
+	playerCountLabel.Size = UDim2.new(1, 0, 0, 20)
+	playerCountLabel.Text = "Players (2-8)"
+	playerCountLabel.Font = Style.Fonts.Body
+	playerCountLabel.TextSize = Style.Sizes.Body
+	playerCountLabel.TextColor3 = Style.Colors.Text
+	playerCountLabel.BackgroundTransparency = 1
+	playerCountLabel.TextXAlignment = Enum.TextXAlignment.Left
 	table.insert(startElements, playerCountLabel)
 
-	local playerCountInput = Instance.new("TextBox", matchmakingFrame)
-	playerCountInput.Size = UDim2.new(0, 100, 0, 30)
-	playerCountInput.Position = UDim2.new(0.5, -50, 0.4, 0)
-	playerCountInput.Text = "2"
+	local playerCountInput = Instance.new("TextBox", optionsFrame)
+	playerCountInput.Size = UDim2.new(0, 100, 0, 40)
+	playerCountInput.Font = Style.Fonts.Body
+	playerCountInput.Text = "4"
+	playerCountInput.TextColor3 = Style.Colors.Text
+	playerCountInput.BackgroundColor3 = Style.Colors.Secondary
+	local inputCorner = Instance.new("UICorner", playerCountInput)
+	inputCorner.CornerRadius = Style.Radius
 	table.insert(startElements, playerCountInput)
 
 	local matchmakingMode = "Story" -- Default mode
-	local modeButton = Instance.new("TextButton", matchmakingFrame)
-	modeButton.Size = UDim2.new(0, 200, 0, 30)
-	modeButton.Position = UDim2.new(0.5, -100, 0.6, 0)
+	local modeButton = Instance.new("TextButton", optionsFrame)
+	modeButton.Size = UDim2.new(1, 0, 0, 40)
 	modeButton.Text = "Mode: Story"
-	modeButton.Font = Enum.Font.SourceSans
-	modeButton.TextSize = 18
-	modeButton.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
-	modeButton.TextColor3 = Color3.new(1, 1, 1)
+	modeButton.Font = Style.Fonts.Body
+	modeButton.TextSize = Style.Sizes.Body
+	modeButton.BackgroundColor3 = Style.Colors.Secondary
+	modeButton.TextColor3 = Style.Colors.Text
 	local modeCorner = Instance.new("UICorner", modeButton)
-	modeCorner.CornerRadius = UDim.new(0, 6)
+	modeCorner.CornerRadius = Style.Radius
 	table.insert(startElements, modeButton)
 
 	modeButton.MouseButton1Click:Connect(function()
@@ -698,19 +777,23 @@ local function populateMatchmakingFrame()
 		modeButton.Text = "Mode: " .. matchmakingMode
 	end)
 
-	local startButton = Instance.new("TextButton", matchmakingFrame)
-	startButton.Size = UDim2.new(0, 150, 0, 40)
-	startButton.Position = UDim2.new(0.5, -75, 0.8, 0)
-	startButton.Text = "Start Search"
-	table.insert(startElements, startButton)
-
 	local selectedDifficulty = "Easy"
-	local difficultySelector = createDifficultySelector(matchmakingFrame, function(difficulty)
+	local difficultySelector = createDifficultySelector(optionsFrame, function(difficulty)
 		selectedDifficulty = difficulty
 	end)
-	difficultySelector.Position = UDim2.new(0.5, -100, 0.55, 0)
 	table.insert(startElements, difficultySelector)
 
+	local startButton = Instance.new("TextButton", matchmakingFrame)
+	startButton.Size = UDim2.new(1, -40, 0, 50)
+	startButton.Position = UDim2.new(0, 20, 1, -70)
+	startButton.Text = "Start Search"
+	startButton.Font = Style.Fonts.Header
+	startButton.TextSize = Style.Sizes.Subheader
+	startButton.BackgroundColor3 = Style.Colors.Accent
+	startButton.TextColor3 = Style.Colors.TextHeader
+	local startCorner = Instance.new("UICorner", startButton)
+	startCorner.CornerRadius = Style.Radius
+	table.insert(startElements, startButton)
 
 	-- Elements for when searching is in progress
 	local searchingElements = {}
@@ -718,13 +801,23 @@ local function populateMatchmakingFrame()
 	searchingLabel.Size = UDim2.new(1, 0, 0.5, 0)
 	searchingLabel.Position = UDim2.new(0, 0, 0.2, 0)
 	searchingLabel.Text = "Searching for players..."
+	searchingLabel.Font = Style.Fonts.Header
+	searchingLabel.TextSize = Style.Sizes.Subheader
+	searchingLabel.TextColor3 = Style.Colors.Text
+	searchingLabel.BackgroundTransparency = 1
 	searchingLabel.Visible = false
 	table.insert(searchingElements, searchingLabel)
 
 	local cancelButton = Instance.new("TextButton", matchmakingFrame)
-	cancelButton.Size = UDim2.new(0, 150, 0, 40)
-	cancelButton.Position = UDim2.new(0.5, -75, 0.8, 0)
-	cancelButton.Text = "Cancel"
+	cancelButton.Size = UDim2.new(1, -40, 0, 50)
+	cancelButton.Position = UDim2.new(0, 20, 1, -70)
+	cancelButton.Text = "Cancel Search"
+	cancelButton.Font = Style.Fonts.Header
+	cancelButton.TextSize = Style.Sizes.Subheader
+	cancelButton.BackgroundColor3 = Style.Colors.Danger
+	cancelButton.TextColor3 = Style.Colors.TextHeader
+	local cancelCorner = Instance.new("UICorner", cancelButton)
+	cancelCorner.CornerRadius = Style.Radius
 	cancelButton.Visible = false
 	table.insert(searchingElements, cancelButton)
 
@@ -745,113 +838,120 @@ local function populateMatchmakingFrame()
 
 	cancelButton.MouseButton1Click:Connect(function()
 		lobbyRemote:FireServer("cancelMatchmaking")
-		-- The server will fire back an event to confirm, which will trigger the UI reset
-	end)
-
-	backButton.MouseButton1Click:Connect(function() 
-		lobbyRemote:FireServer("cancelMatchmaking") -- Also cancel if they go back
-		resetMatchmakingFrameUI()
-		switchFrame(nil) 
 	end)
 end
 
 -- Populate PreGameLobbyFrame
 local function populatePreGameLobbyFrame()
-	local title = Instance.new("TextLabel", preGameLobbyFrame)
+	-- Main container for player cards
+	local playerList = Instance.new("ScrollingFrame", preGameLobbyFrame)
+	playerList.Size = UDim2.new(0.7, -15, 1, -80)
+	playerList.Position = UDim2.new(0, 10, 0, 10)
+	playerList.BackgroundColor3 = Style.Colors.Background
+	playerList.BorderSizePixel = 0
+	local gridLayout = Instance.new("UIGridLayout", playerList)
+	gridLayout.CellPadding = UDim2.new(0, 10, 0, 10)
+	gridLayout.CellSize = UDim2.new(0.5, -5, 0, 70)
+	preGameLobbyPlayerList = playerList
+
+	-- Sidebar for room info and actions
+	local sidebar = Instance.new("Frame", preGameLobbyFrame)
+	sidebar.Size = UDim2.new(0.3, -15, 1, -80)
+	sidebar.Position = UDim2.new(0.7, 0, 0, 10)
+	sidebar.BackgroundTransparency = 1
+
+	local title = Instance.new("TextLabel", sidebar)
+	title.Name = "TitleLabel"
 	title.Size = UDim2.new(1, 0, 0, 30)
-	title.Position = UDim2.new(0, 0, 0, 5)
 	title.Text = "LOBBY"
-	title.Font = Enum.Font.SourceSansBold
-	title.TextSize = 24
-	title.TextColor3 = Color3.new(1,1,1)
+	title.Font = Style.Fonts.Header
+	title.TextSize = Style.Sizes.Header
+	title.TextColor3 = Style.Colors.TextHeader
 	title.BackgroundTransparency = 1
 
-	local roomCodeLabel = Instance.new("TextLabel", preGameLobbyFrame)
+	local roomCodeLabel = Instance.new("TextLabel", sidebar)
 	roomCodeLabel.Name = "RoomCodeLabel"
 	roomCodeLabel.Size = UDim2.new(1, 0, 0, 20)
 	roomCodeLabel.Position = UDim2.new(0, 0, 0, 35)
-	roomCodeLabel.Font = Enum.Font.SourceSans
-	roomCodeLabel.Text = "Room Code: 12345"
-	roomCodeLabel.TextSize = 16
-	roomCodeLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+	roomCodeLabel.Font = Style.Fonts.Light
+	roomCodeLabel.Text = "Room Code: ..."
+	roomCodeLabel.TextSize = Style.Sizes.Small
+	roomCodeLabel.TextColor3 = Style.Colors.TextMuted
 	roomCodeLabel.BackgroundTransparency = 1
-	roomCodeLabel.Visible = false -- Initially hidden
-	preGameLobbyRoomCodeLabel = roomCodeLabel -- Assign variable
+	roomCodeLabel.Visible = false
+	preGameLobbyRoomCodeLabel = roomCodeLabel
 
-	local playersLabel = Instance.new("TextLabel", preGameLobbyFrame)
-	playersLabel.Size = UDim2.new(1, -20, 0, 20)
-	playersLabel.Position = UDim2.new(0, 10, 0, 60)
-	playersLabel.Text = "Players"
-	playersLabel.Font = Enum.Font.SourceSansBold
-	playersLabel.TextSize = 18
-	playersLabel.TextColor3 = Color3.new(1,1,1)
-	playersLabel.TextXAlignment = Enum.TextXAlignment.Left
-	playersLabel.BackgroundTransparency = 1
+	local gameModeLabel = Instance.new("TextLabel", sidebar)
+	gameModeLabel.Name = "GameModeLabel"
+	gameModeLabel.Size = UDim2.new(1, 0, 0, 20)
+	gameModeLabel.Position = UDim2.new(0, 0, 0, 60)
+	gameModeLabel.Font = Style.Fonts.Body
+	gameModeLabel.Text = "Mode: ..."
+	gameModeLabel.TextSize = Style.Sizes.Body
+	gameModeLabel.TextColor3 = Style.Colors.Text
+	gameModeLabel.BackgroundTransparency = 1
 
-	local playerList = Instance.new("ScrollingFrame", preGameLobbyFrame)
-	playerList.Size = UDim2.new(1, -20, 0.6, -20)
-	playerList.Position = UDim2.new(0, 10, 0, 85)
-	playerList.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-	playerList.BorderSizePixel = 0
-	local listLayout = Instance.new("UIListLayout", playerList)
-	listLayout.Padding = UDim.new(0, 5)
-	preGameLobbyPlayerList = playerList -- Assign variable
+	local difficultyLabel = Instance.new("TextLabel", sidebar)
+	difficultyLabel.Name = "DifficultyLabel"
+	difficultyLabel.Size = UDim2.new(1, 0, 0, 20)
+	difficultyLabel.Position = UDim2.new(0, 0, 0, 85)
+	difficultyLabel.Font = Style.Fonts.Body
+	difficultyLabel.Text = "Difficulty: ..."
+	difficultyLabel.TextSize = Style.Sizes.Body
+	difficultyLabel.TextColor3 = Style.Colors.Text
+	difficultyLabel.BackgroundTransparency = 1
 
-	local countdownLabel = Instance.new("TextLabel", preGameLobbyFrame)
-	countdownLabel.Size = UDim2.new(1, 0, 0, 30)
-	countdownLabel.Position = UDim2.new(0, 0, 1, -35)
-	countdownLabel.Text = "Waiting for players..."
-	countdownLabel.Font = Enum.Font.SourceSansBold
-	countdownLabel.TextSize = 20
-	countdownLabel.TextColor3 = Color3.new(1,1,1)
-	countdownLabel.BackgroundTransparency = 1
-	preGameLobbyCountdownLabel = countdownLabel -- Assign variable
-
-	local leaveButton = Instance.new("TextButton", preGameLobbyFrame)
+	local leaveButton = Instance.new("TextButton", sidebar)
 	leaveButton.Name = "LeaveButton"
-	leaveButton.Size = UDim2.new(0, 80, 0, 30)
-	leaveButton.Position = UDim2.new(1, -90, 0, 5)
+	leaveButton.Size = UDim2.new(1, 0, 0, 40)
+	leaveButton.Position = UDim2.new(0, 0, 1, -50)
 	leaveButton.Text = "Leave"
-	leaveButton.Font = Enum.Font.SourceSans
-	leaveButton.TextSize = 16
-	leaveButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-	leaveButton.TextColor3 = Color3.new(1, 1, 1)
+	leaveButton.Font = Style.Fonts.Body
+	leaveButton.TextSize = Style.Sizes.Body
+	leaveButton.BackgroundColor3 = Style.Colors.Danger
+	leaveButton.TextColor3 = Style.Colors.TextHeader
 	local leaveCorner = Instance.new("UICorner", leaveButton)
-	leaveCorner.CornerRadius = UDim.new(0, 6)
-
+	leaveCorner.CornerRadius = Style.Radius
 	leaveButton.MouseButton1Click:Connect(function()
-		-- Only allow leaving if the button is active (not greyed out)
-		if leaveButton.AutoButtonColor then
-			print("Client sending request to leave room.")
-			lobbyRemote:FireServer("leaveRoom")
-		else
-			print("Leave button is disabled during countdown.")
-		end
+		if leaveButton.AutoButtonColor then lobbyRemote:FireServer("leaveRoom") end
 	end)
 
-	local startGameButton = Instance.new("TextButton", preGameLobbyFrame)
+	-- Bottom bar for status and start button
+	local bottomBar = Instance.new("Frame", preGameLobbyFrame)
+	bottomBar.Size = UDim2.new(1, 0, 0, 60)
+	bottomBar.Position = UDim2.new(0, 0, 1, -60)
+	bottomBar.BackgroundColor3 = Style.Colors.Primary
+	local bottomCorner = Instance.new("UICorner", bottomBar)
+	bottomCorner.CornerRadius = Style.Radius
+
+	local countdownLabel = Instance.new("TextLabel", bottomBar)
+	countdownLabel.Size = UDim2.new(0.5, 0, 1, 0)
+	countdownLabel.Position = UDim2.new(0, 15, 0, 0)
+	countdownLabel.Text = "Waiting for players..."
+	countdownLabel.Font = Style.Fonts.Body
+	countdownLabel.TextSize = Style.Sizes.Body
+	countdownLabel.TextColor3 = Style.Colors.Text
+	countdownLabel.BackgroundTransparency = 1
+	countdownLabel.TextXAlignment = Enum.TextXAlignment.Left
+	preGameLobbyCountdownLabel = countdownLabel
+
+	local startGameButton = Instance.new("TextButton", bottomBar)
 	startGameButton.Name = "StartGameButton"
-	startGameButton.Size = UDim2.new(0, 150, 0, 40)
-	startGameButton.Position = UDim2.new(0.5, -75, 1, -85) -- Position it above the countdown
+	startGameButton.Size = UDim2.new(0.4, 0, 1, -20)
+	startGameButton.Position = UDim2.new(0.6, -10, 0, 10)
 	startGameButton.Text = "Start Game"
-	startGameButton.Font = Enum.Font.SourceSansBold
-	startGameButton.TextSize = 18
-	startGameButton.BackgroundColor3 = Color3.fromRGB(0, 170, 81)
-	startGameButton.TextColor3 = Color3.new(1, 1, 1)
+	startGameButton.Font = Style.Fonts.Body
+	startGameButton.TextSize = Style.Sizes.Body
+	startGameButton.BackgroundColor3 = Style.Colors.Success
+	startGameButton.TextColor3 = Style.Colors.Background
 	local startCorner = Instance.new("UICorner", startGameButton)
-	startCorner.CornerRadius = UDim.new(0, 8)
-	startGameButton.Visible = false -- Hidden by default
-
+	startCorner.CornerRadius = Style.Radius
+	startGameButton.Visible = false
 	startGameButton.MouseButton1Click:Connect(function()
-		if not startGameButton.AutoButtonColor then return end -- Don't do anything if not active
-
+		if not startGameButton.AutoButtonColor then return end
 		if isCountdownActive then
-			-- If countdown is running, this button acts as a cancel button
-			print("Client sending cancel countdown request.")
 			lobbyRemote:FireServer("cancelCountdown")
 		else
-			-- Otherwise, it starts the game
-			print("Client sending force start game request.")
 			lobbyRemote:FireServer("forceStartGame")
 		end
 	end)
@@ -859,8 +959,6 @@ end
 
 populateMatchmakingFrame()
 populatePreGameLobbyFrame()
-
-
 
 -- Function to show/hide the UI
 local function setUIVisible(visible)
@@ -892,69 +990,85 @@ end)
 -- Populate SoloFrame
 local function populateSoloFrame()
 	local title = Instance.new("TextLabel", soloFrame)
-	title.Size = UDim2.new(1, 0, 0, 50)
-	title.Text = "Select Solo Mode"
-	title.Font = Enum.Font.SourceSansBold
-	title.TextSize = 20
-	title.TextColor3 = Color3.new(1, 1, 1)
-	title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	title.Size = UDim2.new(1, -40, 0, 50)
+	title.Position = UDim2.new(0, 20, 0, 10)
+	title.Text = "Play Solo"
+	title.Font = Style.Fonts.Header
+	title.TextSize = Style.Sizes.Subheader
+	title.TextColor3 = Style.Colors.TextHeader
+	title.BackgroundTransparency = 1
+	title.TextXAlignment = Enum.TextXAlignment.Left
 
-	local backButton = Instance.new("TextButton", soloFrame)
-	backButton.Size = UDim2.new(0, 50, 0, 30)
-	backButton.Position = UDim2.new(0, 10, 0, 10)
-	backButton.Text = "Back"
-	backButton.Font = Enum.Font.SourceSans
-	backButton.TextSize = 16
-	backButton.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
-	backButton.TextColor3 = Color3.new(1, 1, 1)
-	local backCorner = Instance.new("UICorner", backButton)
-	backCorner.CornerRadius = UDim.new(0, 6)
-
-	backButton.MouseButton1Click:Connect(function()
-		switchFrame(nil)
-	end)
+	local optionsFrame = Instance.new("Frame", soloFrame)
+	optionsFrame.Size = UDim2.new(1, -40, 1, -140)
+	optionsFrame.Position = UDim2.new(0, 20, 0, 70)
+	optionsFrame.BackgroundTransparency = 1
+	local listLayout = Instance.new("UIListLayout", optionsFrame)
+	listLayout.Padding = UDim.new(0, 15)
 
 	local selectedMode = "Story"
 	local selectedDifficulty = "Easy"
 
-	local storyButton = createButton("Story", 1)
-	storyButton.Parent = soloFrame
-	storyButton.Size = UDim2.new(0, 80, 0, 40)
-	storyButton.Position = UDim2.new(0.25, -40, 0.3, 0)
+	local modeLabel = Instance.new("TextLabel", optionsFrame)
+	modeLabel.Size = UDim2.new(1, 0, 0, 20)
+	modeLabel.Text = "Game Mode"
+	modeLabel.Font = Style.Fonts.Body
+	modeLabel.TextSize = Style.Sizes.Body
+	modeLabel.TextColor3 = Style.Colors.Text
+	modeLabel.BackgroundTransparency = 1
+	modeLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-	local endlessButton = createButton("Endless", 2)
-	endlessButton.Parent = soloFrame
-	endlessButton.Size = UDim2.new(0, 80, 0, 40)
-	endlessButton.Position = UDim2.new(0.75, -40, 0.3, 0)
+	local modeButtonsFrame = Instance.new("Frame", optionsFrame)
+	modeButtonsFrame.Size = UDim2.new(1, 0, 0, 40)
+	modeButtonsFrame.BackgroundTransparency = 1
+	local grid = Instance.new("UIGridLayout", modeButtonsFrame)
+	grid.CellSize = UDim2.new(0.5, -5, 1, 0)
+	grid.CellPadding = UDim2.new(0, 10, 0, 0)
+
+	local storyButton = Instance.new("TextButton", modeButtonsFrame)
+	storyButton.Text = "Story"
+	local endlessButton = Instance.new("TextButton", modeButtonsFrame)
+	endlessButton.Text = "Endless"
+
+	for _, button in ipairs({storyButton, endlessButton}) do
+		button.Size = UDim2.new(1,0,1,0)
+		button.Font = Style.Fonts.Body
+		button.TextSize = Style.Sizes.Body
+		button.TextColor3 = Style.Colors.Text
+		button.BackgroundColor3 = Style.Colors.Secondary
+		local corner = Instance.new("UICorner", button)
+		corner.CornerRadius = Style.Radius
+	end
 
 	storyButton.MouseButton1Click:Connect(function()
 		selectedMode = "Story"
-		storyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 81)
-		endlessButton.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+		storyButton.BackgroundColor3 = Style.Colors.Accent
+		endlessButton.BackgroundColor3 = Style.Colors.Secondary
 	end)
 
 	endlessButton.MouseButton1Click:Connect(function()
 		selectedMode = "Endless"
-		endlessButton.BackgroundColor3 = Color3.fromRGB(0, 170, 81)
-		storyButton.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+		endlessButton.BackgroundColor3 = Style.Colors.Accent
+		storyButton.BackgroundColor3 = Style.Colors.Secondary
 	end)
-	storyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 81) -- Default selection
+	storyButton.BackgroundColor3 = Style.Colors.Accent -- Default selection
 
-	local difficultySelector = createDifficultySelector(soloFrame, function(difficulty)
+	local difficultySelector = createDifficultySelector(optionsFrame, function(difficulty)
 		selectedDifficulty = difficulty
 	end)
-	difficultySelector.Position = UDim2.new(0.5, -180, 0.5, 0)
-	difficultySelector.Size = UDim2.new(0, 360, 0, 60)
-	local grid = difficultySelector:FindFirstChild("DifficultyButtons"):FindFirstChildOfClass("UIGridLayout")
-	if grid then
-		grid.CellSize = UDim2.new(0, 50, 0, 30)
-	end
 
-	local startSoloButton = createButton("Start Solo", 3)
-	startSoloButton.Parent = soloFrame
-	startSoloButton.Position = UDim2.new(0.5, -100, 0.8, 0)
+	local startSoloButton = Instance.new("TextButton", soloFrame)
+	startSoloButton.Size = UDim2.new(1, -40, 0, 50)
+	startSoloButton.Position = UDim2.new(0, 20, 1, -70)
+	startSoloButton.Text = "Start Solo Game"
+	startSoloButton.Font = Style.Fonts.Header
+	startSoloButton.TextSize = Style.Sizes.Subheader
+	startSoloButton.BackgroundColor3 = Style.Colors.Success
+	startSoloButton.TextColor3 = Style.Colors.Background
+	local startCorner = Instance.new("UICorner", startSoloButton)
+	startCorner.CornerRadius = Style.Radius
+
 	startSoloButton.MouseButton1Click:Connect(function()
-		print(string.format("Client requesting to start solo game. Mode: %s, Difficulty: %s", selectedMode, selectedDifficulty))
 		lobbyRemote:FireServer("startSoloGame", { gameMode = selectedMode, difficulty = selectedDifficulty })
 	end)
 end
@@ -970,16 +1084,31 @@ end)
 -- Placeholder for room entry creation, so we can use it in the update function
 local function createRoomEntry(roomName, hostName, playerCount, gameMode)
 	local entry = Instance.new("TextButton")
-	entry.Size = UDim2.new(1, -10, 0, 40)
-	-- New format: Room Name - Host: HostName (Mode | Players: X/Y)
-	entry.Text = string.format(" %s - Host: %s (%s | Pemain: %s)", roomName, hostName, gameMode or "Story", playerCount)
-	entry.Font = Enum.Font.SourceSans
-	entry.TextSize = 16 -- Slightly smaller to fit more text
-	entry.TextColor3 = Color3.new(1, 1, 1)
-	entry.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
-	entry.TextXAlignment = Enum.TextXAlignment.Left
+	entry.Size = UDim2.new(1, -10, 0, 50)
+	entry.BackgroundColor3 = Style.Colors.Secondary
 	local corner = Instance.new("UICorner", entry)
-	corner.CornerRadius = UDim.new(0, 4)
+	corner.CornerRadius = Style.Radius
+
+	local title = Instance.new("TextLabel", entry)
+	title.Size = UDim2.new(0.7, 0, 1, 0)
+	title.Position = UDim2.new(0, 15, 0, 0)
+	title.Text = string.format("%s - Host: %s", roomName, hostName)
+	title.Font = Style.Fonts.Body
+	title.TextSize = Style.Sizes.Body
+	title.TextColor3 = Style.Colors.TextHeader
+	title.BackgroundTransparency = 1
+	title.TextXAlignment = Enum.TextXAlignment.Left
+
+	local details = Instance.new("TextLabel", entry)
+	details.Size = UDim2.new(0.3, 0, 1, 0)
+	details.Position = UDim2.new(0.7, -15, 0, 0)
+	details.Text = string.format("%s | %s", gameMode or "Story", playerCount)
+	details.Font = Style.Fonts.Light
+	details.TextSize = Style.Sizes.Small
+	details.TextColor3 = Style.Colors.TextMuted
+	details.BackgroundTransparency = 1
+	details.TextXAlignment = Enum.TextXAlignment.Right
+
 	return entry
 end
 

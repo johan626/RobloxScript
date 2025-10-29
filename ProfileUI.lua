@@ -34,7 +34,7 @@ profileScreenGui.Name = "ProfileUI"
 profileScreenGui.Parent = playerGui
 profileScreenGui.Enabled = true
 profileScreenGui.ResetOnSpawn = false
-profileScreenGui.IgnoreGuiInset = true
+profileScreenGui.IgnoreGuiInset = false
 
 --[[ HELPER FUNCTIONS ]]--
 local function create(instanceType, properties)
@@ -175,8 +175,9 @@ end
 local profileButton = create("TextButton", {
 	Name = "ProfileButton",
 	Parent = profileScreenGui,
+	AnchorPoint = Vector2.new(0, 0.5),
 	Size = UDim2.new(0.15, 0, 0.1, 0),
-	Position = UDim2.new(0.839, 0, 0.019, 0),
+	Position = UDim2.new(0.01, 0, 0.375, 0),
 	Text = "Profile",
 	Font = Enum.Font.SourceSansBold,
 	TextSize = 18,
@@ -187,6 +188,7 @@ local profileButton = create("TextButton", {
 	TextScaled = true
 })
 create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = profileButton })
+create("UIPadding", { PaddingBottom = UDim.new(0.15, 0), PaddingLeft = UDim.new(0.15, 0), PaddingRight = UDim.new(0.15, 0), PaddingTop = UDim.new(0.15, 0), Parent = profileButton })
 
 --================================================================================--
 --[[ MAIN PROFILE PANEL (Overhauled) ]]--

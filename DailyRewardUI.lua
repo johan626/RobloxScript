@@ -179,19 +179,26 @@ rewardButtonGui.Parent = playerGui
 local openButton = Instance.new("TextButton")
 openButton.Name = "OpenDailyReward"
 openButton.Text = "🎁 Reward"
-openButton.Size = UDim2.new(0, 120, 0, 40)
-openButton.AnchorPoint = Vector2.new(0, 1)
-openButton.Position = UDim2.new(0.02, 0, 0.98, 0)
+openButton.AnchorPoint = Vector2.new(0, 0.5)
+openButton.Size = UDim2.new(0.15, 0, 0.1, 0)
+openButton.Position = UDim2.new(0.01, 0, 0.625, 0)
 openButton.Font = Enum.Font.SourceSansBold
 openButton.TextSize = 18
 openButton.BackgroundColor3 = Color3.fromRGB(52, 152, 219) -- Biru modern
 openButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 openButton.BorderSizePixel = 0
+openButton.TextScaled = true
 openButton.Parent = rewardButtonGui
 local openCorner = Instance.new("UICorner")
 openCorner.CornerRadius = UDim.new(0, 8)
 openCorner.Parent = openButton
 
+local padding = Instance.new("UIPadding")
+padding.PaddingTop = UDim.new(0.15, 0)
+padding.PaddingLeft = UDim.new(0.15, 0)
+padding.PaddingBottom = UDim.new(0.15, 0)
+padding.PaddingRight = UDim.new(0.15, 0)
+padding.Parent = openButton
 
 -- ======================================================
 -- BAGIAN 2: LOGIKA UI

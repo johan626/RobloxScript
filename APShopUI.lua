@@ -40,8 +40,6 @@ function apShopUI:Create()
 	mainFrame.Size = UDim2.new(0.9, 0, 0.9, 0)
 	mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 	mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	mainFrame.BorderSizePixel = 2
-	mainFrame.BorderColor3 = Color3.fromRGB(255, 200, 80)
 	mainFrame.Visible = false
 	mainFrame.Parent = screenGui
 	local uIListLayoutmainFrame = Instance.new("UIListLayout")
@@ -54,13 +52,32 @@ function apShopUI:Create()
 	uIPaddingMainFrame.PaddingBottom = UDim.new(0.01, 0)
 	uIPaddingMainFrame.PaddingRight = UDim.new(0.01, 0)
 	uIPaddingMainFrame.Parent = mainFrame
+
+	-- Modernisasi: Sudut membulat dan garis tepi
+	local mainCorner = Instance.new("UICorner")
+	mainCorner.CornerRadius = UDim.new(0, 8)
+	mainCorner.Parent = mainFrame
+
+	local mainStroke = Instance.new("UIStroke")
+	mainStroke.Color = Color3.fromRGB(255, 200, 80)
+	mainStroke.Thickness = 2
+	mainStroke.Parent = mainFrame
 	
 	-- Title bar remains mostly the same
 	local titleFrame = Instance.new("Frame")
 	titleFrame.Name = "Title"
 	titleFrame.Size = UDim2.new(1, 0, 0.1, 0)
 	titleFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	titleFrame.BorderSizePixel = 0
 	titleFrame.Parent = mainFrame
+
+	local titleGradient = Instance.new("UIGradient")
+	titleGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(85, 85, 85)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(45, 45, 45))
+	})
+	titleGradient.Rotation = 90
+	titleGradient.Parent = titleFrame
 	
 	local mainFrameChild = Instance.new("Frame")
 	mainFrameChild.Name = "Childframe"
@@ -77,29 +94,30 @@ function apShopUI:Create()
 	-- Title text and AP Label
 	local titleLabel = Instance.new("TextLabel")
 	titleLabel.Name = "TitleLabel"
-	titleLabel.Size = UDim2.new(0.201, 0, 0.7, 0)
-	titleLabel.Text = "Toko Achievement Point"
-	titleLabel.Font = Enum.Font.SourceSansBold
+	titleLabel.Size = UDim2.new(0.4, 0, 0.8, 0)
+	titleLabel.Position = UDim2.new(0.3, 0, 0.1, 0)
+	titleLabel.Text = "Toko Achievement"
+	titleLabel.Font = Enum.Font.GothamBlack
 	titleLabel.BackgroundTransparency = 1
-	titleLabel.TextSize = 20
-	titleLabel.TextColor3 = Color3.fromRGB(255, 200, 80)
+	titleLabel.TextSize = 28
+	titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 	titleLabel.TextXAlignment = Enum.TextXAlignment.Center
-	titleLabel.TextYAlignment = Enum.TextYAlignment.Center
-	titleLabel.Position = UDim2.new(0.399, 0, -0.125, 0)
-	titleLabel.TextScaled = true
+
+	local titleStroke = Instance.new("UIStroke")
+	titleStroke.Color = Color3.fromRGB(0, 0, 0)
+	titleStroke.Thickness = 1.5
+	titleStroke.Parent = titleLabel
 	titleLabel.Parent = titleFrame
 
 	apLabel = Instance.new("TextLabel")
 	apLabel.Name = "APLabel"
-	apLabel.Size = UDim2.new(0.099, 0, 0.55, 0)
-	apLabel.Font = Enum.Font.SourceSansBold
-	apLabel.TextSize = 18
-	apLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-	apLabel.TextXAlignment = Enum.TextXAlignment.Center
-	apLabel.TextYAlignment = Enum.TextYAlignment.Center
-	apLabel.Position = UDim2.new(0.45, 0, 0.45, 0)
+	apLabel.Size = UDim2.new(0.3, 0, 0.8, 0)
+	apLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
+	apLabel.Font = Enum.Font.GothamBold
+	apLabel.TextSize = 22
+	apLabel.TextColor3 = Color3.fromRGB(255, 200, 80)
+	apLabel.TextXAlignment = Enum.TextXAlignment.Left
 	apLabel.BackgroundTransparency = 1
-	apLabel.TextScaled = true
 	apLabel.Parent = titleFrame
 
 	local closeButton = Instance.new("TextButton")
@@ -107,10 +125,24 @@ function apShopUI:Create()
 	closeButton.Size = UDim2.new(0.039, 0, 0.65, 0)
 	closeButton.Position = UDim2.new(0.955, 0, 0.175, 0)
 	closeButton.Text = "X"
-	closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+	closeButton.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
 	closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 	closeButton.Font = Enum.Font.SourceSansBold
+	closeButton.BorderSizePixel = 0
 	closeButton.Parent = titleFrame
+
+	local closeButtonCorner = Instance.new("UICorner")
+	closeButtonCorner.CornerRadius = UDim.new(0, 6)
+	closeButtonCorner.Parent = closeButton
+
+	local closeButtonGradient = Instance.new("UIGradient")
+	closeButtonGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(240, 80, 80)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 50, 50))
+	})
+	closeButtonGradient.Rotation = 90
+	closeButtonGradient.Parent = closeButton
+
 	closeButton.MouseButton1Click:Connect(function()
 		apShopUI:Hide()
 	end)
@@ -123,15 +155,23 @@ function apShopUI:Create()
 	scrollingFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 	scrollingFrame.BorderSizePixel = 0
 	scrollingFrame.ScrollBarThickness = 7
-	scrollingFrame.BackgroundTransparency = 1
 	scrollingFrame.Parent = mainFrameChild
+
+	local scrollingFrameCorner = Instance.new("UICorner")
+	scrollingFrameCorner.CornerRadius = UDim.new(0, 6)
+	scrollingFrameCorner.Parent = scrollingFrame
 
 	-- Right Panel for preview
 	local previewPanel = Instance.new("Frame")
 	previewPanel.Name = "PreviewPanel"
 	previewPanel.Size = UDim2.new(0.5, 0, 1, 0)
 	previewPanel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	previewPanel.BorderSizePixel = 0
 	previewPanel.Parent = mainFrameChild
+
+	local previewPanelCorner = Instance.new("UICorner")
+	previewPanelCorner.CornerRadius = UDim.new(0, 6)
+	previewPanelCorner.Parent = previewPanel
 
 	previewNameLabel = Instance.new("TextLabel")
 	previewNameLabel.Name = "PreviewNameLabel"
@@ -153,6 +193,10 @@ function apShopUI:Create()
 	previewViewport.LightDirection = Vector3.new(-1, -1, -1)
 	previewViewport.Parent = previewPanel
 
+	local previewViewportCorner = Instance.new("UICorner")
+	previewViewportCorner.CornerRadius = UDim.new(0, 6)
+	previewViewportCorner.Parent = previewViewport
+
 	-- Zoom Slider elements
 	local sliderTrack = Instance.new("Frame")
 	sliderTrack.Name = "ZoomSliderTrack"
@@ -161,6 +205,10 @@ function apShopUI:Create()
 	sliderTrack.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 	sliderTrack.Parent = previewPanel
 	zoomSlider.Track = sliderTrack
+
+	local sliderTrackCorner = Instance.new("UICorner")
+	sliderTrackCorner.CornerRadius = UDim.new(0, 5)
+	sliderTrackCorner.Parent = sliderTrack
 
 	local sliderFill = Instance.new("Frame")
 	sliderFill.Name = "ZoomSliderFill"
@@ -180,6 +228,10 @@ function apShopUI:Create()
 	sliderHandle.ZIndex = 2
 	sliderHandle.Parent = sliderTrack
 	zoomSlider.Handle = sliderHandle
+
+	local sliderHandleCorner = Instance.new("UICorner")
+	sliderHandleCorner.CornerRadius = UDim.new(0, 10)
+	sliderHandleCorner.Parent = sliderHandle
 
 	-- Populate the item list
 	self:PopulateShop(scrollingFrame)
@@ -201,25 +253,56 @@ function apShopUI:PopulateShop(scrollingFrame)
 				itemFrame.AutoButtonColor = false
 				itemFrame.Parent = scrollingFrame
 
+				local itemFrameCorner = Instance.new("UICorner")
+				itemFrameCorner.CornerRadius = UDim.new(0, 6)
+				itemFrameCorner.Parent = itemFrame
+
+				local itemStroke = Instance.new("UIStroke")
+				itemStroke.Thickness = 1
+				itemStroke.Color = Color3.fromRGB(70, 70, 70)
+				itemStroke.Parent = itemFrame
+
+				-- Hover effect
+				itemFrame.MouseEnter:Connect(function()
+					itemFrame.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+					itemStroke.Color = Color3.fromRGB(255, 200, 80)
+				end)
+
+				itemFrame.MouseLeave:Connect(function()
+					itemFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+					itemStroke.Color = Color3.fromRGB(70, 70, 70)
+				end)
+
 				local skinLabel = Instance.new("TextLabel")
-				skinLabel.Size = UDim2.new(0.518, 0, 0.5, 0)
-				skinLabel.Position = UDim2.new(0.025, 0, 0.029, 0)
-				skinLabel.Text = string.format("%s (%s)", skinName, weaponName)
-				skinLabel.Font = Enum.Font.SourceSansBold
+				skinLabel.Size = UDim2.new(0.65, 0, 0.4, 0)
+				skinLabel.Position = UDim2.new(0.04, 0, 0.15, 0)
+				skinLabel.Text = skinName
+				skinLabel.Font = Enum.Font.GothamBold
 				skinLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 				skinLabel.TextXAlignment = Enum.TextXAlignment.Left
-				skinLabel.TextScaled = true
+				skinLabel.TextSize = 18
 				skinLabel.BackgroundTransparency = 1
 				skinLabel.Parent = itemFrame
 
+				local weaponTypeLabel = Instance.new("TextLabel")
+				weaponTypeLabel.Size = UDim2.new(0.65, 0, 0.3, 0)
+				weaponTypeLabel.Position = UDim2.new(0.04, 0, 0.55, 0)
+				weaponTypeLabel.Text = weaponName
+				weaponTypeLabel.Font = Enum.Font.SourceSans
+				weaponTypeLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+				weaponTypeLabel.TextXAlignment = Enum.TextXAlignment.Left
+				weaponTypeLabel.TextSize = 14
+				weaponTypeLabel.BackgroundTransparency = 1
+				weaponTypeLabel.Parent = itemFrame
+
 				local priceLabel = Instance.new("TextLabel")
-				priceLabel.Size = UDim2.new(0.7, 0, 0.286, 0)
-				priceLabel.Position = UDim2.new(0.025, 0, 0.5, 0)
-				priceLabel.Text = "Harga: " .. tostring(skinData.APCost) .. " AP"
-				priceLabel.Font = Enum.Font.SourceSans
+				priceLabel.Size = UDim2.new(0.3, 0, 0.8, 0)
+				priceLabel.Position = UDim2.new(0.35, 0, 0.1, 0)
+				priceLabel.Text = tostring(skinData.APCost) .. " AP"
+				priceLabel.Font = Enum.Font.GothamBold
 				priceLabel.TextColor3 = Color3.fromRGB(255, 200, 80)
-				priceLabel.TextXAlignment = Enum.TextXAlignment.Left
-				priceLabel.TextScaled = true
+				priceLabel.TextXAlignment = Enum.TextXAlignment.Right
+				priceLabel.TextSize = 18
 				priceLabel.BackgroundTransparency = 1
 				priceLabel.Parent = itemFrame
 
@@ -227,12 +310,26 @@ function apShopUI:PopulateShop(scrollingFrame)
 				buyButton.Name = "BuyButton"
 				buyButton.Size = UDim2.new(0.251, 0, 0.8, 0)
 				buyButton.Position = UDim2.new(0.725, 0, 0.1, 0)
-				buyButton.Text = "Buy"
+				buyButton.Text = "Beli"
 				buyButton.BackgroundColor3 = Color3.fromRGB(80, 160, 80)
 				buyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+				buyButton.Font = Enum.Font.SourceSansBold
 				buyButton.TextYAlignment = Enum.TextYAlignment.Center
 				buyButton.TextXAlignment = Enum.TextXAlignment.Center
+				buyButton.BorderSizePixel = 0
 				buyButton.Parent = itemFrame
+
+				local buyButtonCorner = Instance.new("UICorner")
+				buyButtonCorner.CornerRadius = UDim.new(0, 6)
+				buyButtonCorner.Parent = buyButton
+
+				local buyButtonGradient = Instance.new("UIGradient")
+				buyButtonGradient.Color = ColorSequence.new({
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 180, 100)),
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 160, 80))
+				})
+				buyButtonGradient.Rotation = 90
+				buyButtonGradient.Parent = buyButton
 
 				buyButton.MouseButton1Click:Connect(function()
 					local result = purchaseSkinFunc:InvokeServer(weaponName, skinName)

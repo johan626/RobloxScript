@@ -6,6 +6,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Muat modul yang diperlukan
+local APShopConfig = require(script.Parent:WaitForChild("APShopConfig"))
 local StatsModule = require(script.Parent:WaitForChild("StatsModule"))
 local SkinManager = require(script.Parent:WaitForChild("SkinManager"))
 local WeaponModule = require(ReplicatedStorage:WaitForChild("ModuleScript"):WaitForChild("WeaponModule"))
@@ -14,6 +15,44 @@ local CoinsManager = require(script.Parent:WaitForChild("CoinsModule"))
 local APShopManager = {}
 
 -- Fungsi untuk membeli skin dengan AP
+function APShopManager:PurchaseGenericItemWithAP(player, itemID)
+	if not player or not itemID then
+		return { Success = false, Reason = "Argumen tidak valid." }
+	end
+
+	local itemConfig = APShopConfig.Items[itemID]
+	if not itemConfig then
+		return { Success = false, Reason = "Item tidak ditemukan." }
+	end
+
+	local cost = itemConfig.APCost
+	if not cost or cost <= 0 then
+		return { Success = false, Reason = "Item ini tidak untuk dijual." }
+	end
+
+	local currentPoints = StatsModule.GetAchievementPoints(player)
+	if currentPoints < cost then
+		return { Success = false, Reason = "Achievement Points tidak cukup." }
+	end
+
+	local pointsRemoved = StatsModule.RemoveAchievementPoints(player, cost)
+	if not pointsRemoved then
+		return { Success = false, Reason = "Gagal mengurangi Achievement Points." }
+	end
+
+	-- Berikan item berdasarkan tipenya
+	if itemID == "SKILL_RESET_TOKEN" then
+		local currentTokens = StatsModule.GetStat(player, "FreeSkillResets") or 0
+		StatsModule.SetStat(player, "FreeSkillResets", currentTokens + 1)
+	elseif itemID == "EXCLUSIVE_TITLE_COLLECTOR" then
+		local TitleManager = require(script.Parent:WaitForChild("TitleManager"))
+		TitleManager.UnlockTitle(player, itemConfig.Title)
+	end
+
+	print(string.format("%s berhasil membeli item '%s' seharga %d AP.", player.Name, itemConfig.Name, cost))
+	return { Success = true, Reason = "Pembelian berhasil!" }
+end
+
 function APShopManager:PurchaseSkinWithAP(player, weaponName, skinName)
 	if not player or not weaponName or not skinName then
 		return { Success = false, Reason = "Argumen tidak valid." }
@@ -79,6 +118,12 @@ local purchaseSkinFunc = Instance.new("RemoteFunction", remoteFunctions)
 purchaseSkinFunc.Name = "PurchaseSkinWithAP"
 purchaseSkinFunc.OnServerInvoke = function(player, weaponName, skinName)
 	return APShopManager:PurchaseSkinWithAP(player, weaponName, skinName)
+end
+
+local purchaseGenericItemFunc = Instance.new("RemoteFunction", remoteFunctions)
+purchaseGenericItemFunc.Name = "PurchaseGenericItemWithAP"
+purchaseGenericItemFunc.OnServerInvoke = function(player, itemID)
+	return APShopManager:PurchaseGenericItemWithAP(player, itemID)
 end
 
 return APShopManager

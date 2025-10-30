@@ -97,6 +97,23 @@ local config = {
 				Hell = 2.5,
 				Crazy = 3,
 			}
+		},
+
+		-- Pengaturan Ekonomi XP (Progresi Level)
+		XP = {
+			-- Bonus XP tetap yang diberikan di akhir setiap gelombang
+			WaveCompleteXPBonus = 100,
+			-- Rasio konversi kerusakan menjadi XP.
+			DamageToXPConversionRatio = 5,
+			-- Pengganda hadiah XP berdasarkan tingkat kesulitan.
+			DifficultyXPMultipliers = {
+				Easy = 1,
+				Normal = 1.2,
+				Hard = 1.5,
+				Expert = 2,
+				Hell = 2.2,
+				Crazy = 2.5,
+			}
 		}
 	},
 

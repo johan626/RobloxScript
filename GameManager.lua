@@ -89,6 +89,8 @@ local SpawnerModule = require(ModuleScriptServerScriptService:WaitForChild("Spaw
 local BuildingManager = require(ModuleScriptServerScriptService:WaitForChild("BuildingModule"))
 local PointsSystem = require(ModuleScriptServerScriptService:WaitForChild("PointsModule"))
 local CoinsModule = require(ModuleScriptServerScriptService:WaitForChild("CoinsModule"))
+local LevelModule = require(ModuleScriptServerScriptService:WaitForChild("LevelModule"))
+local BoosterManager = require(ModuleScriptServerScriptService:WaitForChild("BoosterManager"))
 local ElementModule = require(ModuleScriptServerScriptService:WaitForChild("ElementConfigModule"))
 local PerkHandler = require(ModuleScriptServerScriptService:WaitForChild("PerkModule"))
 local WalkSpeedManager = require(ModuleScriptServerScriptService:WaitForChild("WalkSpeedManager"))
@@ -223,6 +225,11 @@ local function HandleGameOver()
 
 	runToken += 1 -- Hentikan semua loop game yang sedang berjalan
 	gameStarted = false
+
+	-- Konsumsi booster berbasis game
+	for _, player in ipairs(Players:GetPlayers()) do
+		BoosterManager.ConsumeGameBooster(player, "COIN_BOOSTER_1GAME")
+	end
 
 	-- Kirim event ke semua client untuk menampilkan layar Game Over
 	GameOverEvent:FireAllClients()
@@ -457,6 +464,11 @@ local function startGameLoop()
 					runToken += 1
 					gameStarted = false
 
+					-- Konsumsi booster berbasis game
+					for _, player in ipairs(Players:GetPlayers()) do
+						BoosterManager.ConsumeGameBooster(player, "COIN_BOOSTER_1GAME")
+					end
+
 					-- Tunggu 10 detik sebelum teleport
 					task.wait(10)
 
@@ -520,10 +532,45 @@ local function startGameLoop()
 						local difficultyMultiplier = coinConfig.DifficultyCoinMultipliers[difficulty] or 1
 						local finalCoinReward = math.floor(baseReward * difficultyMultiplier)
 
+						-- Terapkan Coin Booster
+						if BoosterManager.IsBoosterActive(player, "COIN_BOOSTER_1GAME") then
+							finalCoinReward = math.floor(finalCoinReward * 1.5)
+							print(player.Name .. " mendapatkan bonus 50% Koin dari booster!")
+						end
+
 						if finalCoinReward > 0 then
 							CoinsModule.AddCoins(player, finalCoinReward)
 							print(string.format("%s mendapatkan %d Koin (Bonus: %d, Dari Kerusakan: %d, Pengganda: x%.2f)",
 								player.Name, finalCoinReward, coinConfig.WaveCompleteBonus, coinsFromDamage, difficultyMultiplier))
+						end
+					end
+
+					-- Kalkulasi dan berikan XP (Progresi Level)
+					local xpConfig = GameConfig.Economy.XP
+					if xpConfig and difficultyConfig then
+						local healthMultiplier = difficultyConfig.HealthMultiplier
+						local adjustedRatio = xpConfig.DamageToXPConversionRatio * healthMultiplier
+
+						local xpFromDamage = 0
+						if adjustedRatio > 0 then
+							xpFromDamage = math.floor(totalDamage / adjustedRatio)
+						end
+
+						local baseReward = xpConfig.WaveCompleteXPBonus + xpFromDamage
+
+						local difficultyMultiplier = xpConfig.DifficultyXPMultipliers[difficulty] or 1
+						local finalXPReward = math.floor(baseReward * difficultyMultiplier)
+
+						-- Terapkan XP Booster
+						if BoosterManager.IsBoosterActive(player, "XP_BOOSTER_30MIN") then
+							finalXPReward = finalXPReward * 2
+							print(player.Name .. " mendapatkan bonus 2x XP dari booster!")
+						end
+
+						if finalXPReward > 0 then
+							LevelModule.AddXP(player, finalXPReward)
+							print(string.format("%s mendapatkan %d XP (Bonus: %d, Dari Kerusakan: %d, Pengganda: x%.2f)",
+								player.Name, finalXPReward, xpConfig.WaveCompleteXPBonus, xpFromDamage, difficultyMultiplier))
 						end
 					end
 

@@ -92,6 +92,12 @@ function StatsModule.IncrementStat(player, key, amount)
 	end
 end
 
+function StatsModule.GetStat(player, key)
+	if not player or not key then return nil end
+	local data = StatsModule.GetData(player)
+	return data[key]
+end
+
 -- Fungsi publik untuk menambah statistik
 function StatsModule.AddKill(player, amount)
 	StatsModule.IncrementStat(player, "TotalKills", amount or 1)

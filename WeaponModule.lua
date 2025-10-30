@@ -55,7 +55,7 @@ WeaponModule.Weapons = {
 				ADS_Position_Mobile = Vector3.new(0.15, -0.37, -1),
 				ADS_Rotation_Mobile = Vector3.new(0, 0, 0),
 				MPCost = 2500,
-				APCost = 150
+				APCost = 500
 			}
 		},
 		ShowCrosshair = true,
@@ -121,7 +121,7 @@ WeaponModule.Weapons = {
 				ADS_Position_Mobile = Vector3.new(0.5, -0.45, -1),
 				ADS_Rotation_Mobile = Vector3.new(0, 0, 0),
 				MPCost = 2500,
-				APCost = 150
+				APCost = 500
 			}
 		},
 		ShowCrosshair = true,
@@ -186,8 +186,8 @@ WeaponModule.Weapons = {
 				ADS_Rotation = Vector3.new(0, 0, 0),
 				ADS_Position_Mobile = Vector3.new(0.3, -0.46, -1),
 				ADS_Rotation_Mobile = Vector3.new(0, 0, 0),
-				MPCost = 2500,
-				APCost = 150
+				MPCost = 5000,
+				APCost = 1500
 			}
 		},
 		ShowCrosshair = true,
@@ -254,7 +254,7 @@ WeaponModule.Weapons = {
 				ADS_Position_Mobile = Vector3.new(0.5, -0.25, -1),
 				ADS_Rotation_Mobile = Vector3.new(0, 0, 0),
 				MPCost = 2500,
-				APCost = 150
+				APCost = 1500
 			}
 		},
 		ShowCrosshair = true,
@@ -320,7 +320,7 @@ WeaponModule.Weapons = {
 				ADS_Position_Mobile = Vector3.new(0.15, 10, -1),
 				ADS_Rotation_Mobile = Vector3.new(0, 0, 0),
 				MPCost = 2500,
-				APCost = 150
+				APCost = 4000
 			}
 		},
 		ShowCrosshair = false,
@@ -915,7 +915,7 @@ WeaponModule.Weapons = {
 				ADS_Rotation = Vector3.new(0, 0, 0),
 				ADS_Position_Mobile = Vector3.new(0.15, 10, -1),
 				ADS_Rotation_Mobile = Vector3.new(0, 0, 0),
-				MPCost = 2500,
+				MPCost = 10000,
 				APCost = 150
 			}
 		},

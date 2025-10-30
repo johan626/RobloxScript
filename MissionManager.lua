@@ -230,6 +230,55 @@ function MissionManager:GetMissionDataForClient(player)
 	return clientData
 end
 
+function MissionManager:RerollDailyMission(player, missionIDToReroll)
+    local missionsData = self.GetData(player)
+    if missionsData.Daily.RerollUsed then
+        return false, "Anda sudah menggunakan reroll harian."
+    end
+
+    if not missionsData.Daily.Missions[missionIDToReroll] then
+        return false, "Misi yang dipilih tidak valid."
+    end
+
+    -- Hapus misi lama
+    missionsData.Daily.Missions[missionIDToReroll] = nil
+
+    -- Dapatkan misi baru yang unik
+    local available = {}
+    local currentIDs = {}
+    for id, _ in pairs(missionsData.Daily.Missions) do
+        table.insert(currentIDs, id)
+    end
+
+    for _, m in ipairs(MissionConfig.DailyMissions) do
+        if not table.find(currentIDs, m.ID) and not table.find(missionsData.RecentMissions, m.ID) then
+            table.insert(available, m)
+        end
+    end
+
+    if #available == 0 then -- Fallback jika tidak ada misi unik
+        for _, m in ipairs(MissionConfig.DailyMissions) do
+            if not table.find(currentIDs, m.ID) then
+                table.insert(available, m)
+            end
+        end
+    end
+
+	if #available == 0 then
+		return false, "Tidak ada misi lain yang tersedia untuk diganti."
+	end
+
+    local newMission = available[math.random(#available)]
+    missionsData.Daily.Missions[newMission.ID] = { Progress = 0, Completed = false, Claimed = false }
+    table.insert(missionsData.RecentMissions, newMission.ID)
+
+    missionsData.Daily.RerollUsed = true
+    self.SaveData(player, missionsData)
+
+	missionsResetEvent:FireClient(player) -- Memicu refresh UI di client
+    return true
+end
+
 
 -- =============================================================================
 -- KONEKSI EVENT

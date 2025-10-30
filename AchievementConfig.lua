@@ -28,9 +28,9 @@ end
 -- Function to generate weapon achievements dynamically
 local function generateWeaponAchievements(achievements)
 	local weaponTiers = {
-		{ Target = 1000,    Title = "Specialist",   APReward = 100 },
-		{ Target = 10000,   Title = "Expert",       APReward = 250 },
-		{ Target = 100000,  Title = "Master",       APReward = 1000 },
+		{ Target = 1000,    Title = "Specialist",   APReward = 75 },
+		{ Target = 10000,   Title = "Expert",       APReward = 300 },
+		{ Target = 100000,  Title = "Master",       APReward = 1250 },
 		{ Target = 1000000, Title = "Legendary",  APReward = 5000 },
 	}
 
@@ -59,9 +59,9 @@ local deadeyeConfig = {
 	Category = "Tempur",
 	Desc = "Get %s headshots.",
 	Tiers = {
-		{ Tier = 1, Name = "Sharpshooter", Title = "Sharpshooter", Target = 100,    APReward = 100 },
-		{ Tier = 2, Name = "Deadeye",      Title = "Deadeye",      Target = 1000,   APReward = 250 },
-		{ Tier = 3, Name = "Headhunter",   Title = "Headhunter",   Target = 10000,  APReward = 1000 },
+		{ Tier = 1, Name = "Sharpshooter", Title = "Sharpshooter", Target = 100,    APReward = 75 },
+		{ Tier = 2, Name = "Deadeye",      Title = "Deadeye",      Target = 1000,   APReward = 300 },
+		{ Tier = 3, Name = "Headhunter",   Title = "Headhunter",   Target = 10000,  APReward = 1250 },
 		{ Tier = 4, Name = "Godlike Aim",  Title = "Godlike Aim",  Target = 100000, APReward = 5000 },
 	}
 }
@@ -73,9 +73,9 @@ local survivorConfig = {
 	Category = "Ketahanan Hidup",
 	Desc = "Selesaikan %s gelombang tanpa terkena knock down.",
 	Tiers = {
-		{ Tier = 1, Name = "Determined",  Title = "Determined",  Target = 10,  APReward = 150 },
+		{ Tier = 1, Name = "Determined",  Title = "Determined",  Target = 10,  APReward = 75 },
 		{ Tier = 2, Name = "Resilient",   Title = "Resilient",   Target = 25,  APReward = 300 },
-		{ Tier = 3, Name = "Untouchable", Title = "Untouchable", Target = 50,  APReward = 750 },
+		{ Tier = 3, Name = "Untouchable", Title = "Untouchable", Target = 50,  APReward = 1250 },
 		{ Tier = 4, Name = "The Legend",  Title = "The Legend",  Target = 100, APReward = 2000 },
 	}
 }
@@ -87,10 +87,10 @@ local waveConquerorConfig = {
 	Category = "Ketahanan Hidup",
 	Desc = "Selesaikan total %s gelombang zombi.",
 	Tiers = {
-		{ Tier = 1, Name = "Rookie Conqueror",    Title = "Rookie Conqueror",    Target = 100,   APReward = 100 },
-		{ Tier = 2, Name = "Hardened Conqueror",  Title = "Hardened Conqueror",  Target = 500,   APReward = 250 },
-		{ Tier = 3, Name = "Veteran Conqueror",   Title = "Veteran Conqueror",   Target = 1000,  APReward = 500 },
-		{ Tier = 4, Name = "Legendary Conqueror", Title = "Legendary Conqueror", Target = 5000,  APReward = 1000 },
+		{ Tier = 1, Name = "Rookie Conqueror",    Title = "Rookie Conqueror",    Target = 100,   APReward = 75 },
+		{ Tier = 2, Name = "Hardened Conqueror",  Title = "Hardened Conqueror",  Target = 500,   APReward = 300 },
+		{ Tier = 3, Name = "Veteran Conqueror",   Title = "Veteran Conqueror",   Target = 1000,  APReward = 1250 },
+		{ Tier = 4, Name = "Legendary Conqueror", Title = "Legendary Conqueror", Target = 5000,  APReward = 2500 },
 	}
 }
 
@@ -101,10 +101,10 @@ local coinCollectorConfig = {
 	Category = "Koleksi",
 	Desc = "Kumpulkan total %s koin.",
 	Tiers = {
-		{ Tier = 1, Name = "Thrifty",     Title = "Thrifty",     Target = 100000,   APReward = 100 },
-		{ Tier = 2, Name = "Investor",    Title = "Investor",    Target = 500000,   APReward = 250 },
-		{ Tier = 3, Name = "Millionaire", Title = "Millionaire", Target = 1000000,  APReward = 500 },
-		{ Tier = 4, Name = "The Magnate", Title = "The Magnate", Target = 10000000, APReward = 1000 },
+		{ Tier = 1, Name = "Thrifty",     Title = "Thrifty",     Target = 100000,   APReward = 75 },
+		{ Tier = 2, Name = "Investor",    Title = "Investor",    Target = 500000,   APReward = 300 },
+		{ Tier = 3, Name = "Millionaire", Title = "Millionaire", Target = 1000000,  APReward = 1250 },
+		{ Tier = 4, Name = "The Magnate", Title = "The Magnate", Target = 10000000, APReward = 2500 },
 	}
 }
 
@@ -115,10 +115,10 @@ local bossHunterConfig = {
 	Category = "Progresi",
 	Desc = "Kalahkan total %s bos.",
 	Tiers = {
-		{ Tier = 1, Name = "Boss Hunter",   Title = "Boss Hunter",   Target = 10,   APReward = 150 },
+		{ Tier = 1, Name = "Boss Hunter",   Title = "Boss Hunter",   Target = 10,   APReward = 75 },
 		{ Tier = 2, Name = "Elite Hunter",  Title = "Elite Hunter",  Target = 50,   APReward = 300 },
-		{ Tier = 3, Name = "Master Hunter", Title = "Master Hunter", Target = 150,  APReward = 750 },
-		{ Tier = 4, Name = "The Dominator", Title = "The Dominator", Target = 500,  APReward = 2000 },
+		{ Tier = 3, Name = "Master Hunter", Title = "Master Hunter", Target = 150,  APReward = 1250 },
+		{ Tier = 4, Name = "The Dominator", Title = "The Dominator", Target = 500,  APReward = 2500 },
 	}
 }
 
@@ -129,10 +129,10 @@ local gachaEnthusiastConfig = {
 	Category = "Koleksi",
 	Desc = "Lakukan spin gacha sebanyak %s kali.",
 	Tiers = {
-		{ Tier = 1, Name = "Gambler",        Title = "Gambler",        Target = 50,    APReward = 100 },
-		{ Tier = 2, Name = "High Roller",    Title = "High Roller",    Target = 250,   APReward = 250 },
-		{ Tier = 3, Name = "Gacha Addict",   Title = "Gacha Addict",   Target = 1000,  APReward = 500 },
-		{ Tier = 4, Name = "King of Chance", Title = "King of Chance", Target = 5000,  APReward = 1000 },
+		{ Tier = 1, Name = "Gambler",        Title = "Gambler",        Target = 50,    APReward = 75 },
+		{ Tier = 2, Name = "High Roller",    Title = "High Roller",    Target = 250,   APReward = 300 },
+		{ Tier = 3, Name = "Gacha Addict",   Title = "Gacha Addict",   Target = 1000,  APReward = 1250 },
+		{ Tier = 4, Name = "King of Chance", Title = "King of Chance", Target = 5000,  APReward = 2500 },
 	}
 }
 
@@ -143,10 +143,10 @@ local missionAccomplishedConfig = {
 	Category = "Progresi",
 	Desc = "Selesaikan total %s misi.",
 	Tiers = {
-		{ Tier = 1, Name = "Operative",       Title = "Operative",       Target = 50,    APReward = 100 },
-		{ Tier = 2, Name = "Specialist",      Title = "Specialist",      Target = 200,   APReward = 250 },
-		{ Tier = 3, Name = "Elite Operative", Title = "Elite Operative", Target = 500,   APReward = 500 },
-		{ Tier = 4, Name = "Master of Tasks", Title = "Master of Tasks", Target = 1500,  APReward = 1000 },
+		{ Tier = 1, Name = "Operative",       Title = "Operative",       Target = 50,    APReward = 75 },
+		{ Tier = 2, Name = "Specialist",      Title = "Specialist",      Target = 200,   APReward = 300 },
+		{ Tier = 3, Name = "Elite Operative", Title = "Elite Operative", Target = 500,   APReward = 1250 },
+		{ Tier = 4, Name = "Master of Tasks", Title = "Master of Tasks", Target = 1500,  APReward = 2500 },
 	}
 }
 
@@ -157,10 +157,10 @@ local masterTacticianConfig = {
 	Category = "Progresi",
 	Desc = "Gunakan total %s booster untuk membantumu dalam pertempuran.",
 	Tiers = {
-		{ Tier = 1, Name = "Tactician",        Title = "Tactician",        Target = 50,    APReward = 100 },
-		{ Tier = 2, Name = "Strategist",       Title = "Strategist",       Target = 200,   APReward = 250 },
-		{ Tier = 3, Name = "Master Tactician", Title = "Master Tactician", Target = 500,   APReward = 500 },
-		{ Tier = 4, Name = "The Grandmaster",  Title = "The Grandmaster",  Target = 1500,  APReward = 1000 },
+		{ Tier = 1, Name = "Tactician",        Title = "Tactician",        Target = 50,    APReward = 75 },
+		{ Tier = 2, Name = "Strategist",       Title = "Strategist",       Target = 200,   APReward = 300 },
+		{ Tier = 3, Name = "Master Tactician", Title = "Master Tactician", Target = 500,   APReward = 1250 },
+		{ Tier = 4, Name = "The Grandmaster",  Title = "The Grandmaster",  Target = 1500,  APReward = 2500 },
 	}
 }
 
@@ -171,10 +171,10 @@ local livingLegendConfig = {
 	Category = "Progresi",
 	Desc = "Capai level pemain %s.",
 	Tiers = {
-		{ Tier = 1, Name = "Rising Star",    Title = "Rising Star",    Target = 50,   APReward = 150 },
+		{ Tier = 1, Name = "Rising Star",    Title = "Rising Star",    Target = 50,   APReward = 75 },
 		{ Tier = 2, Name = "Veteran",        Title = "Veteran",        Target = 100,  APReward = 300 },
-		{ Tier = 3, Name = "Elite",          Title = "Elite",          Target = 250,  APReward = 750 },
-		{ Tier = 4, Name = "Living Legend",  Title = "Living Legend",  Target = 500,  APReward = 2000 },
+		{ Tier = 3, Name = "Elite",          Title = "Elite",          Target = 250,  APReward = 1250 },
+		{ Tier = 4, Name = "Living Legend",  Title = "Living Legend",  Target = 500,  APReward = 2500 },
 	}
 }
 
@@ -185,10 +185,10 @@ local zombieSlayerConfig = {
 	Category = "Tempur",
 	Desc = "Kalahkan total %s zombi.",
 	Tiers = {
-		{ Tier = 1, Name = "Zombie Slayer",      Title = "Zombie Slayer",      Target = 5000,    APReward = 100 },
-		{ Tier = 2, Name = "Zombie Executioner", Title = "Zombie Executioner", Target = 25000,   APReward = 250 },
-		{ Tier = 3, Name = "Zombie Annihilator", Title = "Zombie Annihilator", Target = 100000,  APReward = 500 },
-		{ Tier = 4, Name = "The Apocalypse",     Title = "The Apocalypse",     Target = 500000,  APReward = 1000 },
+		{ Tier = 1, Name = "Zombie Slayer",      Title = "Zombie Slayer",      Target = 5000,    APReward = 75 },
+		{ Tier = 2, Name = "Zombie Executioner", Title = "Zombie Executioner", Target = 25000,   APReward = 300 },
+		{ Tier = 3, Name = "Zombie Annihilator", Title = "Zombie Annihilator", Target = 100000,  APReward = 1250 },
+		{ Tier = 4, Name = "The Apocalypse",     Title = "The Apocalypse",     Target = 500000,  APReward = 2500 },
 	}
 }
 
@@ -199,10 +199,10 @@ local warMachineConfig = {
 	Category = "Tempur",
 	Desc = "Berikan total %s kerusakan pada zombi.",
 	Tiers = {
-		{ Tier = 1, Name = "Brawler",       Title = "Brawler",       Target = 5000000,    APReward = 100 },
-		{ Tier = 2, Name = "Ravager",       Title = "Ravager",       Target = 25000000,   APReward = 250 },
-		{ Tier = 3, Name = "Juggernaut",    Title = "Juggernaut",    Target = 100000000,  APReward = 500 },
-		{ Tier = 4, Name = "War Machine",   Title = "War Machine",   Target = 500000000,  APReward = 1000 },
+		{ Tier = 1, Name = "Brawler",       Title = "Brawler",       Target = 5000000,    APReward = 75 },
+		{ Tier = 2, Name = "Ravager",       Title = "Ravager",       Target = 25000000,   APReward = 300 },
+		{ Tier = 3, Name = "Juggernaut",    Title = "Juggernaut",    Target = 100000000,  APReward = 1250 },
+		{ Tier = 4, Name = "War Machine",   Title = "War Machine",   Target = 500000000,  APReward = 2500 },
 	}
 }
 

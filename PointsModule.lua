@@ -115,10 +115,6 @@ function PointsSystem.AddDamage(player, damageAmount)
 		end
 	end
 
-	-- Integrasi dengan LevelManager: 1 damage = 1 XP
-	if LevelManager then
-		LevelManager.AddXP(player, damageAmount)
-	end
 end
 
 return PointsSystem

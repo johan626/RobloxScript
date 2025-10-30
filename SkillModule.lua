@@ -165,13 +165,26 @@ function SkillModule.ResetSkills(player)
 	local statsData = StatsModule.GetData(player)
 	local cost = SkillModule.GetResetCost(player)
 
-	-- 3. Cek koin
-	local coinData = CoinsModule.GetData(player)
-	if coinData.Coins < cost then
-		return { success = false, message = "Koin tidak cukup untuk reset." }
+	-- 3. Cek token atau koin
+	local freeResets = StatsModule.GetStat(player, "FreeSkillResets") or 0
+	if freeResets > 0 then
+		-- Gunakan token
+		StatsModule.SetStat(player, "FreeSkillResets", freeResets - 1)
+		print(player.Name .. " menggunakan Skill Reset Token.")
+	else
+		-- Jika tidak ada token, gunakan koin
+		local coinData = CoinsModule.GetData(player)
+		if coinData.Coins < cost then
+			return { success = false, message = "Koin tidak cukup untuk reset." }
+		end
+
+		local success = CoinsModule.SubtractCoins(player, cost)
+		if not success then
+			return { success = false, message = "Gagal mengurangi koin." }
+		end
 	end
 
-	-- 4. Hitung total poin skill yang dihabiskan
+	-- 5. Hitung total poin skill yang dihabiskan
 	local spentSkillPoints = 0
 	if statsData.Skills then
 		for skillName, levels in pairs(statsData.Skills) do
@@ -188,13 +201,7 @@ function SkillModule.ResetSkills(player)
 		end
 	end
 
-	-- 5. Lakukan transaksi dan update data
-	local success = CoinsModule.SubtractCoins(player, cost)
-	if not success then
-		return { success = false, message = "Gagal mengurangi koin." }
-	end
-
-	-- Kembalikan poin skill
+	-- 5. Kembalikan poin skill
 	statsData.SkillPoints = (statsData.SkillPoints or 0) + spentSkillPoints
 
 	-- Reset semua skill ke level 0

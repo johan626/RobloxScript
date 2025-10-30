@@ -28,7 +28,7 @@ local DEFAULT_LEVEL_DATA = {
 
 -- Fungsi untuk menghitung XP yang dibutuhkan untuk level berikutnya
 local function GetXPForNextLevel(level)
-	return 1000 + (level * 100)
+	return math.floor(1000 * (level ^ 1.5))
 end
 
 function LevelManager.GetData(player)

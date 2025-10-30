@@ -154,7 +154,7 @@ end
 function SkillModule.GetResetCost(player)
 	local data = StatsModule.GetData(player)
 	local resetCount = data.SkillResetCount or 0
-	return 5000 * (2 ^ resetCount)
+	return 4000 * (2 ^ resetCount)
 end
 
 function SkillModule.ResetSkills(player)
@@ -239,8 +239,8 @@ function SkillModule.GetSingleSkillResetCost(player, skillName, categoryName)
 		currentLevel = data.Skills[skillName]
 	end
 
-	-- Biaya = Level saat ini * 500 koin
-	return (currentLevel or 0) * 500
+	-- Biaya = Level saat ini * 300 koin
+	return (currentLevel or 0) * 300
 end
 
 function SkillModule.ResetSingleSkill(player, skillName, categoryName)

@@ -3,7 +3,7 @@
 -- Script Place: Lobby
 
 local GachaConfig = {
-	GACHA_COST = 100,
+	GACHA_COST = 1500,
 
 	RARITY_CHANCES = {
 		Legendary = 5,  -- Chance in percent (5%)

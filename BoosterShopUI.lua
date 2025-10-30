@@ -16,7 +16,6 @@ local playerGui = player:WaitForChild("PlayerGui")
 local ToggleBoosterShopEvent = ReplicatedStorage.RemoteEvents:WaitForChild("ToggleBoosterShopEvent")
 local PurchaseBoosterFunction = ReplicatedStorage.RemoteFunctions:WaitForChild("PurchaseBoosterFunction")
 local GetBoosterConfig = ReplicatedStorage.RemoteFunctions:WaitForChild("GetBoosterConfig")
-local ActivateBoosterEvent = ReplicatedStorage.RemoteEvents:WaitForChild("ActivateBoosterEvent")
 
 -- ==================================
 -- ======== UI SETUP ================
@@ -181,6 +180,18 @@ detailsDesc.Text = "Select a booster from the grid to see its details here."
 detailsDesc.LayoutOrder = 2
 detailsDesc.Parent = detailsPanel
 
+local detailsOwnedLabel = Instance.new("TextLabel")
+detailsOwnedLabel.Name = "DetailsOwnedLabel"
+detailsOwnedLabel.Size = UDim2.new(1, 0, 0, 20)
+detailsOwnedLabel.Font = FONTS.Body
+detailsOwnedLabel.TextSize = 16
+detailsOwnedLabel.TextColor3 = PALETTE.TextSecondary
+detailsOwnedLabel.BackgroundTransparency = 1
+detailsOwnedLabel.Text = ""
+detailsOwnedLabel.Visible = false
+detailsOwnedLabel.LayoutOrder = 3
+detailsOwnedLabel.Parent = detailsPanel
+
 local actionButton = Instance.new("TextButton")
 actionButton.Name = "ActionButton"
 actionButton.Size = UDim2.new(1, -40, 0, 60)
@@ -276,6 +287,7 @@ local selectedBoosterId = nil
 local function updateDetailsPanel(boosterId)
 	selectedBoosterId = boosterId
 	actionButton.Visible = false
+	detailsOwnedLabel.Visible = false
 
 	if not boosterId or not boosterConfigCache[boosterId] then
 		detailsTitle.Text = "SELECT AN ITEM"
@@ -287,21 +299,19 @@ local function updateDetailsPanel(boosterId)
 	detailsTitle.Text = boosterInfo.Name
 	detailsDesc.Text = boosterInfo.Description
 
-	actionButton.Visible = true
-	local owned = currentPlayerData.inventory[boosterId] and currentPlayerData.inventory[boosterId] > 0
+	local ownedCount = currentPlayerData.inventory[boosterId] or 0
+	if ownedCount > 0 then
+		detailsOwnedLabel.Text = "You own: " .. ownedCount
+		detailsOwnedLabel.Visible = true
+	end
 
-	if owned then
-		local isActive = currentPlayerData.activeBooster == boosterId
-		actionButton.Text = isActive and "ACTIVE" or "ACTIVATE"
-		actionButton.BackgroundColor3 = isActive and PALETTE.Success or PALETTE.Accent
+	actionButton.Visible = true
+	actionButton.Text = "BUY (" .. boosterInfo.Price .. ")"
+	if currentPlayerData.coins < boosterInfo.Price then
+		actionButton.BackgroundColor3 = PALETTE.AccentDark
+		actionButton.Text = "INSUFFICIENT FUNDS"
 	else
-		actionButton.Text = "BUY (" .. boosterInfo.Price .. ")"
-		if currentPlayerData.coins < boosterInfo.Price then
-			actionButton.BackgroundColor3 = PALETTE.AccentDark
-			actionButton.Text = "INSUFFICIENT FUNDS"
-		else
-			actionButton.BackgroundColor3 = PALETTE.Accent
-		end
+		actionButton.BackgroundColor3 = PALETTE.Accent
 	end
 end
 
@@ -364,15 +374,8 @@ local function populateShop()
 		statusText.BackgroundTransparency = 1
 		statusText.Parent = statusIndicator
 
-		local owned = currentPlayerData.inventory[boosterId] and currentPlayerData.inventory[boosterId] > 0
-		if owned then
-			local isActive = currentPlayerData.activeBooster == boosterId
-			statusIndicator.BackgroundColor3 = isActive and PALETTE.Success or PALETTE.Gold
-			statusText.Text = isActive and "ACTIVE" or "OWNED"
-		else
-			statusIndicator.BackgroundColor3 = PALETTE.Secondary
-			statusText.Text = boosterInfo.Price .. " COINS"
-		end
+		statusIndicator.BackgroundColor3 = PALETTE.Secondary
+		statusText.Text = boosterInfo.Price .. " COINS"
 
 		local cardButton = Instance.new("TextButton")
 		cardButton.Name = "CardButton"
@@ -419,28 +422,7 @@ local function handlePurchase()
 	end)
 end
 
-local function handleActivate()
-	if not selectedBoosterId then return end
-
-	local owned = currentPlayerData.inventory[selectedBoosterId] and currentPlayerData.inventory[selectedBoosterId] > 0
-	if not owned then return end
-
-	ActivateBoosterEvent:FireServer(selectedBoosterId)
-
-	-- Instant visual feedback
-	currentPlayerData.activeBooster = selectedBoosterId
-	populateShop()
-	updateDetailsPanel(selectedBoosterId)
-end
-
-actionButton.MouseButton1Click:Connect(function()
-	local owned = currentPlayerData.inventory[selectedBoosterId] and currentPlayerData.inventory[selectedBoosterId] > 0
-	if owned then
-		handleActivate()
-	else
-		handlePurchase()
-	end
-end)
+actionButton.MouseButton1Click:Connect(handlePurchase)
 
 function toggleShop(visible, data)
 	if visible then

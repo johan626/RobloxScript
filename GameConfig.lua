@@ -72,7 +72,7 @@ local config = {
 
 	-- Pengaturan Senjata Acak
 	RandomWeapon = {
-		BaseCost = 100,
+		BaseCost = 750,
 		CostIncrease = 50, -- Jumlah kenaikan harga setiap pembelian
 	},
 

@@ -27,13 +27,16 @@ local openPerkShopEvent = RemoteEvents:WaitForChild("OpenPerkShop")
 local requestOpenPerkShopEvent = RemoteEvents:WaitForChild("RequestOpenPerkShop")
 
 local PerkCosts = {
-	HPPlus = 3000,
-	StaminaPlus = 3000,
-	ReloadPlus = 3000,
-	RevivePlus = 3000,
-	RateBoost = 3000,
-	Medic = 3000,
-	ExplosiveRounds = 3000
+	-- Jenjang Utilitas
+	RevivePlus = 2000,
+	Medic = 2000,
+	-- Jenjang Inti
+	HPPlus = 4000,
+	StaminaPlus = 4000,
+	ReloadPlus = 4000,
+	-- Jenjang Elit
+	RateBoost = 6000,
+	ExplosiveRounds = 6000
 }
 
 local function isPlayerNearPerkMachine(player)

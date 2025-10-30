@@ -17,9 +17,9 @@ local PointsSystem = require(ModuleScriptServerScriptService:WaitForChild("Point
 local playerLevels = {}
 
 local DefaultConfig = {
-	BaseCost = 100,
-	CostMultiplier = 1.6,
-	CostExpo = 1.35,
+	BaseCost = 500,
+	CostMultiplier = 1.55,
+	CostExpo = 1.32,
 	DamagePerLevel = 5,
 	MaxLevel = 10
 }

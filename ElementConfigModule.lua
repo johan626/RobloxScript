@@ -21,7 +21,7 @@ local InvincibilityEffectEvent = RemoteEvents:WaitForChild("InvincibilityEffectE
 --// Config Elements
 local ElementsConfig = {
 	Fire   = {
-		Cost = 1000, Duration = 10,
+		Cost = 1500, Duration = 10,
 		DamageMultiplier = 0.3,
 		BurnPercentPerTick = 0.10,
 		BurnTicks = 3,
@@ -29,26 +29,26 @@ local ElementsConfig = {
 		SFX_SoundId = "rbxassetid://123456789", SFX_Volume = 1, SFX_Pitch = 1,
 	},
 	Ice    = {
-		Cost = 1000,
+		Cost = 1500,
 		Duration = 20,
 		SlowPercent = 0.30,
 		SlowDuration = 4,
 		SFX_SoundId = "rbxassetid://123456789", SFX_Volume = 1, SFX_Pitch = 1,
 	},
 	Poison = {
-		Cost = 1000,
+		Cost = 1500,
 		Duration = 10,
 		PoisonDPS = 5,
 		PoisonDuration = 6,
 		SFX_SoundId = "rbxassetid://123456789", SFX_Volume = 1, SFX_Pitch = 1,
 	},
 	Shock  = {
-		Cost = 1000, Duration = 10,
+		Cost = 1500, Duration = 10,
 		ChainRange = 6, ChainDamageMultiplier = 0.5,
 		SFX_SoundId = "rbxassetid://123456789", SFX_Volume = 1, SFX_Pitch = 1,
 	},
 	Wind   = {
-		Cost = 1000,
+		Cost = 1500,
 		Duration = 10,
 		SpeedMultiplier = 1.5,
 		PushSpeed = 60,
@@ -56,7 +56,7 @@ local ElementsConfig = {
 		SFX_SoundId = "rbxassetid://123456789", SFX_Volume = 1, SFX_Pitch = 1,
 	},
 	Earth  = {
-		Cost = 1000,
+		Cost = 1500,
 		Duration = 10,
 		DamageReduction = 0.20,
 		SFX_SoundId = "rbxassetid://123456789", SFX_Volume = 1, SFX_Pitch = 1,

@@ -36,70 +36,38 @@ local function createLeaderboardUI(part, title, face)
 
 	local mainFrame = Instance.new("Frame")
 	mainFrame.Size = UDim2.new(1, 0, 1, 0)
-	mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	mainFrame.BackgroundTransparency = 0.5
+	mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+	mainFrame.BackgroundTransparency = 0.2
 	mainFrame.BorderSizePixel = 0
 	mainFrame.Parent = gui
+
+	local frameStroke = Instance.new("UIStroke")
+	frameStroke.Thickness = 2
+	frameStroke.Color = Color3.fromRGB(60, 60, 60)
+	frameStroke.Parent = mainFrame
 
 	local titleLabel = Instance.new("TextLabel")
 	titleLabel.Size = UDim2.new(1, 0, 0.15, 0)
 	titleLabel.Position = UDim2.new(0, 0, 0, 0)
-	titleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	titleLabel.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
 	titleLabel.Text = title
 	titleLabel.Font = Enum.Font.SourceSansBold
 	titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 	titleLabel.TextScaled = true
 	titleLabel.Parent = mainFrame
 
-	local listFrame = Instance.new("Frame")
-	listFrame.Size = UDim2.new(0.9, 0, 0.55, 0) -- Reduced height for 5 players
+	local listFrame = Instance.new("ScrollingFrame")
+	listFrame.Size = UDim2.new(0.9, 0, 0.65, 0) -- Increased height to fill space
 	listFrame.Position = UDim2.new(0.05, 0, 0.18, 0)
 	listFrame.BackgroundTransparency = 1
+	listFrame.BorderSizePixel = 0
+	listFrame.ScrollBarThickness = 6
 	listFrame.Parent = mainFrame
 
 	local listLayout = Instance.new("UIListLayout")
 	listLayout.Padding = UDim.new(0, 5)
 	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	listLayout.Parent = listFrame
-
-	-- --- Pagination Controls ---
-	local paginationFrame = Instance.new("Frame")
-	paginationFrame.Name = "PaginationFrame"
-	paginationFrame.Size = UDim2.new(0.9, 0, 0.08, 0)
-	paginationFrame.Position = UDim2.new(0.05, 0, 0.74, 0) -- Below the list frame
-	paginationFrame.BackgroundTransparency = 1
-	paginationFrame.Parent = mainFrame
-
-	local prevButton = Instance.new("TextButton")
-	prevButton.Name = "PrevButton"
-	prevButton.Size = UDim2.new(0.2, 0, 1, 0)
-	prevButton.Position = UDim2.new(0, 0, 0, 0)
-	prevButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-	prevButton.Font = Enum.Font.SourceSansBold
-	prevButton.Text = "<"
-	prevButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	prevButton.Parent = paginationFrame
-
-	local nextButton = Instance.new("TextButton")
-	nextButton.Name = "NextButton"
-	nextButton.Size = UDim2.new(0.2, 0, 1, 0)
-	nextButton.Position = UDim2.new(0.8, 0, 0, 0)
-	nextButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-	nextButton.Font = Enum.Font.SourceSansBold
-	nextButton.Text = ">"
-	nextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	nextButton.Parent = paginationFrame
-
-	local pageLabel = Instance.new("TextLabel")
-	pageLabel.Name = "PageLabel"
-	pageLabel.Size = UDim2.new(0.5, 0, 1, 0)
-	pageLabel.Position = UDim2.new(0.25, 0, 0, 0)
-	pageLabel.BackgroundTransparency = 1
-	pageLabel.Font = Enum.Font.SourceSans
-	pageLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-	pageLabel.TextScaled = true
-	pageLabel.Text = "Page 1 / 10"
-	pageLabel.Parent = paginationFrame
 
 	local countdownLabel = Instance.new("TextLabel")
 	countdownLabel.Name = "CountdownLabel"
@@ -118,17 +86,17 @@ local function createLeaderboardUI(part, title, face)
 	playerRankLabel.Size = UDim2.new(0.9, 0, 0.05, 0)
 	playerRankLabel.Position = UDim2.new(0.05, 0, 0.94, 0) -- Position is fine
 	playerRankLabel.Font = Enum.Font.SourceSansBold
-	playerRankLabel.TextColor3 = Color3.fromRGB(100, 220, 255)
+	playerRankLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
 	playerRankLabel.TextScaled = true
 	playerRankLabel.Text = ""
 	playerRankLabel.TextXAlignment = Enum.TextXAlignment.Center
 	playerRankLabel.Parent = mainFrame
 
 	-- --- Row Template ---
-	-- --- Row Template --- (Adjusted for 5 rows)
+	-- --- Row Template ---
 	local rowTemplate = Instance.new("Frame")
 	rowTemplate.Name = "RowTemplate"
-	rowTemplate.Size = UDim2.new(1, 0, 0.18, 0) -- Adjusted size for 5 items
+	rowTemplate.Size = UDim2.new(1, 0, 0, 35) -- Use fixed pixel height for consistency
 	rowTemplate.BackgroundTransparency = 1
 	rowTemplate.Visible = false
 	rowTemplate.Parent = listFrame
@@ -177,8 +145,8 @@ local function createLeaderboardUI(part, title, face)
 	valueLabel.Name = "Value"
 	valueLabel.Position = UDim2.new(0.7, 0, 0, 0)
 	valueLabel.Size = UDim2.new(0.3, 0, 1, 0)
-	valueLabel.Font = Enum.Font.SourceSans
-	valueLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
+	valueLabel.Font = Enum.Font.SourceSansBold
+	valueLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
 	valueLabel.TextScaled = true
 	valueLabel.TextXAlignment = Enum.TextXAlignment.Right
 	valueLabel.Parent = rowTemplate
@@ -196,7 +164,7 @@ local function createLeaderboardUI(part, title, face)
 	errorLabel.Visible = false
 	errorLabel.Parent = mainFrame
 
-	return listFrame, rowTemplate, errorLabel, playerRankLabel, prevButton, nextButton, pageLabel
+	return listFrame, rowTemplate, errorLabel, playerRankLabel
 end
 
 
@@ -211,15 +179,7 @@ for key, config in pairs(LeaderboardConfig) do
 	local functionName = "GetLeaderboard_" .. key
 	local getLeaderboardFunction = remoteFolder:WaitForChild(functionName)
 
-	local listFrame, rowTemplate, errorLabel, playerRankLabel, prevButton, nextButton, pageLabel = createLeaderboardUI(leaderboardPart, config.Title, config.Face)
-
-	-- --- Pagination State ---
-	local leaderboardState = {
-		allPlayers = {},
-		currentPage = 1,
-		totalPages = 10,
-		playersPerPage = 5
-	}
+	local listFrame, rowTemplate, errorLabel, playerRankLabel = createLeaderboardUI(leaderboardPart, config.Title, config.Face)
 
 	-- --- Cache for Rank Changes ---
 	local rankCache = {} -- Stores UserId -> previous rank
@@ -267,31 +227,6 @@ for key, config in pairs(LeaderboardConfig) do
 		end
 		rankCache = newCache
 
-		-- 3. Store the processed list of players and reset state
-		leaderboardState.allPlayers = newPlayerRanks
-		leaderboardState.currentPage = 1
-		leaderboardState.totalPages = math.max(1, math.ceil(#leaderboardState.allPlayers / leaderboardState.playersPerPage))
-
-		-- 4. Initial display using the processed data
-		displayPage(leaderboardState.currentPage)
-
-		-- Update the player's specific rank info
-		local playerInfo = result.PlayerInfo
-		if playerInfo and playerInfo.Score then
-			if playerInfo.Rank then
-				playerRankLabel.Text = string.format("Your Rank: #%d (%s%s)", playerInfo.Rank, config.ValuePrefix, playerInfo.Score)
-			else
-				-- If rank is not available (player is outside top 10), we need to fetch it separately.
-				-- For now, we'll just show the score. A future improvement could be to get the rank directly.
-				playerRankLabel.Text = string.format("Your Score: %s%s", config.ValuePrefix, playerInfo.Score)
-			end
-		else
-			playerRankLabel.Text = "You are not ranked."
-		end
-	end
-
-	-- --- Pagination Logic ---
-	function displayPage(page)
 		-- Clear existing rows
 		for _, child in ipairs(listFrame:GetChildren()) do
 			if child:IsA("Frame") and child.Name ~= "RowTemplate" then
@@ -299,11 +234,8 @@ for key, config in pairs(LeaderboardConfig) do
 			end
 		end
 
-		local startIndex = (page - 1) * leaderboardState.playersPerPage + 1
-		local endIndex = math.min(startIndex + leaderboardState.playersPerPage - 1, #leaderboardState.allPlayers)
-
-		for i = startIndex, endIndex do
-			local playerData = leaderboardState.allPlayers[i]
+		-- Populate the scrolling frame with all players
+		for i, playerData in ipairs(newPlayerRanks) do
 			if not playerData then break end
 
 			local newRow = rowTemplate:Clone()
@@ -324,13 +256,21 @@ for key, config in pairs(LeaderboardConfig) do
 				rankChangeIndicator.Text = "▼"
 				rankChangeIndicator.TextColor3 = Color3.fromRGB(255, 80, 80)
 			else -- "same" or nil
-				rankChangeIndicator.Text = "–"
+				rankChangeIndicator.Text = "" -- Cleaner look
 				rankChangeIndicator.TextColor3 = Color3.fromRGB(180, 180, 180)
 			end
 
 			if playerData.UserId == localPlayer.UserId then
-				newRow.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-				newRow.BackgroundTransparency = 0.5
+				newRow.BackgroundColor3 = Color3.fromRGB(100, 20, 20)
+				newRow.BackgroundTransparency = 0.3
+				-- To prevent memory leaks, only add the stroke if it doesn't exist.
+				if not newRow:FindFirstChild("HighlightStroke") then
+					local highlightStroke = Instance.new("UIStroke")
+					highlightStroke.Name = "HighlightStroke"
+					highlightStroke.Thickness = 1.5
+					highlightStroke.Color = Color3.fromRGB(255, 165, 0)
+					highlightStroke.Parent = newRow
+				end
 			end
 
 			if avatarCache[playerData.UserId] then
@@ -349,25 +289,20 @@ for key, config in pairs(LeaderboardConfig) do
 			newRow.Parent = listFrame
 		end
 
-		-- Update UI elements
-		pageLabel.Text = string.format("Page %d / %d", page, leaderboardState.totalPages)
-		prevButton.Visible = page > 1
-		nextButton.Visible = page < leaderboardState.totalPages and endIndex < #leaderboardState.allPlayers
+		-- Update the player's specific rank info
+		local playerInfo = result.PlayerInfo
+		if playerInfo and playerInfo.Score then
+			if playerInfo.Rank then
+				playerRankLabel.Text = string.format("Your Rank: #%d (%s%s)", playerInfo.Rank, config.ValuePrefix, playerInfo.Score)
+			else
+				-- If rank is not available (player is outside top 10), we need to fetch it separately.
+				-- For now, we'll just show the score. A future improvement could be to get the rank directly.
+				playerRankLabel.Text = string.format("Your Score: %s%s", config.ValuePrefix, playerInfo.Score)
+			end
+		else
+			playerRankLabel.Text = "You are not ranked."
+		end
 	end
-
-	prevButton.MouseButton1Click:Connect(function()
-		if leaderboardState.currentPage > 1 then
-			leaderboardState.currentPage = leaderboardState.currentPage - 1
-			displayPage(leaderboardState.currentPage)
-		end
-	end)
-
-	nextButton.MouseButton1Click:Connect(function()
-		if leaderboardState.currentPage < leaderboardState.totalPages then
-			leaderboardState.currentPage = leaderboardState.currentPage + 1
-			displayPage(leaderboardState.currentPage)
-		end
-	end)
 
 	table.insert(leaderboardUpdaters, updateThisLeaderboard)
 	pcall(updateThisLeaderboard)

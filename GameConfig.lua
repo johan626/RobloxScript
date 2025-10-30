@@ -76,6 +76,12 @@ local config = {
 		CostIncrease = 50, -- Jumlah kenaikan harga setiap pembelian
 	},
 
+	-- Pengaturan Ekonomi
+	Economy = {
+		-- Pengganda untuk menghitung BP yang didapat dari kerusakan (misal: 1 damage * 0.5 = 0.5 BP)
+		BP_Per_Damage_Multiplier = 0.5,
+	},
+
 	-- Pengaturan Tingkat Kesulitan
 	Difficulty = {
 		Easy = {

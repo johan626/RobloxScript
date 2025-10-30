@@ -343,8 +343,12 @@ ShootEvent.OnServerEvent:Connect(function(player, tool, cameraDirection, isAimin
 					local finalDamage = applyDamageAndStats(player, targetHumanoid, hitModel, damage, isHeadshotPellet, weaponName)
 					if finalDamage and finalDamage > 0 then
 						-- Logika Poin & Misi per Pellet
+						if not immune then
+							local bpMultiplier = GameConfig.Economy and GameConfig.Economy.BP_Per_Damage_Multiplier or 0
+							PointsSystem.AddPoints(player, math.floor(finalDamage * bpMultiplier))
+						end
+
 						if isHeadshotPellet then
-							PointsSystem.AddPoints(player, 20)
 							HitmarkerEvent:FireClient(player, true)
 							-- Update misi headshot
 							if MissionManager then
@@ -355,7 +359,6 @@ ShootEvent.OnServerEvent:Connect(function(player, tool, cameraDirection, isAimin
 								})
 							end
 						else
-							PointsSystem.AddPoints(player, 10)
 							HitmarkerEvent:FireClient(player, false)
 							-- Update misi 'hit' jika ada di masa depan
 							if MissionManager then
@@ -412,16 +415,7 @@ ShootEvent.OnServerEvent:Connect(function(player, tool, cameraDirection, isAimin
 						local headshotLevel = skillData.Skills.HeadshotDamage or 0
 						local headshotBonus = headshotLevel * (SkillConfig.HeadshotDamage.DamagePerLevel or 1)
 						damage = (damage * weaponStats.HeadshotMultiplier) + headshotBonus
-						if not hitModel:GetAttribute("Immune") then
-							PointsSystem.AddPoints(player, 20)
-						end
 						isHeadshot = true
-						print(player.Name .. " mendapatkan 20 poin (Headshot)!")
-					else
-						if not hitModel:GetAttribute("Immune") then
-							PointsSystem.AddPoints(player, 10)
-						end
-						print(player.Name .. " mendapatkan 10 poin (Body Shot)!")
 					end
 					if hitModel:FindFirstChild("IsBoss") then
 						local bossDamageLevel = skillData.Skills.DamageBoss or 0
@@ -447,6 +441,12 @@ ShootEvent.OnServerEvent:Connect(function(player, tool, cameraDirection, isAimin
 
 				HitmarkerEvent:FireClient(player, isHeadshot)
 				local finalDamage = applyDamageAndStats(player, targetHumanoid, hitModel, damage, isHeadshot, weaponName)
+
+				-- Berikan poin berdasarkan damage jika target bukan immune
+				if finalDamage and finalDamage > 0 and not hitModel:GetAttribute("Immune") then
+					local bpMultiplier = GameConfig.Economy and GameConfig.Economy.BP_Per_Damage_Multiplier or 0
+					PointsSystem.AddPoints(player, math.floor(finalDamage * bpMultiplier))
+				end
 
 				-- Update Misi untuk non-shotgun
 				if MissionManager and finalDamage and finalDamage > 0 then

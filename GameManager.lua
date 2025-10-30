@@ -88,6 +88,7 @@ local PlaceData = require(ModuleScriptServerScriptService:WaitForChild("PlaceDat
 local SpawnerModule = require(ModuleScriptServerScriptService:WaitForChild("SpawnerModule"))
 local BuildingManager = require(ModuleScriptServerScriptService:WaitForChild("BuildingModule"))
 local PointsSystem = require(ModuleScriptServerScriptService:WaitForChild("PointsModule"))
+local CoinsModule = require(ModuleScriptServerScriptService:WaitForChild("CoinsModule"))
 local ElementModule = require(ModuleScriptServerScriptService:WaitForChild("ElementConfigModule"))
 local PerkHandler = require(ModuleScriptServerScriptService:WaitForChild("PerkModule"))
 local WalkSpeedManager = require(ModuleScriptServerScriptService:WaitForChild("WalkSpeedManager"))
@@ -112,6 +113,18 @@ local StartVoteCanceledEvent  = RemoteEvents:WaitForChild("StartVoteCanceledEven
 local CancelStartVoteEvent = RemoteEvents:WaitForChild("CancelStartVoteEvent")
 
 local ZombieDiedEvent = BindableEvents:WaitForChild("ZombieDiedEvent")
+local ReportDamageEvent = BindableEvents:FindFirstChild("ReportDamageEvent") or Instance.new("BindableEvent", BindableEvents)
+ReportDamageEvent.Name = "ReportDamageEvent"
+
+ReportDamageEvent.Event:Connect(function(player, damageAmount)
+	if not gameStarted or not player or not damageAmount then return end
+
+	local userId = player.UserId
+	if not waveDamageTracker[userId] then
+		waveDamageTracker[userId] = 0
+	end
+	waveDamageTracker[userId] += damageAmount
+end)
 
 -- Penanda sesi voting agar timer lama tidak 'menimpa' sesi baru
 local currentVoteSession = 0
@@ -126,6 +139,7 @@ local activePlayers = 0
 local initialPlayerCount = 0
 -- Kumpulan pemain yang sudah menekan YES
 local readyPlayers = {}
+local waveDamageTracker = {}
 
 local Lighting = game:GetService("Lighting")
 -- Simpan nilai default lighting untuk dipulihkan nanti
@@ -405,6 +419,7 @@ local function startGameLoop()
 			zombiesKilled = 0
 			chamsApplied = false
 			ClearChams()
+			waveDamageTracker = {}
 			local isBossWave = SpawnerModule.SpawnWave(zombiesToSpawn, wave, activePlayers, gameMode, difficulty, waveModifiers)
 			print("Menunggu " .. zombiesToSpawn .. " zombie dikalahkan.")
 			while zombiesKilled < zombiesToSpawn do
@@ -484,6 +499,34 @@ local function startGameLoop()
 			-- Berikan bonus kepada setiap pemain yang masih hidup (tidak knocked)
 			for _, player in ipairs(game.Players:GetPlayers()) do
 				if player.Character and not player.Character:FindFirstChild("Knocked") then
+					-- Kalkulasi dan berikan Koin (Mata Uang Permanen)
+					local userId = player.UserId
+					local totalDamage = waveDamageTracker[userId] or 0
+
+					local coinConfig = GameConfig.Economy.Coins
+					local difficultyConfig = GameConfig.Difficulty[difficulty]
+
+					if coinConfig and difficultyConfig then
+						local healthMultiplier = difficultyConfig.HealthMultiplier
+						local adjustedRatio = coinConfig.DamageToCoinConversionRatio * healthMultiplier
+
+						local coinsFromDamage = 0
+						if adjustedRatio > 0 then
+							coinsFromDamage = math.floor(totalDamage / adjustedRatio)
+						end
+
+						local baseReward = coinConfig.WaveCompleteBonus + coinsFromDamage
+
+						local difficultyMultiplier = coinConfig.DifficultyCoinMultipliers[difficulty] or 1
+						local finalCoinReward = math.floor(baseReward * difficultyMultiplier)
+
+						if finalCoinReward > 0 then
+							CoinsModule.AddCoins(player, finalCoinReward)
+							print(string.format("%s mendapatkan %d Koin (Bonus: %d, Dari Kerusakan: %d, Pengganda: x%.2f)",
+								player.Name, finalCoinReward, coinConfig.WaveCompleteBonus, coinsFromDamage, difficultyMultiplier))
+						end
+					end
+
 					-- Berikan Poin
 					PointsSystem.AddPoints(player, GameConfig.Wave.BonusPoints)
 					print(player.Name .. " mendapatkan " .. GameConfig.Wave.BonusPoints .. " BP (Wave Bonus)!")

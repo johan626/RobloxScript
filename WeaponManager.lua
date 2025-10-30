@@ -7,9 +7,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local RemoteEvents = game.ReplicatedStorage.RemoteEvents
+local BindableEvents = game.ReplicatedStorage.BindableEvents
 local ModuleScriptReplicatedStorage = ReplicatedStorage.ModuleScript
 local ModuleScriptServerScriptService = ServerScriptService.ModuleScript
 
+local ReportDamageEvent = BindableEvents:WaitForChild("ReportDamageEvent")
 local WeaponModule = require(ModuleScriptReplicatedStorage:WaitForChild("WeaponModule"))
 local GameConfig = require(ModuleScriptServerScriptService:WaitForChild("GameConfig"))
 local GameStatus = require(ModuleScriptServerScriptService:WaitForChild("GameStatus"))
@@ -71,10 +73,10 @@ local function applyDamageAndStats(player, targetHumanoid, hitModel, damage, isH
 
 	-- Update statistik, poin, dan creator tag hanya untuk zombie
 	if isZombie then
+		ReportDamageEvent:Fire(player, finalDamage)
 		StatsModule.AddTotalDamage(player, finalDamage)
 		StatsModule.AddWeaponDamage(player, weaponName, finalDamage)
 		PointsSystem.AddDamage(player, finalDamage)
-		CoinsManager.AddCoins(player, math.floor(finalDamage))
 		DamageDisplayEvent:FireAllClients(finalDamage, hitModel, isHeadshot)
 
 		-- Handle creator tag for kill credit

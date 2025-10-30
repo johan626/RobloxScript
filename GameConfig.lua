@@ -80,6 +80,24 @@ local config = {
 	Economy = {
 		-- Pengganda untuk menghitung BP yang didapat dari kerusakan (misal: 1 damage * 0.5 = 0.5 BP)
 		BP_Per_Damage_Multiplier = 0.5,
+
+		-- Pengaturan Ekonomi Koin (Mata Uang Permanen)
+		Coins = {
+			-- Bonus koin tetap yang diberikan di akhir setiap gelombang
+			WaveCompleteBonus = 50,
+			-- Rasio konversi kerusakan menjadi koin. Formula: Kerusakan / Rasio.
+			-- Rasio ini akan dikalikan dengan HealthMultiplier tingkat kesulitan untuk menyeimbangkan.
+			DamageToCoinConversionRatio = 20,
+			-- Pengganda hadiah koin berdasarkan tingkat kesulitan. Diterapkan SETELAH perhitungan dasar.
+			DifficultyCoinMultipliers = {
+				Easy = 1,
+				Normal = 1.2,
+				Hard = 1.5,
+				Expert = 2,
+				Hell = 2.5,
+				Crazy = 3,
+			}
+		}
 	},
 
 	-- Pengaturan Tingkat Kesulitan

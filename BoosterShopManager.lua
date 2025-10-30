@@ -49,14 +49,34 @@ else
 
 	-- Fungsi yang akan dieksekusi saat prompt dipicu
 	local function onPromptTriggered(player)
-		-- Beri tahu klien untuk membuka/menutup UI toko
-		ToggleBoosterShopEvent:FireClient(player)
+		-- Kumpulkan data yang relevan untuk dikirim ke klien
+		local boosterData = BoosterModule.GetData(player)
+		local coinsData = CoinsModule.GetData(player)
+
+		local clientData = {
+			coins = coinsData.Coins,
+			inventory = boosterData.Inventory,
+			activeBooster = boosterData.Active
+		}
+
+		-- Kirim data bersamaan dengan event toggle
+		ToggleBoosterShopEvent:FireClient(player, clientData)
 	end
 
 	-- Hubungkan fungsi ke event Triggered dari prompt
 	proximityPrompt.Triggered:Connect(onPromptTriggered)
 	print("BoosterShopManager: ProximityPrompt terhubung untuk membuka UI.")
 end
+
+-- Fungsi untuk menangani aktivasi booster
+local function onActivateRequest(player, boosterId)
+	if not player or not boosterId then return end
+	BoosterModule.SetActiveBooster(player, boosterId)
+end
+
+-- Hubungkan fungsi aktivasi ke RemoteEvent
+local ActivateBoosterEvent = RemoteEvents:WaitForChild("ActivateBoosterEvent")
+ActivateBoosterEvent.OnServerEvent:Connect(onActivateRequest)
 
 -- Fungsi untuk menangani permintaan pembelian dari klien
 local function onPurchaseRequest(player, boosterId)

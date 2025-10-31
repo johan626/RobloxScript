@@ -139,7 +139,7 @@ function ZombieModule.SpawnZombie(spawnPoint, typeName, playerCount, difficulty,
 		-- faster chase handled by WalkSpeed; keep standard attack
 	elseif typeName == "Shooter" then
 		-- shooter will periodically spit projectiles at nearest player
-		spawn(function()
+		task.spawn(function()
 			while zombie.Parent and humanoid and humanoid.Health > 0 do
 				local target = ZombieModule.GetNearestPlayer(zombie)
 				if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
@@ -163,7 +163,7 @@ function ZombieModule.SpawnZombie(spawnPoint, typeName, playerCount, difficulty,
 	end
 
 	-- [[ REVISED ZOMBIE CHASE AND PATHFINDING LOOP ]]
-	spawn(function()
+	task.spawn(function()
 		local path = PathfindingService:CreatePath({
 			AgentRadius = 3,
 			AgentHeight = 6,

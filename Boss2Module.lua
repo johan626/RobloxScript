@@ -35,7 +35,7 @@ function Boss2.Init(zombie, humanoid, config, executeHardWipe, zombieModuleRef)
 	local specialTimeout = (config and config.SpecialTimeout) or 300
 	local bossStartTime = tick()
 	BossTimerEvent:FireAllClients(specialTimeout, specialTimeout)
-	spawn(function()
+	task.spawn(function()
 		while zombie.Parent and humanoid and humanoid.Health > 0 do
 			local remaining = math.max(0, specialTimeout - (tick() - bossStartTime))
 			BossTimerEvent:FireAllClients(remaining, specialTimeout)
@@ -48,7 +48,7 @@ function Boss2.Init(zombie, humanoid, config, executeHardWipe, zombieModuleRef)
 	end)
 
 	-- Radiation Aura
-	spawn(function()
+	task.spawn(function()
 		local r = config and config.Radiation
 		local tickTime = (r and r.Tick) or 0.5
 		local hr = (r and r.HorizontalRadius) or 6
@@ -79,7 +79,7 @@ function Boss2.Init(zombie, humanoid, config, executeHardWipe, zombieModuleRef)
 	end)
 
 	-- Gravity Well Follow Attack
-	spawn(function()
+	task.spawn(function()
 		local g = config and config.Gravity
 		while zombie.Parent and humanoid and humanoid.Health > 0 do
 			local target = ZombieModule.GetNearestPlayer(zombie)
@@ -99,7 +99,7 @@ function Boss2.Init(zombie, humanoid, config, executeHardWipe, zombieModuleRef)
 	end)
 
 	-- Gravity Slam Attack
-	spawn(function()
+	task.spawn(function()
 		local s = config and config.GravitySlam
 		local function groundAt(pos)
 			local rayParams = RaycastParams.new()

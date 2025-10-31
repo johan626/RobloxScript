@@ -431,7 +431,7 @@ local function showNotification(message)
 
 	-- Animate In
 	notificationFrame:TweenPosition(UDim2.new(0.5, -175, 0.05, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Back, 0.5, true)
-	wait(4)
+	task.wait(4)
 	-- Animate Out
 	notificationFrame:TweenPosition(UDim2.new(0.5, -175, -0.1, 0), Enum.EasingDirection.In, Enum.EasingStyle.Back, 0.5, true, function()
 		notificationFrame:Destroy()

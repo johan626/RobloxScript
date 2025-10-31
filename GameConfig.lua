@@ -180,6 +180,32 @@ local config = {
 			}
 		},
 	},
+
+	-- Pengaturan Sistem Knock & Revive
+	KnockSystem = {
+		-- Waktu revive dasar dalam detik
+		BaseReviveTime = 6,
+		-- Waktu revive jika reviver memiliki perk "ReviveBoost"
+		BoostedReviveTime = 3,
+		-- Penalti waktu tambahan per knock (setelah knock pertama)
+		PenaltyPerKnock = 1,
+		-- Jarak maksimum untuk melakukan revive
+		MaxReviveDistance = 8,
+		-- Persentase HP yang dipulihkan saat revive normal (0.1 = 10%)
+		DefaultReviveHealth = 0.1,
+		-- Persentase HP yang dipulihkan jika reviver memiliki perk "MedicBoost"
+		BoostedReviveHealth = 0.3,
+		-- Cooldown untuk ping saat knocked dalam detik
+		PingCooldown = 15,
+		-- Kekuatan lompatan standar setelah di-revive
+		PostReviveJumpPower = 50,
+	},
+
+	-- Pengaturan default untuk pemain
+	Player = {
+		-- Kekuatan lompatan standar
+		DefaultJumpPower = 30,
+	},
 }
 
 return config

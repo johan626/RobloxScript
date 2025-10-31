@@ -144,7 +144,7 @@ local function createMirrorSurface(parentPart)
 				tween:Play()
 
 				Debris:AddItem(shimmer, 2)
-				wait(math.random(2, 4))
+				task.wait(math.random(2, 4))
 			end
 		end)()
 	end
@@ -389,10 +389,10 @@ function Boss3VFXModule.StartMirrorQuartet(bossModel, config)
 			end
 		end)
 		coroutine.resume(hoverCoroutine)
-		table.insert(mechanicContext.CleanupFunctions, function() 
-			if hoverCoroutine then 
-				coroutine.close(hoverCoroutine) 
-			end 
+		table.insert(mechanicContext.CleanupFunctions, function()
+			if hoverCoroutine then
+				coroutine.close(hoverCoroutine)
+			end
 		end)
 
 		-- Add enhanced glow effect to mirror
@@ -454,11 +454,11 @@ function Boss3VFXModule.StartMirrorQuartet(bossModel, config)
 
 		-- Simpan referensi
 		mechanicContext.Mirrors[i] = {
-			mirrorBase = mirrorBase, 
-			mirrorFrame = mirrorFrame, 
-			mirrorSurface = mirrorSurface, 
-			beamComponents = mechanicContext.BeamComponents[i], 
-			beamTarget = beamTarget, 
+			mirrorBase = mirrorBase,
+			mirrorFrame = mirrorFrame,
+			mirrorSurface = mirrorSurface,
+			beamComponents = mechanicContext.BeamComponents[i],
+			beamTarget = beamTarget,
 			locked = false,
 			frameOrnamentTop = frameOrnamentTop,
 			frameOrnamentBottom = frameOrnamentBottom,
@@ -607,7 +607,7 @@ function Boss3VFXModule.StartMirrorQuartet(bossModel, config)
 						-- Enhanced button feedback
 						buttonPart.Color = Color3.fromRGB(160, 160, 200)
 						buttonGlow.Color = Color3.fromRGB(160, 160, 255)
-						wait(0.04)
+						task.wait(0.04)
 						buttonPart.Color = Color3.fromRGB(90, 90, 130)
 						buttonGlow.Color = Color3.fromRGB(110, 110, 180)
 
@@ -1465,7 +1465,7 @@ function Boss3VFXModule.CreateSoulExplosion(position, radius)
 		lightTween:Play()
 
 		-- Tunggu animasi selesai lalu bersihkan
-		wait(1.5)
+		task.wait(1.5)
 		if explosionContainer.Parent then
 			explosionContainer:Destroy()
 		end

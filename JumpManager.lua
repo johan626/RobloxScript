@@ -1,11 +1,12 @@
--- JumpManager.lua (Script) 
+-- JumpManager.lua (Script)
 -- Path: ServerScriptService/Script/JumpManager.lua
 -- Script Place: ACT 1: Village
 
 local Players = game:GetService("Players")
+local ServerScriptService = game:GetService("ServerScriptService")
+local GameConfig = require(ServerScriptService.ModuleScript:WaitForChild("GameConfig"))
 
 -- Atur nilai default di sini:
-local DEFAULT_JUMP_POWER = 30
 local USE_JUMP_POWER = true
 
 local function setupHumanoid(humanoid)
@@ -13,7 +14,7 @@ local function setupHumanoid(humanoid)
 	-- Pastikan properti ada (safety)
 	pcall(function()
 		humanoid.UseJumpPower = USE_JUMP_POWER
-		humanoid.JumpPower = DEFAULT_JUMP_POWER
+		humanoid.JumpPower = GameConfig.Player.DefaultJumpPower
 	end)
 end
 
@@ -37,7 +38,7 @@ Players.PlayerAdded:Connect(onPlayerAdded)
 
 -- Tangani pemain yang sudah ada (jika script dimuat ulang saat ada pemain online)
 for _, player in ipairs(Players:GetPlayers()) do
-	spawn(function() -- ajak asynchronous kecil supaya tidak blocking
+	task.spawn(function() -- ajak asynchronous kecil supaya tidak blocking
 		onPlayerAdded(player)
 	end)
 end

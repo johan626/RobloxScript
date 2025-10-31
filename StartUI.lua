@@ -258,12 +258,12 @@ desktopPrompt.Parent = screenGui
 
 -- Animate the prompt
 if not UIS.TouchEnabled then
-	spawn(function()
+	task.spawn(function()
 		while true do
 			TweenService:Create(desktopPrompt, TweenInfo.new(0.8), {TextTransparency = 0.3}):Play()
-			wait(0.9)
+			task.wait(0.9)
 			TweenService:Create(desktopPrompt, TweenInfo.new(0.8), {TextTransparency = 0}):Play()
-			wait(0.9)
+			task.wait(0.9)
 		end
 	end)
 end

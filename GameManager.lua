@@ -5,12 +5,13 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local Constants = require(ServerScriptService.ModuleScript:WaitForChild("Constants"))
 local TeleportService = game:GetService("TeleportService")
 
 -- Game Mode Initialization
 -- Game Initialization
-local gameMode = "Story" -- Default to Story
-local difficulty = "Easy" -- Default difficulty
+local gameMode = Constants.Strings.GAME_MODE_STORY -- Default to Story
+local difficulty = Constants.Strings.DIFFICULTY_EASY -- Default difficulty
 local gameInitialized = false
 
 local function initializeGameSettings(player)
@@ -20,8 +21,8 @@ local function initializeGameSettings(player)
 	local teleportData = joinData and joinData.TeleportData
 
 	if teleportData then
-		gameMode = teleportData.gameMode or "Story"
-		difficulty = teleportData.difficulty or "Easy"
+		gameMode = teleportData.gameMode or Constants.Strings.GAME_MODE_STORY
+		difficulty = teleportData.difficulty or Constants.Strings.DIFFICULTY_EASY
 		gameInitialized = true
 		print(string.format("Game settings initialized from JoinData. Mode: %s, Difficulty: %s", gameMode, difficulty))
 	else
@@ -58,24 +59,24 @@ local BindableEvents = game.ReplicatedStorage.BindableEvents
 local RemoteEvents = game.ReplicatedStorage.RemoteEvents
 
 -- Pastikan MissionCompleteEvent ada
-if not RemoteEvents:FindFirstChild("MissionCompleteEvent") then
+if not RemoteEvents:FindFirstChild(Constants.Events.MISSION_COMPLETE) then
 	local event = Instance.new("RemoteEvent")
-	event.Name = "MissionCompleteEvent"
+	event.Name = Constants.Events.MISSION_COMPLETE
 	event.Parent = RemoteEvents
 end
 
 -- Pastikan GameModeUpdateEvent ada
 -- Pastikan GameSettingsUpdateEvent ada
-if not RemoteEvents:FindFirstChild("GameSettingsUpdateEvent") then
+if not RemoteEvents:FindFirstChild(Constants.Events.GAME_SETTINGS_UPDATE) then
 	local event = Instance.new("RemoteEvent")
-	event.Name = "GameSettingsUpdateEvent"
+	event.Name = Constants.Events.GAME_SETTINGS_UPDATE
 	event.Parent = RemoteEvents
 end
 
 -- Pastikan SpecialWaveAlertEvent ada
-if not RemoteEvents:FindFirstChild("SpecialWaveAlertEvent") then
+if not RemoteEvents:FindFirstChild(Constants.Events.SPECIAL_WAVE_ALERT) then
 	local event = Instance.new("RemoteEvent")
-	event.Name = "SpecialWaveAlertEvent"
+	event.Name = Constants.Events.SPECIAL_WAVE_ALERT
 	event.Parent = RemoteEvents
 end
 
@@ -102,21 +103,21 @@ local AchievementManager = require(ModuleScriptServerScriptService:WaitForChild(
 local DataStoreManager = require(ModuleScriptServerScriptService:WaitForChild("DataStoreManager"))
 DataStoreManager:Init()
 
-local WaveCountdownEvent = RemoteEvents:WaitForChild("WaveCountdownEvent")
-local PlayerCountEvent   = RemoteEvents:WaitForChild("PlayerCountEvent")
-local OpenStartUIEvent   = RemoteEvents:WaitForChild("OpenStartUIEvent")
-local ReadyCountEvent    = RemoteEvents:WaitForChild("ReadyCountEvent")
-local RestartGameEvent = RemoteEvents:WaitForChild("RestartGameEvent")
-local StartGameEvent = RemoteEvents:WaitForChild("StartGameEvent")
-local ExitGameEvent = RemoteEvents:WaitForChild("ExitGameEvent")
-local WaveUpdateEvent = RemoteEvents:WaitForChild("WaveUpdateEvent")
-local StartVoteCountdownEvent = RemoteEvents:WaitForChild("StartVoteCountdownEvent")
-local StartVoteCanceledEvent  = RemoteEvents:WaitForChild("StartVoteCanceledEvent")
-local CancelStartVoteEvent = RemoteEvents:WaitForChild("CancelStartVoteEvent")
+local WaveCountdownEvent = RemoteEvents:WaitForChild(Constants.Events.WAVE_COUNTDOWN)
+local PlayerCountEvent   = RemoteEvents:WaitForChild(Constants.Events.PLAYER_COUNT)
+local OpenStartUIEvent   = RemoteEvents:WaitForChild(Constants.Events.OPEN_START_UI)
+local ReadyCountEvent    = RemoteEvents:WaitForChild(Constants.Events.READY_COUNT)
+local RestartGameEvent = RemoteEvents:WaitForChild(Constants.Events.RESTART_GAME)
+local StartGameEvent = RemoteEvents:WaitForChild(Constants.Events.START_GAME)
+local ExitGameEvent = RemoteEvents:WaitForChild(Constants.Events.EXIT_GAME)
+local WaveUpdateEvent = RemoteEvents:WaitForChild(Constants.Events.WAVE_UPDATE)
+local StartVoteCountdownEvent = RemoteEvents:WaitForChild(Constants.Events.START_VOTE_COUNTDOWN)
+local StartVoteCanceledEvent  = RemoteEvents:WaitForChild(Constants.Events.START_VOTE_CANCELED)
+local CancelStartVoteEvent = RemoteEvents:WaitForChild(Constants.Events.CANCEL_START_VOTE)
 
-local ZombieDiedEvent = BindableEvents:WaitForChild("ZombieDiedEvent")
-local ReportDamageEvent = BindableEvents:FindFirstChild("ReportDamageEvent") or Instance.new("BindableEvent", BindableEvents)
-ReportDamageEvent.Name = "ReportDamageEvent"
+local ZombieDiedEvent = BindableEvents:WaitForChild(Constants.Events.ZOMBIE_DIED)
+local ReportDamageEvent = BindableEvents:FindFirstChild(Constants.Events.REPORT_DAMAGE) or Instance.new("BindableEvent", BindableEvents)
+ReportDamageEvent.Name = Constants.Events.REPORT_DAMAGE
 
 ReportDamageEvent.Event:Connect(function(player, damageAmount)
 	if not gameStarted or not player or not damageAmount then return end
@@ -186,13 +187,13 @@ end
 
 local function ApplyChamsToZombies()
 	for _, m in ipairs(workspace:GetChildren()) do
-		if m:IsA("Model") and m:FindFirstChild("IsZombie") and not m:FindFirstChild("IsBoss") then
+		if m:IsA("Model") and m:FindFirstChild(Constants.Attributes.IS_ZOMBIE) and not m:FindFirstChild(Constants.Attributes.IS_BOSS) then
 			local hum = m:FindFirstChildOfClass("Humanoid")
 			if hum and hum.Health > 0 then
 				-- Hanya zombie yang masih hidup yang diberi highlight
-				if not m:FindFirstChild("ChamsHighlight") then
+				if not m:FindFirstChild(Constants.Strings.CHAMS_HIGHLIGHT) then
 					local h = Instance.new("Highlight")
-					h.Name = "ChamsHighlight"
+					h.Name = Constants.Strings.CHAMS_HIGHLIGHT
 					h.FillTransparency = 1 -- hanya outline
 					h.OutlineTransparency = 0
 					h.OutlineColor = Color3.fromRGB(0, 255, 0) -- hijau
@@ -201,7 +202,7 @@ local function ApplyChamsToZombies()
 				end
 			else
 				-- Jika mayat masih tersisa dan sempat punya highlight, cabut supaya tidak ikut ter-highlight
-				local h = m:FindFirstChild("ChamsHighlight")
+				local h = m:FindFirstChild(Constants.Strings.CHAMS_HIGHLIGHT)
 				if h then h:Destroy() end
 			end
 		end
@@ -210,14 +211,14 @@ end
 
 local function ClearChams()
 	for _, m in ipairs(workspace:GetChildren()) do
-		if m:IsA("Model") and m:FindFirstChild("IsZombie") then
-			local h = m:FindFirstChild("ChamsHighlight")
+		if m:IsA("Model") and m:FindFirstChild(Constants.Attributes.IS_ZOMBIE) then
+			local h = m:FindFirstChild(Constants.Strings.CHAMS_HIGHLIGHT)
 			if h then h:Destroy() end
 		end
 	end
 end
 
-local GameOverEvent = RemoteEvents:WaitForChild("GameOverEvent")
+local GameOverEvent = RemoteEvents:WaitForChild(Constants.Events.GAME_OVER)
 
 local function HandleGameOver()
 	if not gameStarted then return end
@@ -228,7 +229,7 @@ local function HandleGameOver()
 
 	-- Konsumsi booster berbasis game
 	for _, player in ipairs(Players:GetPlayers()) do
-		BoosterManager.ConsumeGameBooster(player, "COIN_BOOSTER_1GAME")
+		BoosterManager.ConsumeGameBooster(player, Constants.Strings.COIN_BOOSTER_1GAME)
 	end
 
 	-- Kirim event ke semua client untuk menampilkan layar Game Over
@@ -247,7 +248,7 @@ local function countActivePlayers()
 	-- Saat game berjalan, hitung pemain yang benar-benar aktif (punya Character dan tidak Knocked)
 	local count = 0
 	for _, player in ipairs(game.Players:GetPlayers()) do
-		if player.Character and not player.Character:FindFirstChild("Knocked") then
+		if player.Character and not player.Character:FindFirstChild(Constants.Attributes.KNOCKED) then
 			local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
 			if humanoid and humanoid.Health > 0 then
 				count += 1
@@ -281,7 +282,7 @@ local function ResetGame()
 
 	-- Bersihkan semua zombie sisa sesi sebelumnya
 	for _, m in ipairs(workspace:GetChildren()) do
-		if m:IsA("Model") and m:FindFirstChild("IsZombie") then
+		if m:IsA("Model") and m:FindFirstChild(Constants.Attributes.IS_ZOMBIE) then
 			m:Destroy()
 		end
 	end
@@ -336,10 +337,10 @@ local function startGameLoop()
 			local usedBooster = BoosterModule.UseActiveBooster(plr) -- Gunakan dan konsumsi
 
 			if usedBooster then -- Pastikan booster berhasil digunakan
-				if usedBooster == "StarterPoints" then
+				if usedBooster == Constants.Strings.STARTER_POINTS_BOOSTER then
 					PointsSystem.AddPoints(plr, 1500)
 					print(plr.Name .. " used StarterPoints booster and received 1500 points.")
-				elseif usedBooster == "StartingShield" then
+				elseif usedBooster == Constants.Strings.STARTING_SHIELD_BOOSTER then
 					if plr.Character then
 						local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
 						if humanoid then
@@ -361,7 +362,7 @@ local function startGameLoop()
 
 			for _, player in ipairs(game.Players:GetPlayers()) do
 				-- Add playtime only to active (not knocked) players
-				if player.Character and not player.Character:FindFirstChild("Knocked") then
+				if player.Character and not player.Character:FindFirstChild(Constants.Attributes.KNOCKED) then
 					if StatsModule and StatsModule.AddPlaytime then
 						StatsModule.AddPlaytime(player, 60)
 					end
@@ -448,14 +449,14 @@ local function startGameLoop()
 			if (myToken ~= runToken) or (not gameStarted) then break end
 
 			-- <<< KONDISI KEMENANGAN (HANYA UNTUK MODE STORY) >>>
-			if gameMode == "Story" then
+			if gameMode == Constants.Strings.GAME_MODE_STORY then
 				-- Kondisi kemenangan yang lebih kuat: hanya bergantung pada nomor wave.
 				-- Ini mencegah bug di masa depan jika logika SpawnerModule diubah.
 				if wave == 50 then
 					print("Wave 50 selesai! Misi selesai.")
 
 					-- Kirim event kemenangan ke semua client
-					local missionCompleteEvent = ReplicatedStorage.RemoteEvents:FindFirstChild("MissionCompleteEvent")
+					local missionCompleteEvent = ReplicatedStorage.RemoteEvents:FindFirstChild(Constants.Events.MISSION_COMPLETE)
 					if missionCompleteEvent then
 						missionCompleteEvent:FireAllClients()
 					end
@@ -466,14 +467,14 @@ local function startGameLoop()
 
 					-- Konsumsi booster berbasis game
 					for _, player in ipairs(Players:GetPlayers()) do
-						BoosterManager.ConsumeGameBooster(player, "COIN_BOOSTER_1GAME")
+						BoosterManager.ConsumeGameBooster(player, Constants.Strings.COIN_BOOSTER_1GAME)
 					end
 
 					-- Tunggu 10 detik sebelum teleport
 					task.wait(10)
 
 					-- Teleport semua pemain ke lobi
-					local lobbyId = PlaceData["Lobby"]
+					local lobbyId = PlaceData[Constants.Strings.LOBBY_PLACE]
 					if lobbyId then
 						local playersToTeleport = game.Players:GetPlayers()
 						if #playersToTeleport > 0 then
@@ -510,7 +511,7 @@ local function startGameLoop()
 
 			-- Berikan bonus kepada setiap pemain yang masih hidup (tidak knocked)
 			for _, player in ipairs(game.Players:GetPlayers()) do
-				if player.Character and not player.Character:FindFirstChild("Knocked") then
+				if player.Character and not player.Character:FindFirstChild(Constants.Attributes.KNOCKED) then
 					-- Kalkulasi dan berikan Koin (Mata Uang Permanen)
 					local userId = player.UserId
 					local totalDamage = waveDamageTracker[userId] or 0
@@ -533,7 +534,7 @@ local function startGameLoop()
 						local finalCoinReward = math.floor(baseReward * difficultyMultiplier)
 
 						-- Terapkan Coin Booster
-						if BoosterManager.IsBoosterActive(player, "COIN_BOOSTER_1GAME") then
+						if BoosterManager.IsBoosterActive(player, Constants.Strings.COIN_BOOSTER_1GAME) then
 							finalCoinReward = math.floor(finalCoinReward * 1.5)
 							print(player.Name .. " mendapatkan bonus 50% Koin dari booster!")
 						end
@@ -562,7 +563,7 @@ local function startGameLoop()
 						local finalXPReward = math.floor(baseReward * difficultyMultiplier)
 
 						-- Terapkan XP Booster
-						if BoosterManager.IsBoosterActive(player, "XP_BOOSTER_30MIN") then
+						if BoosterManager.IsBoosterActive(player, Constants.Strings.XP_BOOSTER_30MIN) then
 							finalXPReward = finalXPReward * 2
 							print(player.Name .. " mendapatkan bonus 2x XP dari booster!")
 						end
@@ -604,9 +605,9 @@ local function startGameLoop()
 			end
 
 			-- Auto-revive untuk mode Crazy SEBELUM countdown dimulai
-			if difficulty == "Crazy" then
+			if difficulty == Constants.Strings.DIFFICULTY_CRAZY then
 				for _, player in ipairs(game.Players:GetPlayers()) do
-					if player.Character and player.Character:FindFirstChild("Knocked") then
+					if player.Character and player.Character:FindFirstChild(Constants.Attributes.KNOCKED) then
 						local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
 						if humanoid then
 							print("Auto-reviving " .. player.Name .. " for Crazy mode.")
@@ -616,7 +617,7 @@ local function startGameLoop()
 							humanoid.JumpPower = 50
 							humanoid.PlatformStand = false
 
-							local knockedTag = player.Character:FindFirstChild("Knocked")
+							local knockedTag = player.Character:FindFirstChild(Constants.Attributes.KNOCKED)
 							if knockedTag then knockedTag:Destroy() end
 
 							-- Kirim event ke klien untuk menutup UI knock
@@ -717,7 +718,7 @@ ExitGameEvent.OnServerEvent:Connect(function(player)
 	end
 
 	print(player.Name .. " memilih Exit")
-	local lobbyId = PlaceData["Lobby"]
+	local lobbyId = PlaceData[Constants.Strings.LOBBY_PLACE]
 
 	if lobbyId then
 		-- Simpan data secara sinkron sebelum teleport
@@ -789,12 +790,12 @@ game.Players.PlayerAdded:Connect(function(player)
 	player.CharacterAdded:Connect(function(character)
 		-- Pemicu untuk saat pemain di-knock
 		character.ChildAdded:Connect(function(child)
-			if child.Name == "Knocked" then
+			if child.Name == Constants.Attributes.KNOCKED then
 				updatePlayerCount()
 			end
 		end)
 		character.ChildRemoved:Connect(function(child)
-			if child.Name == "Knocked" then
+			if child.Name == Constants.Attributes.KNOCKED then
 				updatePlayerCount()
 			end
 		end)

@@ -36,7 +36,7 @@ function Boss3.Init(zombie, humanoid, config, executeHardWipe, zombieModuleRef)
 	local specialTimeout = (config and config.SpecialTimeout) or 300
 	local bossStartTime = tick()
 	BossTimerEvent:FireAllClients(specialTimeout, specialTimeout)
-	spawn(function()
+	task.spawn(function()
 		while zombie.Parent and humanoid and humanoid.Health > 0 do
 			local remaining = math.max(0, specialTimeout - (tick() - bossStartTime))
 			BossTimerEvent:FireAllClients(remaining, specialTimeout)
@@ -49,7 +49,7 @@ function Boss3.Init(zombie, humanoid, config, executeHardWipe, zombieModuleRef)
 	end)
 
 	-- Radiation Aura
-	spawn(function()
+	task.spawn(function()
 		local r = config and config.Radiation
 		local tickTime = (r and r.Tick) or 0.5
 		local hr = (r and r.HorizontalRadius) or 6
@@ -76,7 +76,7 @@ function Boss3.Init(zombie, humanoid, config, executeHardWipe, zombieModuleRef)
 	end)
 
 	-- Corrupting Blast Attack
-	spawn(function()
+	task.spawn(function()
 		local blastConf = config and config.CorruptingBlast
 		if not blastConf then return end
 		while zombie.Parent and humanoid and humanoid.Health > 0 do
@@ -119,7 +119,7 @@ function Boss3.Init(zombie, humanoid, config, executeHardWipe, zombieModuleRef)
 	end)
 
 	-- Grasping Souls Attack
-	spawn(function()
+	task.spawn(function()
 		local soulConf = config and config.GraspingSouls
 		if not soulConf then return end
 		while zombie.Parent and humanoid and humanoid.Health > 0 do

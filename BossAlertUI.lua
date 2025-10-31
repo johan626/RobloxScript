@@ -274,7 +274,7 @@ bossIncoming.OnClientEvent:Connect(function(bossName)
 	end
 
 	-- Auto-remove after 5 seconds
-	wait(5)
+	task.wait(5)
 	animateOut()
 	if pulseConnection then pulseConnection:Disconnect() end
 	if skullConnection then skullConnection:Disconnect() end

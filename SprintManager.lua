@@ -66,7 +66,7 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 -- Server loop
-spawn(function()
+task.spawn(function()
 	while true do
 		for player, data in pairs(playerData) do
 			local char = player.Character

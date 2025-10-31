@@ -297,7 +297,7 @@ local function spawnDrop(dropName, position)
 		light.Parent = part
 		-- gunakan loop berkelanjutan untuk memutar dan mengayunkan drop
 		local RunService = game:GetService("RunService")
-		spawn(function()
+		task.spawn(function()
 			-- simpan posisi awal agar bobbing mempertahankan posisi horizontal
 			local basePos = part.Position
 			local elapsed = 0

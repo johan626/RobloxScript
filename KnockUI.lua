@@ -443,7 +443,7 @@ local function handlePing()
 
 		for i = PING_COOLDOWN, 1, -1 do
 			cooldownText.Text = tostring(i)
-			wait(1)
+			task.wait(1)
 		end
 
 		-- Cooldown finished

@@ -34,7 +34,7 @@ function Boss1.Init(zombie, humanoid, config, executeHardWipe)
 	local specialTimeout = pconf.SpecialTimeout or 300
 	BossTimerEvent:FireAllClients(specialTimeout, specialTimeout)
 
-	spawn(function()
+	task.spawn(function()
 		while zombie.Parent and humanoid and humanoid.Health > 0 do
 			local elapsed = tick() - bossStartTime
 			local remaining = math.max(0, specialTimeout - elapsed)
@@ -50,7 +50,7 @@ function Boss1.Init(zombie, humanoid, config, executeHardWipe)
 	end)
 
 	-- Start the radiation damage aura
-	spawn(function()
+	task.spawn(function()
 		local rconf = config.Radiation
 		local tickTime = (rconf and rconf.Tick) or 0.5
 		local hr = (rconf and rconf.HorizontalRadius) or 10
@@ -83,7 +83,7 @@ function Boss1.Init(zombie, humanoid, config, executeHardWipe)
 	end)
 
 	-- Start the poison attack skill
-	spawn(function()
+	task.spawn(function()
 		local pconf = config.Poison
 		Boss1VFXModule.CreateBossPoisonAura(zombie)
 

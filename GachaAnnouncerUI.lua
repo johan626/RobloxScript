@@ -46,7 +46,7 @@ local function showAnnouncement(winner, skinName)
 	)
 
 	-- Tunggu beberapa detik
-	wait(5)
+	task.wait(5)
 
 	-- Animasi keluar
 	messageLabel:TweenPosition(

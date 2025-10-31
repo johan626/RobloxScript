@@ -8,6 +8,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local RemoteEvents = game.ReplicatedStorage.RemoteEvents
 local ModuleScriptServerScriptService = ServerScriptService.ModuleScript
 
+local Constants = require(ModuleScriptServerScriptService:WaitForChild("Constants"))
 local GameConfig = require(ModuleScriptServerScriptService:WaitForChild("GameConfig"))
 local GameStatus = require(ModuleScriptServerScriptService:WaitForChild("GameStatus"))
 local WalkSpeedManager = require(ModuleScriptServerScriptService:WaitForChild("WalkSpeedManager"))
@@ -16,18 +17,18 @@ local StatsModule = require(ModuleScriptServerScriptService:WaitForChild("StatsM
 local BoosterModule = require(ModuleScriptServerScriptService:WaitForChild("BoosterModule"))
 local AchievementManager = require(ModuleScriptServerScriptService:WaitForChild("AchievementManager"))
 
-local KnockEvent = RemoteEvents:WaitForChild("KnockEvent")
-local ReviveEvent = RemoteEvents:WaitForChild("ReviveEvent")
-local GameOverEvent = RemoteEvents:WaitForChild("GameOverEvent")
-local ReviveProgressEvent = RemoteEvents:WaitForChild("ReviveProgressEvent")
-local CancelReviveEvent = RemoteEvents:WaitForChild("CancelReviveEvent")
-local GlobalKnockNotificationEvent = RemoteEvents:WaitForChild("GlobalKnockNotificationEvent")
-local PingKnockedPlayerEvent = RemoteEvents:WaitForChild("PingKnockedPlayerEvent")
+local KnockEvent = RemoteEvents:WaitForChild(Constants.Events.KNOCK)
+local ReviveEvent = RemoteEvents:WaitForChild(Constants.Events.REVIVE)
+local GameOverEvent = RemoteEvents:WaitForChild(Constants.Events.GAME_OVER)
+local ReviveProgressEvent = RemoteEvents:WaitForChild(Constants.Events.REVIVE_PROGRESS)
+local CancelReviveEvent = RemoteEvents:WaitForChild(Constants.Events.CANCEL_REVIVE)
+local GlobalKnockNotificationEvent = RemoteEvents:WaitForChild(Constants.Events.GLOBAL_KNOCK_NOTIFICATION)
+local PingKnockedPlayerEvent = RemoteEvents:WaitForChild(Constants.Events.PING_KNOCKED_PLAYER)
 
 local activeRevivers = {} -- [reviver] = {target, startTime, connection}
 local pingCooldowns = {} -- [player] = lastPingTime
 
-local PING_COOLDOWN = 15
+local KnockConfig = GameConfig.KnockSystem
 
 local function cancelRevive(reviver)
 	if activeRevivers[reviver] then
@@ -51,10 +52,10 @@ game.Players.PlayerAdded:Connect(function(player)
 
 
 		humanoid.HealthChanged:Connect(function(health)
-			if (not justSpawned) and health <= 0 and not char:FindFirstChild("Knocked") then
+			if (not justSpawned) and health <= 0 and not char:FindFirstChild(Constants.Attributes.KNOCKED) then
 				-- Cek untuk Self-Revive Booster
 				local usedBooster = BoosterModule.UseActiveBooster(player)
-				if usedBooster == "SelfRevive" then
+				if usedBooster == Constants.Strings.SELF_REVIVE_BOOSTER then
 					-- Booster digunakan, hidupkan kembali pemain
 					humanoid.Health = humanoid.MaxHealth * 0.5 -- Pulihkan 50% HP
 					-- Tambahkan efek visual/suara di sini jika diinginkan
@@ -64,7 +65,7 @@ game.Players.PlayerAdded:Connect(function(player)
 
 				local activePlayers = 0
 				for _, p in pairs(game.Players:GetPlayers()) do
-					if p.Character and not p.Character:FindFirstChild("Knocked") then
+					if p.Character and not p.Character:FindFirstChild(Constants.Attributes.KNOCKED) then
 						activePlayers = activePlayers + 1
 					end
 				end
@@ -82,7 +83,7 @@ game.Players.PlayerAdded:Connect(function(player)
 					-- Hapus tag "Knocked" & kirim KnockEvent(false) agar UI Knock ditutup
 					for _, plr in ipairs(Players:GetPlayers()) do
 						if plr.Character then
-							local tag = plr.Character:FindFirstChild("Knocked")
+							local tag = plr.Character:FindFirstChild(Constants.Attributes.KNOCKED)
 							if tag then tag:Destroy() end
 							KnockEvent:FireClient(plr, false)
 							-- Pastikan progress bar revive (jika ada) juga direset & disembunyikan
@@ -107,18 +108,18 @@ game.Players.PlayerAdded:Connect(function(player)
 					end
 
 					for _, zombie in pairs(workspace:GetChildren()) do
-						if zombie:FindFirstChild("IsZombie") then
+						if zombie:FindFirstChild(Constants.Attributes.IS_ZOMBIE) then
 							zombie:Destroy()
 						end
 					end
 				else
 					local tag = Instance.new("BoolValue")
-					tag.Name = "Knocked"
+					tag.Name = Constants.Attributes.KNOCKED
 					tag.Parent = char
 
 					-- NEW: Lacak jumlah knock pada player
-					local currentKnocks = player:GetAttribute("KnockCount") or 0
-					player:SetAttribute("KnockCount", currentKnocks + 1)
+					local currentKnocks = player:GetAttribute(Constants.Attributes.KNOCK_COUNT) or 0
+					player:SetAttribute(Constants.Attributes.KNOCK_COUNT, currentKnocks + 1)
 
 					WalkSpeedManager.add_modifier(player, "knock", -16)
 					humanoid.JumpPower = 0
@@ -142,7 +143,7 @@ game.Players.PlayerAdded:Connect(function(player)
 					-- NEW: Kirim notifikasi ke semua pemain
 					GlobalKnockNotificationEvent:FireAllClients(player.Name, true, char.HumanoidRootPart.Position)
 				end
-			elseif char:FindFirstChild("Knocked") and humanoid.Health < 1 then
+			elseif char:FindFirstChild(Constants.Attributes.KNOCKED) and humanoid.Health < 1 then
 				humanoid.Health = 1
 			end
 		end)
@@ -164,13 +165,13 @@ ReviveEvent.OnServerEvent:Connect(function(player, target)
 	end
 
 	-- HARD GUARD: reviver tidak boleh knock / self-target / target harus knock
-	if not player.Character or player.Character:FindFirstChild("Knocked") or player.Character:GetAttribute("IsReloading") then
+	if not player.Character or player.Character:FindFirstChild(Constants.Attributes.KNOCKED) or player.Character:GetAttribute(Constants.Attributes.IS_RELOADING) then
 		return
 	end
 	if not target or target == player then
 		return
 	end
-	if not target.Character or not target.Character:FindFirstChild("Knocked") then
+	if not target.Character or not target.Character:FindFirstChild(Constants.Attributes.KNOCKED) then
 		return
 	end
 
@@ -179,7 +180,7 @@ ReviveEvent.OnServerEvent:Connect(function(player, target)
 		return
 	end
 
-	if target and target.Character and target.Character:FindFirstChild("Knocked") then
+	if target and target.Character and target.Character:FindFirstChild(Constants.Attributes.KNOCKED) then
 		local humanoid = target.Character:FindFirstChild("Humanoid")
 		if humanoid then
 			local startTime = time()
@@ -189,15 +190,15 @@ ReviveEvent.OnServerEvent:Connect(function(player, target)
 				connection = nil
 			}
 
-			local reviveTime = 6 -- default 6 detik
-			if player.Character and player.Character:GetAttribute("ReviveBoost") then
-				reviveTime = 3 -- 3 detik dengan perk
+			local reviveTime = KnockConfig.BaseReviveTime
+			if player.Character and player.Character:GetAttribute(Constants.Attributes.REVIVE_BOOST) then
+				reviveTime = KnockConfig.BoostedReviveTime
 			end
 
 			-- NEW: Tambahkan penalti waktu berdasarkan jumlah knock target
-			local knockCount = target:GetAttribute("KnockCount") or 1
+			local knockCount = target:GetAttribute(Constants.Attributes.KNOCK_COUNT) or 1
 			if knockCount > 1 then
-				reviveTime = reviveTime + (knockCount - 1) -- Tambah 1 detik untuk setiap knock setelah yang pertama
+				reviveTime = reviveTime + (knockCount - 1) * KnockConfig.PenaltyPerKnock
 			end
 
 			-- Progress update loop
@@ -220,12 +221,12 @@ ReviveEvent.OnServerEvent:Connect(function(player, target)
 					-- Batal jika status berubah (termasuk jika reviver bergerak)
 					if not reviverChar or not targetChar
 						or not reviverChar.Parent or not targetChar.Parent
-						or reviverChar:FindFirstChild("Knocked")
-						or reviverChar:GetAttribute("IsReloading")
-						or reviverChar:GetAttribute("IsShooting")
-						or reviverChar:GetAttribute("IsUsingBooster")
-						or not targetChar:FindFirstChild("Knocked")
-						or (reviverChar.HumanoidRootPart.Position - targetChar.HumanoidRootPart.Position).Magnitude > 8
+						or reviverChar:FindFirstChild(Constants.Attributes.KNOCKED)
+						or reviverChar:GetAttribute(Constants.Attributes.IS_RELOADING)
+						or reviverChar:GetAttribute(Constants.Attributes.IS_SHOOTING)
+						or reviverChar:GetAttribute(Constants.Attributes.IS_USING_BOOSTER)
+						or not targetChar:FindFirstChild(Constants.Attributes.KNOCKED)
+						or (reviverChar.HumanoidRootPart.Position - targetChar.HumanoidRootPart.Position).Magnitude > KnockConfig.MaxReviveDistance
 						or reviverChar.Humanoid.MoveDirection.Magnitude > 0 then
 						cancelRevive(player)
 						break
@@ -240,13 +241,13 @@ ReviveEvent.OnServerEvent:Connect(function(player, target)
 
 				if activeRevivers[player] then
 					-- Successfully revived
-					if player.Character and player.Character:GetAttribute("MedicBoost") then
-						humanoid.Health = humanoid.MaxHealth * 0.3 -- 30% HP dengan perk Medic
+					if player.Character and player.Character:GetAttribute(Constants.Attributes.MEDIC_BOOST) then
+						humanoid.Health = humanoid.MaxHealth * KnockConfig.BoostedReviveHealth
 					else
-						humanoid.Health = humanoid.MaxHealth * 0.1 -- 10% HP default
+						humanoid.Health = humanoid.MaxHealth * KnockConfig.DefaultReviveHealth
 					end
 					WalkSpeedManager.remove_modifier(target, "knock")
-					humanoid.JumpPower = 50
+					humanoid.JumpPower = KnockConfig.PostReviveJumpPower
 					humanoid.PlatformStand = false
 					-- FIX: reset fisika & paksa humanoid bangun agar tidak melayang/berputar
 					local targetChar = target.Character
@@ -281,7 +282,7 @@ ReviveEvent.OnServerEvent:Connect(function(player, target)
 					-- WalkSpeedManager.remove_modifier(target, "knock") -- Already called above
 					-- atur sesuai desainmu
 					humanoid.UseJumpPower = true
-					humanoid.JumpPower = 30              -- samakan dengan JumpPower.lua
+					humanoid.JumpPower = KnockConfig.PostReviveJumpPower
 					KnockEvent:FireClient(target, false)
 					-- Pastikan progress bar hilang di client setelah sukses
 					ReviveProgressEvent:FireClient(player, 1, false, reviveTime)
@@ -311,12 +312,12 @@ end)
 
 PingKnockedPlayerEvent.OnServerEvent:Connect(function(player)
 	-- Security checks: player must be knocked and not in cooldown
-	if not player.Character or not player.Character:FindFirstChild("Knocked") then
+	if not player.Character or not player.Character:FindFirstChild(Constants.Attributes.KNOCKED) then
 		return
 	end
 
 	local now = time()
-	if pingCooldowns[player] and now - pingCooldowns[player] < PING_COOLDOWN then
+	if pingCooldowns[player] and now - pingCooldowns[player] < KnockConfig.PingCooldown then
 		return
 	end
 

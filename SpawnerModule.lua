@@ -16,6 +16,11 @@ local GameConfig = require(ServerScriptService.ModuleScript.GameConfig)
 local ZombieModule = require(ModuleScriptServerScriptService:WaitForChild("ZombieModule"))
 local BuildingManager = require(ModuleScriptServerScriptService:WaitForChild("BuildingModule"))
 
+-- Muat modul bos di sini untuk diinisialisasi oleh Spawner
+local Boss1 = require(ModuleScriptServerScriptService.BossModule:WaitForChild("Boss1Module"))
+local Boss2 = require(ModuleScriptServerScriptService.BossModule:WaitForChild("Boss2Module"))
+local Boss3 = require(ModuleScriptServerScriptService.BossModule:WaitForChild("Boss3Module"))
+
 -- Track boss spawn per interval window (ChanceWaveMin..ChanceWaveMax)
 local bossWindowSpawned = false
 local boss2WindowSpawned = false
@@ -121,11 +126,61 @@ function SpawnerModule.SpawnWave(amount, wave, playerCount, gameMode, difficulty
 		end
 
 		-- Spawn the chosen zombie type (or default if none chosen)
-		ZombieModule.SpawnZombie(randomSpawn, chosenType, playerCount, difficulty, waveModifiers)
+		local zombie = ZombieModule.SpawnZombie(randomSpawn, chosenType, playerCount, difficulty, waveModifiers)
+
+		-- >> LOGIKA INISIALISASI BOSS BARU <<
+		if zombie and chosenType and string.find(chosenType, "Boss") then
+			local humanoid = zombie:FindFirstChildOfClass("Humanoid")
+			local cfg = ZombieConfig.Types[chosenType]
+			if humanoid and cfg then
+				if chosenType == "Boss" then
+					Boss1.Init(zombie, humanoid, cfg, ZombieModule.ExecuteHardWipe, SpawnerModule)
+				elseif chosenType == "Boss2" then
+					Boss2.Init(zombie, humanoid, cfg, ZombieModule.ExecuteHardWipe, SpawnerModule)
+				elseif chosenType == "Boss3" then
+					Boss3.Init(zombie, humanoid, cfg, ZombieModule.ExecuteHardWipe)
+				end
+			end
+		end
+
 		task.wait(1) -- Wait between spawns
 	end
 
 	return isBossWave
 end
+
+function SpawnerModule.SpawnVolatileMinion(bossPosition, minionConfig)
+	local spawners = workspace:FindFirstChild("Spawners")
+	if not spawners then return end
+
+	-- Cari titik spawn yang berjarak wajar dari bos
+	local spawnPoint = nil
+	local attempts = 0
+	while not spawnPoint and attempts < 15 do
+		local potentialSpawners = spawners:GetChildren()
+		local randomSpawn = potentialSpawners[math.random(1, #potentialSpawners)]
+		if (randomSpawn.Position - bossPosition).Magnitude > 25 then
+			spawnPoint = randomSpawn
+		end
+		attempts += 1
+	end
+
+	-- Fallback ke spawner acak jika tidak ditemukan yang cocok
+	if not spawnPoint then
+		local potentialSpawners = spawners:GetChildren()
+		spawnPoint = potentialSpawners[math.random(1, #potentialSpawners)]
+	end
+
+	-- Gunakan ZombieModule untuk spawn, tapi tandai sebagai minion
+	local zombie = ZombieModule.SpawnZombie(spawnPoint, minionConfig.MinionType, 1, "Easy", {isMinion = true})
+	if zombie then
+		-- Tambahkan tag khusus untuk identifikasi saat mati
+		local volatileTag = Instance.new("StringValue")
+		volatileTag.Name = "VolatileMinion"
+		volatileTag.Value = "Boss1" -- Simpan info asal minion
+		volatileTag.Parent = zombie
+	end
+end
+
 
 return SpawnerModule

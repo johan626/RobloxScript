@@ -23,11 +23,6 @@ local ShooterVFXModule = require(ZombieVFX:WaitForChild("ShooterVFXModule"))
 local Boss1VFXModule = require(ZombieVFX:WaitForChild("Boss1VFXModule"))
 local Boss2VFXModule = require(ZombieVFX:WaitForChild("Boss2VFXModule"))
 local Boss3VFXModule = require(ZombieVFX:WaitForChild("Boss3VFXModule"))
-
--- Boss Logic Modules
-local Boss1 = require(ServerScriptService.ModuleScript.BossModule:WaitForChild("Boss1Module"))
-local Boss2 = require(ServerScriptService.ModuleScript.BossModule:WaitForChild("Boss2Module"))
-local Boss3 = require(ServerScriptService.ModuleScript.BossModule:WaitForChild("Boss3Module"))
 local ZombieConfig = require(ModuleScriptReplicatedStorage:WaitForChild("ZombieConfig"))
 local SkillConfig = require(ModuleScriptReplicatedStorage:WaitForChild("SkillConfig"))
 local GameConfig = require(ModuleScriptServerScriptService:WaitForChild("GameConfig"))
@@ -44,7 +39,7 @@ local GameOverEvent = RemoteEvents:WaitForChild("GameOverEvent")
 local ZombieDiedEvent = BindableEvents:WaitForChild("ZombieDiedEvent")
 
 -- Helper function for a "hard wipe" mechanic used by bosses on timeout.
-local function _executeHardWipe(zombie, humanoid)
+function ZombieModule.ExecuteHardWipe(zombie, humanoid)
 	local bossPos = (zombie.PrimaryPart and zombie.PrimaryPart.Position) or zombie:GetModelCFrame().p
 
 	-- Make the boss immune and freeze them to signify the start of the wipe.
@@ -150,16 +145,6 @@ function ZombieModule.SpawnZombie(spawnPoint, typeName, playerCount, difficulty,
 				task.wait(2 + math.random()) -- interval
 			end
 		end)
-	elseif typeName == "Tank" then
-		-- tank: high HP & heavy attack (attack damage used in Chase)
-	elseif typeName == "Boss3" then
-		Boss3.Init(zombie, humanoid, cfg, _executeHardWipe, ZombieModule)
-
-	elseif typeName == "Boss2" then
-		Boss2.Init(zombie, humanoid, cfg, _executeHardWipe, ZombieModule)
-
-	elseif typeName == "Boss" then
-		Boss1.Init(zombie, humanoid, cfg, _executeHardWipe)
 	end
 
 	-- [[ REVISED ZOMBIE CHASE AND PATHFINDING LOOP ]]
@@ -312,6 +297,40 @@ function ZombieModule.SpawnZombie(spawnPoint, typeName, playerCount, difficulty,
 	humanoid.Died:Connect(function()
 		-- Guard clause to prevent error if zombie is destroyed before this event fires
 		if not zombie or not zombie.Parent then return end
+
+		-- >> LOGIKA BARU UNTUK MINION YANG BISA MELEDAK <<
+		local volatileTag = zombie:FindFirstChild("VolatileMinion")
+		if volatileTag and volatileTag.Value == "Boss1" then
+			local minionConfig = ZombieConfig.Types.Boss.VolatileMinions
+			local explosionPos = zombie.PrimaryPart.Position
+
+			-- Panggil VFX ledakan
+			Boss1VFXModule.CreateVolatileMinionExplosion(explosionPos, minionConfig)
+
+			-- Berikan damage ke pemain dalam radius
+			for _, player in ipairs(game.Players:GetPlayers()) do
+				local char = player.Character
+				if char and not ElementModule.IsPlayerInvincible(player) then
+					local hum = char:FindFirstChildOfClass("Humanoid")
+					local hrp = char:FindFirstChild("HumanoidRootPart")
+					if hum and hum.Health > 0 and hrp then
+						if (hrp.Position - explosionPos).Magnitude <= minionConfig.ExplosionRadius then
+							local damage = minionConfig.ExplosionDamage
+							damage = ElementModule.ApplyDamageReduction(player, damage)
+							local leftoverDamage = ShieldModule.Damage(player, damage)
+							if leftoverDamage > 0 then
+								hum:TakeDamage(leftoverDamage)
+							end
+						end
+					end
+				end
+			end
+
+			-- Hancurkan minion segera setelah meledak
+			zombie:Destroy()
+			return -- Hentikan eksekusi lebih lanjut untuk minion
+		end
+		-- >> AKHIR LOGIKA MINION <<
 
 		-- Cabut highlight saat mati supaya mayat tidak ter-highlight
 		local ch = zombie:FindFirstChild("ChamsHighlight")

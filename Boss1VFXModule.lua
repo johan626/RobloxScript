@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Workspace = game:GetService("Workspace")
 
 local ModuleScriptReplicatedStorage = ReplicatedStorage.ModuleScript
 local ModuleScriptServerScriptService = ServerScriptService.ModuleScript
@@ -301,8 +302,8 @@ function BossVFXModule.CreateBossPoisonAura(bossModel)
 	aura.Parent = workspace
 	task.spawn(function()
 		while bossModel and bossModel.Parent and aura do
-			if bossModel.PrimaryPart then 
-				aura.CFrame = bossModel.PrimaryPart.CFrame 
+			if bossModel.PrimaryPart then
+				aura.CFrame = bossModel.PrimaryPart.CFrame
 			end
 			task.wait(0.1)
 		end
@@ -528,5 +529,159 @@ function BossVFXModule.CreateBossPoisonEffectFollow(targetCharacter, isSpecial, 
 	end)
 	return cloud
 end
+
+-- === FUNGSI VFX BARU UNTUK BOSS 1 V2 ===
+
+function BossVFXModule.CreatePhaseTransitionEffect(bossModel)
+	if not bossModel or not bossModel.PrimaryPart then return end
+
+	local shockwave = Instance.new("Part")
+	shockwave.Size = Vector3.new(0.5, 20, 0.5)
+	shockwave.Shape = Enum.PartType.Cylinder
+	shockwave.CFrame = bossModel.PrimaryPart.CFrame * CFrame.Angles(math.rad(90), 0, 0)
+	shockwave.Anchored = true
+	shockwave.CanCollide = false
+	shockwave.Transparency = 0.4
+	shockwave.Material = Enum.Material.Neon
+	shockwave.Color = Color3.fromRGB(150, 255, 150)
+	shockwave.Name = "PhaseTransitionShockwave"
+	shockwave.Parent = Workspace
+
+	local expandTween = TweenService:Create(shockwave, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = Vector3.new(100, 20, 100), Transparency = 1})
+	expandTween:Play()
+	Debris:AddItem(shockwave, 1)
+
+	local burstPart = Instance.new("Part")
+    burstPart.Size = Vector3.new(1,1,1)
+    burstPart.CFrame = CFrame.new(bossModel.PrimaryPart.Position)
+    burstPart.Anchored = true
+    burstPart.CanCollide = false
+    burstPart.Transparency = 1
+    burstPart.Parent = Workspace
+
+	local particles = Instance.new("ParticleEmitter")
+	particles.Color = ColorSequence.new(Color3.fromRGB(100, 255, 100))
+	particles.LightEmission = 0.5
+	particles.Size = NumberSequence.new(2, 5)
+	particles.Lifetime = NumberRange.new(1, 2)
+	particles.Rate = 0
+	particles.Speed = NumberRange.new(30, 50)
+    particles.SpreadAngle = Vector2.new(360, 360)
+	particles.Parent = burstPart
+
+    particles:Emit(200)
+    Debris:AddItem(burstPart, 2)
+end
+
+function BossVFXModule.CreateCorrosiveSlamTelegraph(bossModel, config)
+	if not bossModel or not bossModel.PrimaryPart then return end
+
+	local telegraphPart = Instance.new("Part")
+	telegraphPart.Shape = Enum.PartType.Cylinder
+	telegraphPart.Size = Vector3.new(0.5, config.Radius * 2, config.Radius * 2)
+	telegraphPart.CFrame = CFrame.new(bossModel.PrimaryPart.Position - Vector3.new(0, bossModel.PrimaryPart.Size.Y/2 - 0.5, 0)) * CFrame.Angles(0,0,math.rad(90))
+    telegraphPart.Anchored = true
+    telegraphPart.CanCollide = false
+    telegraphPart.Material = Enum.Material.ForceField
+    telegraphPart.Color = Color3.fromRGB(100, 255, 100)
+    telegraphPart.Transparency = 1
+	telegraphPart.Name = "SlamTelegraph"
+    telegraphPart.Parent = Workspace
+
+    local texture = Instance.new("Texture")
+    texture.Texture = "rbxassetid://2415962297"
+    texture.StudsPerTileU = 20
+    texture.StudsPerTileV = 20
+    texture.Face = Enum.NormalId.Top
+    texture.Parent = telegraphPart
+
+    local tweenInfo = TweenInfo.new(config.TelegraphDuration, Enum.EasingStyle.Linear)
+    local fadeIn = TweenService:Create(telegraphPart, tweenInfo, {Transparency = 0.5})
+
+    fadeIn:Play()
+
+    Debris:AddItem(telegraphPart, config.TelegraphDuration)
+end
+
+function BossVFXModule.ExecuteCorrosiveSlamVFX(position, config)
+	local shockwave = Instance.new("Part")
+	shockwave.Size = Vector3.new(0.5, 1, 1)
+	shockwave.Shape = Enum.PartType.Cylinder
+	shockwave.CFrame = CFrame.new(position) * CFrame.Angles(0,0,math.rad(90))
+	shockwave.Anchored = true
+	shockwave.CanCollide = false
+	shockwave.Material = Enum.Material.Neon
+	shockwave.Color = Color3.fromRGB(150, 255, 150)
+	shockwave.Name = "SlamShockwave"
+	shockwave.Parent = Workspace
+
+	local duration = config.Radius / config.WaveSpeed
+	local expandTween = TweenService:Create(shockwave, TweenInfo.new(duration, Enum.EasingStyle.Linear), {Size = Vector3.new(0.5, config.Radius * 2, config.Radius * 2), Transparency = 1})
+	expandTween:Play()
+	Debris:AddItem(shockwave, duration)
+end
+
+function BossVFXModule.CreateToxicLobTelegraph(position, config)
+    local telegraphPart = Instance.new("Part")
+	telegraphPart.Shape = Enum.PartType.Cylinder
+	telegraphPart.Size = Vector3.new(0.5, config.PuddleRadius * 2, config.PuddleRadius * 2)
+	telegraphPart.CFrame = CFrame.new(position) * CFrame.Angles(0,0,math.rad(90))
+    telegraphPart.Anchored = true
+    telegraphPart.CanCollide = false
+    telegraphPart.Material = Enum.Material.ForceField
+    telegraphPart.Color = Color3.fromRGB(50, 200, 50)
+    telegraphPart.Transparency = 0.5
+	telegraphPart.Name = "LobTelegraph"
+    telegraphPart.Parent = Workspace
+
+    Debris:AddItem(telegraphPart, config.TelegraphDuration)
+end
+
+function BossVFXModule.ExecuteToxicLob(position, config)
+    local puddle = BossVFXModule.CreateBossPoisonEffect(position, false)
+    Debris:AddItem(puddle, config.PuddleDuration)
+end
+
+function BossVFXModule.CreateVolatileMinionExplosion(position, config)
+    local explosionSphere = Instance.new("Part")
+    explosionSphere.Shape = Enum.PartType.Ball
+    explosionSphere.Size = Vector3.new(1, 1, 1)
+    explosionSphere.CFrame = CFrame.new(position)
+    explosionSphere.Anchored = true
+    explosionSphere.CanCollide = false
+    explosionSphere.Material = Enum.Material.Neon
+    explosionSphere.Color = Color3.fromRGB(180, 255, 180)
+    explosionSphere.Parent = Workspace
+
+    local duration = 0.5
+    local expandTween = TweenService:Create(explosionSphere, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Size = Vector3.new(config.ExplosionRadius * 2, config.ExplosionRadius * 2, config.ExplosionRadius * 2),
+        Transparency = 1
+    })
+    expandTween:Play()
+    Debris:AddItem(explosionSphere, duration)
+
+    local burstPart = Instance.new("Part")
+    burstPart.Size = Vector3.new(1,1,1)
+    burstPart.CFrame = CFrame.new(position)
+    burstPart.Anchored = true
+    burstPart.CanCollide = false
+    burstPart.Transparency = 1
+    burstPart.Parent = Workspace
+
+	local particles = Instance.new("ParticleEmitter")
+	particles.Color = ColorSequence.new(Color3.fromRGB(100, 255, 100))
+	particles.LightEmission = 0.5
+	particles.Size = NumberSequence.new(2, 4)
+	particles.Lifetime = NumberRange.new(0.5, 1)
+	particles.Rate = 0
+	particles.Speed = NumberRange.new(20, 30)
+    particles.SpreadAngle = Vector2.new(360, 360)
+	particles.Parent = burstPart
+
+    particles:Emit(150)
+    Debris:AddItem(burstPart, 2)
+end
+
 
 return BossVFXModule

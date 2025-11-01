@@ -47,27 +47,59 @@ ZombieConfig.Types = {
 		AttackRange = 5  -- Ditambahkan
 	},
 	Boss = {
-		MaxHealth = 75000,  -- Diperbesar untuk Boss
-		WalkSpeed = 8,  -- Dipercepat sedikit
-		AttackDamage = 50,
-		AttackCooldown = 2.0,
-		AttackRange = 25,  -- Ditambahkan (jarak besar untuk Boss raksasa)
-		-- boss poison skill config
-		Poison = {
-			InitialCount = 4,
-			Interval = 60,
-			SinglePoisonPct = 0.40,
-			Duration = 4,
-			SpecialTimeout = 30,
-			SpecialDuration = 10
-		},
-		-- radiasi (kolom sempit, vertikal tinggi)
+		Name = "Plague Titan",
+		MaxHealth = 75000,
+		WalkSpeed = 8,
+		AttackDamage = 50, -- Serangan melee standar jika pemain terlalu dekat
+		AttackRange = 8,
+		SpecialTimeout = 300, -- Timer pemusnahan tetap ada
+
+		-- FASE 1 & 2
 		Radiation = {
-			HorizontalRadius = 12,      -- radius kecil secara horizontal (XZ)
-			VerticalHalfHeight = 200,   -- jangkauan ke atas & bawah (Y)
-			DamagePerSecondPct = 0.01,  -- % dari MaxHealth per detik
-			Tick = 0.5                  -- interval cek & tick damage
+			Phase1Radius = 15,
+			Phase2Radius = 25, -- Aura mengembang di Fase 2
+			VerticalHalfHeight = 200,
+			DamagePerSecondPct = 0.01,
+			Tick = 0.5
 		},
+
+		-- FASE 1
+		CorrosiveSlam = {
+			Cooldown = 12,
+			Damage = 30,
+			Radius = 40,
+			TelegraphDuration = 1.5,
+			WaveSpeed = 80,
+		},
+		ToxicLob = {
+			Cooldown = 8,
+			PuddleDuration = 15,
+			PuddleDamagePerTick = 5,
+			PuddleTickInterval = 0.5,
+			PuddleRadius = 12,
+			TelegraphDuration = 1,
+		},
+
+		-- TRANSISI
+		PhaseTransition = {
+			TriggerHPPercent = 0.5,
+			RoarDuration = 3,
+		},
+
+		-- FASE 2
+		VolatileMinions = {
+			Cooldown = 25,
+			SpawnCount = {2, 3}, -- min, max
+			MinionType = "Runner", -- Akan menggunakan stats Runner tapi mungkin dengan HP lebih rendah
+			ExplosionRadius = 15,
+			ExplosionDamage = 25,
+		},
+		FissionBarrage = {
+			Cooldown = 40,
+			ProjectileCount = 4,
+			IntervalBetweenShots = 0.5,
+		},
+
 		ChanceWaveMin = 10,
 		ChanceWaveMax = 15,
 		ChanceToSpawn = 1

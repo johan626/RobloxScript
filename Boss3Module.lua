@@ -7,38 +7,62 @@ local Boss3 = {}
 -- Dependencies
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 
 local Boss3VFXModule = require(ReplicatedStorage.ZombieVFX:WaitForChild("Boss3VFXModule"))
-local Boss2VFXModule = require(ReplicatedStorage.ZombieVFX:WaitForChild("Boss2VFXModule")) -- For some shared UI
 local ElementModule = require(ServerScriptService.ModuleScript:WaitForChild("ElementConfigModule"))
 local ShieldModule = require(ServerScriptService.ModuleScript:WaitForChild("ShieldModule"))
+local SpawnerModule -- Akan diinisialisasi melalui Init
+
 local BossTimerEvent = ReplicatedStorage.RemoteEvents:WaitForChild("BossTimerEvent")
-local ZombieModule -- Forward declaration
+local BossAlertEvent = ReplicatedStorage.RemoteEvents:WaitForChild("BossIncoming")
 
-function Boss3.Init(zombie, humanoid, config, executeHardWipe, zombieModuleRef)
-	ZombieModule = zombieModuleRef -- Set the reference
+-- Helper function to find a valid target
+local function findTarget(bossModel)
+	local furthestTarget = nil
+	local maxDistance = 0
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+			local distance = (bossModel.PrimaryPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+			if distance > maxDistance then
+				maxDistance = distance
+				furthestTarget = player
+			end
+		end
+	end
+	return furthestTarget
+end
 
-	-- Tag the zombie as a boss
+function Boss3.Init(zombie, humanoid, config, executeHardWipe, spawnerModuleRef)
+	SpawnerModule = spawnerModuleRef
+	-- === INITIALIZATION ===
 	local bossTag = Instance.new("BoolValue")
 	bossTag.Name = "IsBoss"
 	bossTag.Parent = zombie
+	BossAlertEvent:FireAllClients(config.Name or "Boss")
 
-	-- Fire the "Boss Incoming" alert
-	local bossAlert = ReplicatedStorage.RemoteEvents:FindFirstChild("BossIncoming")
-	if not bossAlert then
-		bossAlert = Instance.new("RemoteEvent")
-		bossAlert.Name = "BossIncoming"
-		bossAlert.Parent = ReplicatedStorage.RemoteEvents
-	end
-	bossAlert:FireAllClients()
+	local currentMovement = nil
+	local transitioning = false
+	local attackCooldowns = {
+		SoulStream = 0,
+		NecroticEruption = 0,
+		CorruptingBlast = 0,
+		ChainsOfTorment = 0,
+		EchoesOfTheMaestro = 0,
+		CrescendoOfSouls = 0,
+	}
+	local activeEchoes = {}
+	local chainedPlayers = {}
 
-	-- Timer & wipe on timeout
-	local specialTimeout = (config and config.SpecialTimeout) or 300
+	-- === TIMER & WIPE MECHANIC ===
 	local bossStartTime = tick()
+	local specialTimeout = config.SpecialTimeout or 300
 	BossTimerEvent:FireAllClients(specialTimeout, specialTimeout)
-	task.spawn(function()
-		while zombie.Parent and humanoid and humanoid.Health > 0 do
-			local remaining = math.max(0, specialTimeout - (tick() - bossStartTime))
+	local timerCoroutine = task.spawn(function()
+		while zombie.Parent and humanoid.Health > 0 do
+			local elapsed = tick() - bossStartTime
+			local remaining = math.max(0, specialTimeout - elapsed)
 			BossTimerEvent:FireAllClients(remaining, specialTimeout)
 			if remaining <= 0 then
 				executeHardWipe(zombie, humanoid)
@@ -48,264 +72,164 @@ function Boss3.Init(zombie, humanoid, config, executeHardWipe, zombieModuleRef)
 		end
 	end)
 
-	-- Radiation Aura
-	task.spawn(function()
-		local r = config and config.Radiation
-		local tickTime = (r and r.Tick) or 0.5
-		local hr = (r and r.HorizontalRadius) or 6
-		local vy = (r and r.VerticalHalfHeight) or 1000
-		local dpsPct = (r and r.DamagePerSecondPct) or 0.01
-		while zombie.Parent and humanoid and humanoid.Health > 0 do
-			local bossPos = (zombie.PrimaryPart and zombie.PrimaryPart.Position) or zombie:GetModelCFrame().p
-			for _, plr in ipairs(game.Players:GetPlayers()) do
-				local char = plr.Character
-				if char and not ElementModule.IsPlayerInvincible(plr) then
-					local hum = char:FindFirstChildOfClass("Humanoid")
-					local hrp = char:FindFirstChild("HumanoidRootPart")
-					if hum and hum.Health > 0 and hrp then
-						if (Vector2.new(hrp.Position.X, hrp.Position.Z) - Vector2.new(bossPos.X, bossPos.Z)).Magnitude <= hr and math.abs(hrp.Position.Y - bossPos.Y) <= vy then
-							local dmg = ElementModule.ApplyDamageReduction(plr, hum.MaxHealth * dpsPct * tickTime)
-							local leftoverDamage = ShieldModule.Damage(plr, dmg)
-							if leftoverDamage > 0 then hum:TakeDamage(leftoverDamage) end
-						end
-					end
-				end
-			end
-			task.wait(tickTime)
+	-- === MOVEMENT (PHASE) MANAGER ===
+	local movementCoroutine = task.spawn(function()
+		local movements = {"Allegro", "Adagio", "Fortissimo"}
+		while zombie.Parent and humanoid.Health > 0 do
+			transitioning = true
+			local nextMovement = movements[math.random(#movements)]
+			currentMovement = nextMovement
+			Boss3VFXModule.CreateMovementTransition(zombie, currentMovement)
+			task.wait(3) -- Durasi transisi
+			transitioning = false
+
+			local movementDuration = math.random(config.Movements.Duration.min, config.Movements.Duration.max)
+			task.wait(movementDuration)
 		end
 	end)
 
-	-- Corrupting Blast Attack
-	task.spawn(function()
-		local blastConf = config and config.CorruptingBlast
-		if not blastConf then return end
-		while zombie.Parent and humanoid and humanoid.Health > 0 do
-			task.wait(blastConf.Cooldown or 10)
-			if not zombie.Parent or not humanoid or humanoid.Health <= 0 then break end
-			local target = ZombieModule.GetNearestPlayer(zombie)
-			if target and target.Character then
-				local targetPos = target.Character.HumanoidRootPart.Position
-				Boss3VFXModule.CreateCorruptingBlastTelegraph(targetPos, blastConf.BlastRadius or 15, blastConf.TelegraphDuration or 1.5)
-				task.wait(blastConf.TelegraphDuration or 1.5)
-				if not zombie.Parent or not humanoid or humanoid.Health <= 0 then break end
-				Boss3VFXModule.CreateCorruptingBlastEffect(targetPos, blastConf.BlastRadius or 15, blastConf.PuddleDuration or 3)
-				for _, plr in ipairs(game.Players:GetPlayers()) do
-					if plr.Character and not ElementModule.IsPlayerInvincible(plr) then
-						local hum, hrp = plr.Character:FindFirstChildOfClass("Humanoid"), plr.Character:FindFirstChild("HumanoidRootPart")
-						if hum and hum.Health > 0 and hrp and (hrp.Position - targetPos).Magnitude <= (blastConf.BlastRadius or 15) then
-							local damage = ElementModule.ApplyDamageReduction(plr, blastConf.BlastDamage or 35)
-							local leftoverDamage = ShieldModule.Damage(plr, damage)
-							if leftoverDamage > 0 then hum:TakeDamage(leftoverDamage) end
-						end
+	-- === ATTACK LOGIC ===
+	local attackCoroutine = task.spawn(function()
+		while zombie.Parent and humanoid.Health > 0 do
+			if transitioning or not currentMovement then
+				task.wait(0.5)
+				continue
+			end
+
+			local now = tick()
+			local target = findTarget(zombie)
+			if not target then
+				task.wait(1)
+				continue
+			end
+
+			humanoid:MoveTo(target.Character.HumanoidRootPart.Position)
+
+			if currentMovement == "Allegro" then
+				local movementConfig = config.Movements.Allegro
+				if now > attackCooldowns.SoulStream then
+					attackCooldowns.SoulStream = now + movementConfig.SoulStream.Cooldown
+					local streamTarget = findTarget(zombie)
+					if streamTarget then
+						task.spawn(function()
+							for i = 1, movementConfig.SoulStream.ProjectileCount do
+								if not zombie or not zombie.Parent or not streamTarget or not streamTarget.Parent then break end
+								local startPos = zombie.PrimaryPart.Position
+								local targetPos = streamTarget.Character.HumanoidRootPart.Position
+								local direction = (targetPos - startPos).Unit
+								Boss3VFXModule.CreateSoulStreamProjectile(startPos, direction, movementConfig.SoulStream)
+								task.wait(movementConfig.SoulStream.Interval)
+							end
+						end)
 					end
-				end
-				local puddleEndTime = tick() + (blastConf.PuddleDuration or 3)
-				while tick() < puddleEndTime do
-					if not zombie.Parent or not humanoid or humanoid.Health <= 0 then break end
-					for _, plr in ipairs(game.Players:GetPlayers()) do
-						if plr.Character and not ElementModule.IsPlayerInvincible(plr) then
-							local hum, hrp = plr.Character:FindFirstChildOfClass("Humanoid"), plr.Character:FindFirstChild("HumanoidRootPart")
-							if hum and hum.Health > 0 and hrp and (hrp.Position - targetPos).Magnitude <= (blastConf.BlastRadius or 15) then
-								local damage = ElementModule.ApplyDamageReduction(plr, blastConf.PuddleDamagePerTick or 5)
-								local leftoverDamage = ShieldModule.Damage(plr, damage)
-								if leftoverDamage > 0 then hum:TakeDamage(leftoverDamage) end
+				elseif now > attackCooldowns.NecroticEruption then
+					attackCooldowns.NecroticEruption = now + movementConfig.NecroticEruption.Cooldown
+					task.spawn(function()
+						local players = Players:GetPlayers()
+						for i = 1, movementConfig.NecroticEruption.PillarCount do
+							if #players == 0 then break end
+							local player = players[math.random(#players)]
+							local char = player.Character
+							if char then
+								local pos = char.HumanoidRootPart.Position
+								Boss3VFXModule.CreateNecroticEruptionTelegraph(pos, movementConfig.NecroticEruption)
 							end
 						end
-					end
-					task.wait(blastConf.PuddleTickInterval or 0.5)
+						task.wait(movementConfig.NecroticEruption.TelegraphDuration)
+						-- Damage is handled by the VFX module via touch events for pillars
+					end)
 				end
-			end
-		end
-	end)
-
-	-- Grasping Souls Attack
-	task.spawn(function()
-		local soulConf = config and config.GraspingSouls
-		if not soulConf then return end
-		while zombie.Parent and humanoid and humanoid.Health > 0 do
-			task.wait(soulConf.Cooldown or 12)
-			if not zombie.Parent or not humanoid or humanoid.Health <= 0 then break end
-			local players = game:GetService("Players"):GetPlayers()
-			local availablePlayers = {}
-			for _, p in ipairs(players) do
-				if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and not p.Character:FindFirstChild("Knocked") then
-					table.insert(availablePlayers, p)
-				end
-			end
-			if #availablePlayers > 0 then
-				local soulCount = math.min(math.random(soulConf.SoulCount[1], soulConf.SoulCount[2]), #availablePlayers)
-				Boss3VFXModule.CreateGraspingSoulsTelegraph(zombie, soulCount, soulConf.TelegraphDuration or 1.5)
-				task.wait(soulConf.TelegraphDuration or 1.5)
-				if not zombie.Parent or not humanoid or humanoid.Health <= 0 then break end
-				-- Shuffle players
-				for i = #availablePlayers, 2, -1 do
-					local j = math.random(i)
-					availablePlayers[i], availablePlayers[j] = availablePlayers[j], availablePlayers[i]
-				end
-				for i = 1, soulCount do
-					local targetPlayer = availablePlayers[i]
-					if targetPlayer and targetPlayer.Character then
-						local startPos = zombie.PrimaryPart.Position + Vector3.new(0, 5, 0)
-						local soul = Boss3VFXModule.CreateGraspingSoul(startPos, soulConf)
-						local bv = Instance.new("BodyVelocity", soul)
-						bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-						bv.P = 5000
+			elseif currentMovement == "Adagio" then
+				local movementConfig = config.Movements.Adagio
+				if now > attackCooldowns.CorruptingBlast then
+					attackCooldowns.CorruptingBlast = now + movementConfig.CorruptingBlast.Cooldown
+					local blastTarget = findTarget(zombie)
+					if blastTarget then
 						task.spawn(function()
-							local startTime = tick()
-							local lifetime = 15
-							local soulConnection
-							soulConnection = game:GetService("RunService").Heartbeat:Connect(function()
-								if not soul or not soul.Parent or not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") or (tick() - startTime > lifetime) or (soul.Position - targetPlayer.Character.HumanoidRootPart.Position).Magnitude < 3 then
-									soulConnection:Disconnect()
-									local explosionPos = (tick() - startTime > lifetime) and soul.Position or targetPlayer.Character.HumanoidRootPart.Position
-									Boss3VFXModule.CreateSoulExplosion(explosionPos, soulConf.BlastRadius or 8)
-									for _, plr in ipairs(game.Players:GetPlayers()) do
-										if plr.Character and not ElementModule.IsPlayerInvincible(plr) then
-											local hum, hrp = plr.Character:FindFirstChildOfClass("Humanoid"), plr.Character:FindFirstChild("HumanoidRootPart")
-											if hum and hum.Health > 0 and hrp and (hrp.Position - explosionPos).Magnitude <= (soulConf.BlastRadius or 8) then
-												local damage = ElementModule.ApplyDamageReduction(plr, soulConf.BlastDamage or 25)
-												local leftoverDamage = ShieldModule.Damage(plr, damage)
-												if leftoverDamage > 0 then hum:TakeDamage(leftoverDamage) end
-												pcall(require(script.Parent.Parent:WaitForChild("DebuffModule")).ApplySpeedDebuff, plr, "SoulTaint", 1 - soulConf.DebuffSlowPct, soulConf.DebuffDuration)
-											end
-										end
+							local targetPos = blastTarget.Character.HumanoidRootPart.Position
+							Boss3VFXModule.CreateCorruptingBlastTelegraph(targetPos, movementConfig.CorruptingBlast)
+							task.wait(movementConfig.CorruptingBlast.TelegraphDuration)
+							Boss3VFXModule.ExecuteCorruptingBlast(targetPos, movementConfig.CorruptingBlast)
+							-- Damage logic for puddle
+							local puddleEndTime = tick() + movementConfig.CorruptingBlast.PuddleDuration
+							while tick() < puddleEndTime do
+								for _, plr in ipairs(Players:GetPlayers()) do
+									if plr.Character and (plr.Character.HumanoidRootPart.Position - targetPos).Magnitude < movementConfig.CorruptingBlast.BlastRadius then
+										plr.Character.Humanoid:TakeDamage(movementConfig.CorruptingBlast.PuddleDamagePerTick)
 									end
-									if soul and soul.Parent then soul:Destroy() end
-								else
-									bv.Velocity = (targetPlayer.Character.HumanoidRootPart.Position - soul.Position).Unit * soulConf.SoulSpeed
 								end
-							end)
+								task.wait(movementConfig.CorruptingBlast.PuddleTickInterval)
+							end
 						end)
+					end
+				elseif now > attackCooldowns.ChainsOfTorment then
+					attackCooldowns.ChainsOfTorment = now + movementConfig.ChainsOfTorment.Cooldown
+					local players = Players:GetPlayers()
+					if #players >= 2 then
+						local p1 = players[math.random(#players)]
+						local p2 = players[math.random(#players)]
+						while p1 == p2 do p2 = players[math.random(#players)] end
+
+						local chain = Boss3VFXModule.CreateChainsOfTorment(p1, p2, movementConfig.ChainsOfTorment)
+						table.insert(chainedPlayers, {p1, p2, chain, tick()})
+					end
+				end
+			elseif currentMovement == "Fortissimo" then
+				local movementConfig = config.Movements.Fortissimo
+				if now > attackCooldowns.CrescendoOfSouls then
+					attackCooldowns.CrescendoOfSouls = now + movementConfig.CrescendoOfSouls.Cooldown
+					humanoid:MoveTo(zombie.PrimaryPart.Position)
+					task.spawn(function()
+						local safePillar = Boss3VFXModule.CreateCrescendoOfSoulsTelegraph(zombie, movementConfig.CrescendoOfSouls)
+						task.wait(movementConfig.CrescendoOfSouls.ChargeDuration)
+						Boss3VFXModule.ExecuteCrescendoOfSouls(zombie, safePillar, movementConfig.CrescendoOfSouls)
+						for _, plr in ipairs(Players:GetPlayers()) do
+							if plr.Character then
+								local hrp = plr.Character.HumanoidRootPart
+								if hrp and safePillar and (hrp.Position - safePillar.Position).Magnitude > 20 then -- Assuming 20 is a safe radius
+									plr.Character.Humanoid:TakeDamage(movementConfig.CrescendoOfSouls.Damage)
+								end
+							end
+						end
+					end)
+				elseif now > attackCooldowns.EchoesOfTheMaestro then
+					attackCooldowns.EchoesOfTheMaestro = now + movementConfig.EchoesOfTheMaestro.Cooldown
+					local echoCount = math.min(movementConfig.MaxEchoes, math.floor(#Players:GetPlayers() / 2))
+					for i = 1, echoCount do
+						local echo = SpawnerModule.SpawnEcho(zombie.PrimaryPart.Position, movementConfig.EchoesOfTheMaestro)
+						if echo then
+							table.insert(activeEchoes, echo)
+						end
 					end
 				end
 			end
-		end
-	end)
 
-	-- Mirror Quartet Mechanic
-	local mqTriggered = false
-	local function startMirrorQuartet()
-		if mqTriggered then return end
-		mqTriggered = true
-		zombie:SetAttribute("Immune", true)
-		zombie:SetAttribute("MechanicFreeze", true) -- Fix: Freeze the boss
-		local prevWalk, prevAutoR = humanoid.WalkSpeed, humanoid.AutoRotate
-		humanoid.WalkSpeed, humanoid.JumpPower, humanoid.AutoRotate = 0, 0, false
-		local mqConfig = config.MirrorQuartet
-		local duration = mqConfig.Duration or 25
-		local requiredPlayers = math.min(#game:GetService("Players"):GetPlayers(), mqConfig.RequiredPlayers or 4)
-		local mechGui = Boss2VFXModule.ShowMechanicCountdownUI(zombie, "Align the Mirrors", duration)
-		local mechanicContext = Boss3VFXModule.StartMirrorQuartet(zombie, mqConfig)
-		task.spawn(function()
-			local success, mechanicStartTime, allMirrorsLockedStartTime = false, tick(), nil
-			while tick() - mechanicStartTime < duration do
-				local allLocked = true
-				for i = 1, requiredPlayers do
-					if not mechanicContext.Mirrors[i] or not mechanicContext.Mirrors[i].locked then allLocked, allMirrorsLockedStartTime = false, nil break end
-				end
-				if allLocked then
-					if not allMirrorsLockedStartTime then allMirrorsLockedStartTime = tick() end
-					if tick() - allMirrorsLockedStartTime >= 3 then success = true; break end
-				end
-				task.wait(0.1)
-			end
-			Boss3VFXModule.Cleanup(mechanicContext)
-			if mechGui and mechGui.Parent then mechGui:Destroy() end
-			humanoid.WalkSpeed, humanoid.AutoRotate = prevWalk, prevAutoR
-			if not success then
-				local dr, drDuration = mqConfig.FailDR or 0.5, mqConfig.FailDRDuration or 30
-				zombie:SetAttribute("DamageReductionPct", dr)
-				Boss2VFXModule.ShowDamageReductionUI(zombie, dr, drDuration)
-				task.delay(drDuration, function() if zombie and zombie.Parent then zombie:SetAttribute("DamageReductionPct", 0) end end)
-			end
-			zombie:SetAttribute("Immune", false)
-			zombie:SetAttribute("MechanicFreeze", false) -- Fix: Unfreeze the boss
-		end)
-	end
-
-	-- Chromatic Requiem Mechanic
-	local crTriggered = false
-	local function startChromaticRequiem()
-		if crTriggered then return end
-		crTriggered = true
-		zombie:SetAttribute("Immune", true)
-		zombie:SetAttribute("MechanicFreeze", true) -- Fix: Freeze the boss
-		local prevWalk = humanoid.WalkSpeed
-		humanoid.WalkSpeed = 0
-		local crConfig = config.ChromaticRequiem
-		local duration = crConfig.Duration or 30
-		local mechanicContext = Boss3VFXModule.StartChromaticRequiem(zombie, crConfig)
-		local alivePlayers = {}
-		for _, p in ipairs(game:GetService("Players"):GetPlayers()) do
-			if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
-				table.insert(alivePlayers, p)
-			end
-		end
-		local activeCrystalsCount = math.max(1, math.min(#alivePlayers, 4))
-		local allColors = {"North", "East", "South", "West"}
-		local purificationOrder = {}
-		for i = #allColors, 2, -1 do local j = math.random(i); allColors[i], allColors[j] = allColors[j], allColors[i] end
-		for i = 1, activeCrystalsCount do table.insert(purificationOrder, allColors[i]) end
-		local uiEvent = ReplicatedStorage.RemoteEvents:FindFirstChild("ChromaticRequiemUIEvent") or Instance.new("RemoteEvent", ReplicatedStorage.RemoteEvents)
-		uiEvent.Name = "ChromaticRequiemUIEvent"
-		uiEvent:FireAllClients("show", table.clone(purificationOrder), zombie)
-		task.spawn(function()
-			local success, mechanicStartTime, currentPrompt = false, tick(), nil
-			local function updatePrompt()
-				if currentPrompt and currentPrompt.Parent then currentPrompt:Destroy() end
-				if #purificationOrder > 0 then
-					local crystal = mechanicContext.Crystals[purificationOrder[1]]
-					if crystal then
-						currentPrompt = Instance.new("ProximityPrompt", crystal)
-						currentPrompt.ActionText, currentPrompt.ObjectText, currentPrompt.HoldDuration, currentPrompt.MaxActivationDistance, currentPrompt.RequiresLineOfSight = "Purify", "Purify " .. purificationOrder[1] .. " Crystal", 1.5, 15, false
-						table.insert(mechanicContext.Objects, currentPrompt)
-						currentPrompt.Triggered:Connect(function()
-							local purifiedColor = table.remove(purificationOrder, 1)
-							uiEvent:FireAllClients("update", purificationOrder, zombie)
-							if mechanicContext.Crystals[purifiedColor] then mechanicContext.Crystals[purifiedColor].Color = Color3.fromRGB(50, 50, 50) end
-							if mechanicContext.Beams[purifiedColor] and mechanicContext.Beams[purifiedColor].Parent then mechanicContext.Beams[purifiedColor]:Destroy() end
-							updatePrompt()
-						end)
+			-- Handle Chains of Torment damage
+			for i = #chainedPlayers, 1, -1 do
+				local chainInfo = chainedPlayers[i]
+				local p1, p2, chain, startTime = chainInfo[1], chainInfo[2], chainInfo[3], chainInfo[4]
+				if not p1 or not p1.Parent or not p2 or not p2.Parent or (tick() - startTime) > config.Movements.Adagio.ChainsOfTorment.Duration then
+					if chain and chain.Parent then chain:Destroy() end
+					table.remove(chainedPlayers, i)
+				else
+					if (p1.Character.HumanoidRootPart.Position - p2.Character.HumanoidRootPart.Position).Magnitude > config.Movements.Adagio.ChainsOfTorment.MaxDistance then
+						p1.Character.Humanoid:TakeDamage(config.Movements.Adagio.ChainsOfTorment.DamagePerSecond)
+						p2.Character.Humanoid:TakeDamage(config.Movements.Adagio.ChainsOfTorment.DamagePerSecond)
 					end
 				end
 			end
-			updatePrompt()
-			while tick() - mechanicStartTime < duration do
-				if #purificationOrder == 0 then success = true; break end
-				task.wait(0.2)
-			end
-			uiEvent:FireAllClients("hide")
-			Boss3VFXModule.CleanupChromaticRequiem(mechanicContext)
-			humanoid.WalkSpeed = prevWalk
-			if success then
-				zombie:SetAttribute("Stunned", true)
-				task.wait(crConfig.SuccessStunDuration or 5)
-				zombie:SetAttribute("Stunned", false)
-			else
-				local dr, drDuration = crConfig.FailDR or 0.5, crConfig.FailDRDuration or 30
-				zombie:SetAttribute("DamageReductionPct", dr)
-				task.delay(drDuration, function() if zombie and zombie.Parent then zombie:SetAttribute("DamageReductionPct", 0) end end)
-			end
-			zombie:SetAttribute("Immune", false)
-			zombie:SetAttribute("MechanicFreeze", false) -- Fix: Unfreeze the boss
-		end)
-	end
 
-	-- Trigger mechanics based on health
-	humanoid.HealthChanged:Connect(function(h)
-		if humanoid.MaxHealth > 0 then
-			if config.MirrorQuartet and not mqTriggered and (h / humanoid.MaxHealth) <= (config.MirrorQuartet.TriggerHPPercent or 0.5) then
-				startMirrorQuartet()
-			end
-			if config.ChromaticRequiem and not crTriggered and (h / humanoid.MaxHealth) <= (config.ChromaticRequiem.TriggerHPPercent or 0.25) then
-				startChromaticRequiem()
-			end
+			task.wait(0.5)
 		end
 	end)
 
-	-- Stop timer on death
+	-- === CLEANUP ===
 	humanoid.Died:Connect(function()
-		if BossTimerEvent then BossTimerEvent:FireAllClients(0, 0) end
+		BossTimerEvent:FireAllClients(0, 0)
+		task.cancel(timerCoroutine)
+		task.cancel(attackCoroutine)
+		task.cancel(movementCoroutine)
+		for _, echo in ipairs(activeEchoes) do if echo and echo.Parent then echo:Destroy() end end
 	end)
 end
 

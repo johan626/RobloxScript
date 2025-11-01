@@ -105,114 +105,113 @@ ZombieConfig.Types = {
 		ChanceToSpawn = 1
 	},
 	Boss2 = {
-		MaxHealth = 100000,  -- Diperbesar untuk Boss
-		WalkSpeed = 8,  -- Dipercepat sedikit
+		Name = "Void Ascendant",
+		MaxHealth = 100000,
+		WalkSpeed = 8,
 		AttackDamage = 50,
-		AttackCooldown = 2.0,
-		AttackRange = 25,  -- Ditambahkan (jarak besar untuk Boss raksasa)
+		AttackRange = 25,
+		SpecialTimeout = 300,
 
-		-- Timer wajib (wipe out bila habis)
-		SpecialTimeout = 300, -- detik
-
-		-- Radiasi (radius kecil, vertikal tinggi; jangan dihilangkan)
-		Radiation = {
-			Tick = 0.5,
-			HorizontalRadius = 6,       -- kecil
-			VerticalHalfHeight = 1000,  -- kolom tinggi
-			DamagePerSecondPct = 0.01
+		-- FASE 1
+		OrbOfAnnihilation = {
+			Cooldown = 15,
+			OrbSpeed = 20,
+			Lifetime = 20,
+			ExplosionRadius = 15,
+			ExplosionDamage = 40,
 		},
 
-		-- FOLLOW CLOUD: ubah jadi Gravity Well (BUKAN POISON)
-		Gravity = {
-			Interval = 150,        -- tiap 15 detik spawn well di atas target
-			Duration = 6,
-			Radius = 10,          -- area efek
-			PullForce = 500        -- tarikan ke pusat well (opsional)
-		},
-
-		-- Mekanik KOOPERASI 4 PEMAIN @50% HP
-		Coop = {
+		-- TRANSISI
+		Upheaval = {
 			TriggerHPPercent = 0.5,
-			RequiredPlayers = 4,       -- akan dipakai min(#Players, 4)
-			Duration = 20,             -- detik
-			FailDR = 0.50,             -- Damage Reduction 50% kalau gagal
-			FailDRDuration = 30        -- detik
+			Duration = 5, -- Durasi animasi platform naik
+			PlatformCount = 5,
+			PlatformSize = Vector3.new(30, 100, 30),
+			ArenaRadius = 80,
 		},
-		-- GRAVITY SLAM (telegraph -> implode -> explode)
-		GravitySlam = {
-			Cooldown = 10,           -- jeda antar slam (detik)
-			TelegraphTime = 3,       -- durasi cincin warning sebelum meledak
-			Radius = 50,             -- jari-jari area slam (XZ)
-			ImplodeDuration = 0.3,   -- durasi hisap singkat
-			ImplodeForce = 500,     -- kekuatan tarikan (implosion)
-			ExplodeForce = 300,     -- kekuatan dorong (explosion)
-			DamagePct = 0.15,        -- persentase MaxHealth pemain sebagai damage
+
+		-- FASE 2
+		PlatformShatter = {
+			Cooldown = 20,
+			TelegraphDuration = 2,
+			Damage = 30,
 		},
-		-- Spawn window & chance
+		DualOrbSummon = {
+			Cooldown = 25,
+		},
+		CelestialRain = {
+			Cooldown = 45,
+			ProjectileCount = 10,
+			Interval = 0.5,
+			BlastRadius = 10,
+			BlastDamage = 25,
+			TelegraphDuration = 1,
+		},
+
 		ChanceWaveMin = 30,
 		ChanceWaveMax = 35,
 		ChanceToSpawn = 0.3,
 	},
 	Boss3 = {
-		-- “Maestro Nekrosis”
+		Name = "Maestro of Necrosis",
 		MaxHealth = 125000,
 		WalkSpeed = 8,
 		AttackDamage = 55,
-		AttackCooldown = 2.0,
 		AttackRange = 25,
-		SpecialTimeout = 300, -- wajib: waktu habis -> wipe out
+		SpecialTimeout = 300,
 
-		-- Radiasi kecil (dipertahankan)
-		Radiation = {
-			Tick = 0.5,
-			HorizontalRadius = 6,       -- kecil
-			VerticalHalfHeight = 1000,  -- kolom tinggi
-			DamagePerSecondPct = 0.01
+		-- Gerakan Orkestra
+		Movements = {
+			Duration = {min = 20, max = 30}, -- Berapa lama setiap gerakan berlangsung
+			-- Gerakan 1: Allegro of Souls
+			Allegro = {
+				SoulStream = {
+					Cooldown = 8,
+					ProjectileSpeed = 60,
+					ProjectileCount = 15,
+					Interval = 0.2,
+					Damage = 10,
+				},
+				NecroticEruption = {
+					Cooldown = 12,
+					PillarCount = 5,
+					Radius = 8,
+					Damage = 25,
+					TelegraphDuration = 1.5,
+				},
+			},
+			-- Gerakan 2: Adagio of Corruption
+			Adagio = {
+				CorruptingBlast = {
+					Cooldown = 10,
+					BlastRadius = 15,
+					BlastDamage = 15,
+					PuddleDuration = 10,
+					PuddleDamagePerTick = 5,
+					PuddleTickInterval = 0.5,
+					TelegraphDuration = 1.5,
+				},
+				ChainsOfTorment = {
+					Cooldown = 18,
+					Duration = 12,
+					MaxDistance = 40,
+					DamagePerSecond = 10,
+				},
+			},
+			-- Gerakan 3: Fortissimo of the Damned
+			Fortissimo = {
+				EchoesOfTheMaestro = {
+					Cooldown = 25,
+					EchoHealth = 5000,
+					MaxEchoes = 3, -- 1 gema per 2 pemain, maks 3
+				},
+				CrescendoOfSouls = {
+					Cooldown = 40,
+					ChargeDuration = 5,
+					Damage = 100,
+				},
+			},
 		},
-		-- Tidak pakai ChanceWaveMin/Max karena dipaksa spawn di wave 50
-
-		-- MEKANIK BARU: MIRROR QUARTET
-		MirrorQuartet = {
-			TriggerHPPercent = 0.5,
-			RequiredPlayers = 4,
-			Duration = 30,
-			SuccessLockTime = 3,
-			FailDR = 0.5,
-			FailDRDuration = 30
-		},
-
-		-- MEKANIK BARU: CHROMATIC REQUIEM
-		ChromaticRequiem = {
-			TriggerHPPercent = 0.25,
-			Duration = 30,
-			FailDR = 0.5,
-			FailDRDuration = 30,
-			SuccessStunDuration = 5
-		},
-
-		-- SERANGAN BIASA BARU: Corrupting Blast
-		CorruptingBlast = {
-			Cooldown = 10,              -- Jeda antar serangan dalam detik
-			TelegraphDuration = 1.5,    -- Durasi tanda di tanah sebelum meledak
-			BlastRadius = 15,           -- Radius ledakan awal
-			BlastDamage = 15,           -- Damage ledakan awal (flat)
-			PuddleDuration = 3,         -- Durasi genangan korup di tanah
-			PuddleDamagePerTick = 5,    -- Damage setiap tick dari genangan
-			PuddleTickInterval = 0.5    -- Seberapa sering genangan memberikan damage
-		},
-
-		-- SERANGAN BIASA BARU: Grasping Souls
-		GraspingSouls = {
-			Cooldown = 15,              -- Jeda antar serangan
-			TelegraphDuration = 1.5,    -- Waktu peringatan sebelum bola ditembakkan
-			SoulCount = {2, 3},         -- Jumlah bola arwah yang akan ditembakkan (min, max)
-			SoulHP = 30,                -- HP setiap bola arwah
-			SoulSpeed = 12,             -- Kecepatan bola arwah mengejar pemain
-			BlastRadius = 8,            -- Radius ledakan saat mengenai pemain
-			BlastDamage = 25,           -- Damage ledakan
-			DebuffDuration = 6,         -- Durasi debuff "Soul Taint"
-			DebuffSlowPct = 0.5         -- Pengurangan kecepatan gerak (50%)
-		}
 	},
 }
 

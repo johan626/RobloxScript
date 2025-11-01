@@ -136,9 +136,9 @@ function SpawnerModule.SpawnWave(amount, wave, playerCount, gameMode, difficulty
 				if chosenType == "Boss" then
 					Boss1.Init(zombie, humanoid, cfg, ZombieModule.ExecuteHardWipe, SpawnerModule)
 				elseif chosenType == "Boss2" then
-					Boss2.Init(zombie, humanoid, cfg, ZombieModule.ExecuteHardWipe, SpawnerModule)
+					Boss2.Init(zombie, humanoid, cfg, ZombieModule.ExecuteHardWipe)
 				elseif chosenType == "Boss3" then
-					Boss3.Init(zombie, humanoid, cfg, ZombieModule.ExecuteHardWipe)
+					Boss3.Init(zombie, humanoid, cfg, ZombieModule.ExecuteHardWipe, SpawnerModule)
 				end
 			end
 		end
@@ -180,6 +180,44 @@ function SpawnerModule.SpawnVolatileMinion(bossPosition, minionConfig)
 		volatileTag.Value = "Boss1" -- Simpan info asal minion
 		volatileTag.Parent = zombie
 	end
+end
+
+function SpawnerModule.SpawnEcho(bossPosition, echoConfig)
+	local spawners = workspace:FindFirstChild("Spawners")
+	if not spawners then return end
+
+	local spawnPoint = nil
+	local attempts = 0
+	while not spawnPoint and attempts < 15 do
+		local potentialSpawners = spawners:GetChildren()
+		local randomSpawn = potentialSpawners[math.random(1, #potentialSpawners)]
+		if (randomSpawn.Position - bossPosition).Magnitude > 15 then
+			spawnPoint = randomSpawn
+		end
+		attempts += 1
+	end
+
+	if not spawnPoint then
+		local potentialSpawners = spawners:GetChildren()
+		spawnPoint = potentialSpawners[math.random(1, #potentialSpawners)]
+	end
+
+	local echo = ZombieModule.SpawnZombie(spawnPoint, "Boss3", 1, "Easy", {isEcho = true})
+	if echo then
+		local humanoid = echo:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.MaxHealth = echoConfig.EchoHealth
+			humanoid.Health = echoConfig.EchoHealth
+		end
+		-- Make it visually distinct
+		for _, part in ipairs(echo:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.Transparency = 0.7
+				part.Color = Color3.fromRGB(150, 100, 255)
+			end
+		end
+	end
+	return echo
 end
 
 
